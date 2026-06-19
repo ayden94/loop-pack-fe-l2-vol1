@@ -55,7 +55,10 @@ ESLint는 inline config를 허용하지 않습니다.
 - strict type-aware rules를 사용한다.
 - `@typescript-eslint/no-explicit-any`: `any` 금지
 - `@typescript-eslint/ban-ts-comment`: `@ts-check`, `@ts-expect-error`, `@ts-ignore`, `@ts-nocheck` 금지
+- `@typescript-eslint/array-type`: 배열 타입은 `Array<T>`, 불변 배열은 `ReadonlyArray<T>` 표기 사용
 - `@typescript-eslint/consistent-type-imports`: 타입 import는 `import type` 사용
+- `@typescript-eslint/consistent-type-assertions`: 객체 리터럴 type assertion은 금지하고 `satisfies`를 우선 사용
+- `@typescript-eslint/no-unnecessary-type-assertion`: 불필요한 type assertion 금지
 - unused import는 error
 - unused variable은 error. 단, 의도적으로 미사용인 값은 `_` prefix를 사용한다.
 
@@ -72,6 +75,11 @@ ESLint는 inline config를 허용하지 않습니다.
 - 불필요한 JSX 중괄호를 사용하지 않는다.
 - `target="_blank"` 링크는 보안 속성을 함께 둔다.
 - children이 없는 컴포넌트는 self-closing 형태로 작성한다.
+- React 컴포넌트 선언은 function declaration을 사용한다.
+- `React.Suspense` import와 `React.Suspense` JSX는 금지하고 `@suspensive/react`의 `Suspense`를 사용한다.
+- `react-error-boundary` 도입은 금지하고 `@suspensive/react`의 `ErrorBoundary`를 사용한다.
+- `useSuspenseQuery`, `useSuspenseQueries`, `useSuspenseInfiniteQuery` import는 금지하고 `@suspensive/react-query`의 `SuspenseQuery`, `SuspenseQueries`, `SuspenseInfiniteQuery` 컴포넌트를 사용한다. `package.json`에서는 TanStack Query v5에 맞춰 `@suspensive/react-query`를 `@suspensive/react-query-5` alias로 설치한다.
+- JSX children에서 inline logical/ternary 조건 렌더링과 `.map()` 목록 렌더링을 제한한다. 조건은 `Show`, 목록은 `For`를 사용한다.
 
 ### 접근성
 
@@ -90,6 +98,9 @@ ESLint는 inline config를 허용하지 않습니다.
 - `var`는 금지한다.
 - object shorthand, `const`, template literal을 우선한다.
 - import/export 순서는 `simple-import-sort`를 따른다.
+- `src` 내부 default export는 금지한다. 도구 설정 파일처럼 외부 도구가 요구하는 entry point만 예외로 한다.
+- FSD public API인 `index.ts`에서는 `export *`를 금지한다.
+- FSD `lib` segment에서 export되는 유틸리티는 namespace class의 static method로 묶는다. lint는 `lib` segment의 exported standalone function/arrow function을 제한하고, 세부 그룹명과 책임은 리뷰에서 확인한다.
 
 ## lint-staged와 Git hook
 

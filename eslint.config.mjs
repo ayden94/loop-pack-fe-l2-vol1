@@ -20,6 +20,99 @@ const withFiles = (configs, files) =>
     files,
   }))
 
+const restrictedSyntaxBase = [
+  {
+    message:
+      'The comma operator is easy to misread. Split this into separate statements instead.',
+    selector: 'SequenceExpression',
+  },
+]
+
+const restrictedSyntaxNoSrcDefaultExport = [
+  ...restrictedSyntaxBase,
+  {
+    message:
+      'Default exports hide module intent. Use named exports unless this file is a framework/bootstrap entry point with documented justification.',
+    selector: 'ExportDefaultDeclaration',
+  },
+]
+
+const restrictedSyntaxReactRendering = [
+  ...restrictedSyntaxNoSrcDefaultExport,
+  {
+    message: 'Use Suspense from @suspensive/react instead of React.Suspense.',
+    selector:
+      "JSXMemberExpression[object.name='React'][property.name='Suspense']",
+  },
+  {
+    message:
+      'Use <Show /> from @ilokesto/utilinent instead of inline logical conditional rendering in JSX children.',
+    selector: 'JSXElement > JSXExpressionContainer > LogicalExpression',
+  },
+  {
+    message:
+      'Use <Show /> from @ilokesto/utilinent instead of inline logical conditional rendering in JSX children.',
+    selector: 'JSXFragment > JSXExpressionContainer > LogicalExpression',
+  },
+  {
+    message:
+      'Use <Show /> from @ilokesto/utilinent instead of inline ternary conditional rendering in JSX children.',
+    selector: 'JSXElement > JSXExpressionContainer > ConditionalExpression',
+  },
+  {
+    message:
+      'Use <Show /> from @ilokesto/utilinent instead of inline ternary conditional rendering in JSX children.',
+    selector: 'JSXFragment > JSXExpressionContainer > ConditionalExpression',
+  },
+  {
+    message:
+      'Use <For /> from @ilokesto/utilinent instead of inline array.map rendering in JSX children.',
+    selector:
+      "JSXElement > JSXExpressionContainer > CallExpression[callee.property.name='map']",
+  },
+  {
+    message:
+      'Use <For /> from @ilokesto/utilinent instead of inline array.map rendering in JSX children.',
+    selector:
+      "JSXFragment > JSXExpressionContainer > CallExpression[callee.property.name='map']",
+  },
+]
+
+const restrictedSyntaxExplicitIndexExports = [
+  ...restrictedSyntaxNoSrcDefaultExport,
+  {
+    message:
+      'FSD public APIs must explicitly list exports. Do not use export * from index.ts.',
+    selector: 'ExportAllDeclaration',
+  },
+]
+
+const restrictedSyntaxLibUtilities = [
+  ...restrictedSyntaxReactRendering,
+  {
+    message:
+      'FSD public APIs must explicitly list exports. Do not use export * from index.ts.',
+    selector: 'ExportAllDeclaration',
+  },
+  {
+    message:
+      'Group exported utilities as namespace class static methods instead of exporting standalone functions from lib files.',
+    selector: 'ExportNamedDeclaration > FunctionDeclaration',
+  },
+  {
+    message:
+      'Group exported utilities as namespace class static methods instead of exporting standalone arrow functions from lib files.',
+    selector:
+      "ExportNamedDeclaration > VariableDeclaration > VariableDeclarator[init.type='ArrowFunctionExpression']",
+  },
+  {
+    message:
+      'Group exported utilities as namespace class static methods instead of exporting standalone function expressions from lib files.',
+    selector:
+      "ExportNamedDeclaration > VariableDeclaration > VariableDeclarator[init.type='FunctionExpression']",
+  },
+]
+
 const eslintConfig = defineConfig([
   globalIgnores(['dist/**', 'coverage/**']),
   {
@@ -59,11 +152,23 @@ const eslintConfig = defineConfig([
           'ts-nocheck': true,
         },
       ],
+      '@typescript-eslint/array-type': [
+        'error',
+        { default: 'generic', readonly: 'generic' },
+      ],
       '@typescript-eslint/consistent-type-imports': [
         'error',
         { prefer: 'type-imports' },
       ],
+      '@typescript-eslint/consistent-type-assertions': [
+        'error',
+        {
+          assertionStyle: 'as',
+          objectLiteralTypeAssertions: 'never',
+        },
+      ],
       '@typescript-eslint/no-explicit-any': 'error',
+      '@typescript-eslint/no-unnecessary-type-assertion': 'error',
       '@typescript-eslint/no-unused-vars': 'off',
 
       'unused-imports/no-unused-imports': 'error',
@@ -127,10 +232,16 @@ const eslintConfig = defineConfig([
         { children: 'never', props: 'never' },
       ],
       'react/jsx-no-target-blank': 'error',
+      'react/function-component-definition': [
+        'error',
+        {
+          namedComponents: 'function-declaration',
+          unnamedComponents: 'function-expression',
+        },
+      ],
       'react/self-closing-comp': 'error',
     },
   },
-
   {
     plugins: {
       'simple-import-sort': simpleImportSort,
@@ -142,20 +253,72 @@ const eslintConfig = defineConfig([
       'no-console': ['error', { allow: ['warn', 'error'] }],
       'no-debugger': 'error',
       'no-else-return': 'error',
-      'no-restricted-syntax': [
+      'no-restricted-imports': [
         'error',
         {
-          message:
-            'The comma operator is easy to misread. Split this into separate statements instead.',
-          selector: 'SequenceExpression',
+          paths: [
+            {
+              importNames: ['Suspense'],
+              message:
+                'Use Suspense from @suspensive/react so boundary behavior stays consistent across the project.',
+              name: 'react',
+            },
+            {
+              message:
+                'Use ErrorBoundary from @suspensive/react instead of react-error-boundary.',
+              name: 'react-error-boundary',
+            },
+            {
+              importNames: [
+                'useSuspenseInfiniteQuery',
+                'useSuspenseQueries',
+                'useSuspenseQuery',
+              ],
+              message:
+                'Use SuspenseQuery, SuspenseQueries, or SuspenseInfiniteQuery components from @suspensive/react-query so suspense sources stay visible in JSX.',
+              name: '@tanstack/react-query',
+            },
+            {
+              importNames: [
+                'useSuspenseInfiniteQuery',
+                'useSuspenseQueries',
+                'useSuspenseQuery',
+              ],
+              message:
+                'Use SuspenseQuery, SuspenseQueries, or SuspenseInfiniteQuery components instead of suspense hooks.',
+              name: '@suspensive/react-query',
+            },
+          ],
         },
       ],
+      'no-restricted-syntax': ['error', ...restrictedSyntaxBase],
       'no-var': 'error',
       'object-shorthand': 'error',
       'prefer-const': 'error',
       'prefer-template': 'error',
       'simple-import-sort/exports': 'error',
       'simple-import-sort/imports': 'error',
+    },
+  },
+  {
+    files: ['src/**/*.{ts,tsx}'],
+    rules: {
+      'no-restricted-syntax': ['error', ...restrictedSyntaxReactRendering],
+    },
+  },
+  {
+    files: ['**/index.ts'],
+    rules: {
+      'no-restricted-syntax': [
+        'error',
+        ...restrictedSyntaxExplicitIndexExports,
+      ],
+    },
+  },
+  {
+    files: ['src/**/lib/**/*.{ts,tsx}'],
+    rules: {
+      'no-restricted-syntax': ['error', ...restrictedSyntaxLibUtilities],
     },
   },
 

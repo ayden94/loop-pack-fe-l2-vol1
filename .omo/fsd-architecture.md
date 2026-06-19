@@ -99,6 +99,48 @@ src/features/add-to-cart/
 
 segment는 필요할 때만 만든다. 비어 있는 관성적 폴더를 만들지 않는다.
 
+## Co-location과 폴더 승격
+
+하나의 기능/화면/도메인 조각을 위해 함께 움직이는 코드는 처음에는 한 파일에 둔다. 해당 컴포넌트나 동작에만 쓰이는 타입, 상수, 작은 유틸리티 함수, 하위 표현 컴포넌트는 같은 파일 안에서 가까이 배치해 변경 맥락을 유지한다.
+
+파일이 커지거나 책임이 분리되기 시작하면 그때 폴더로 승격한다.
+
+```txt
+src/features/add-to-cart/ui/add-to-cart-button/
+  index.ts
+  add-to-cart-button.tsx
+  add-to-cart-button.types.ts
+  add-to-cart-button.constants.ts
+  add-to-cart-button.utils.ts
+```
+
+폴더로 승격한 뒤에도 외부 공개 계약은 폴더의 `index.ts`에서 필요한 것만 명시적으로 export한다. 내부 타입, 상수, 유틸리티, 보조 컴포넌트는 외부에서 직접 import하지 않는다.
+
+폴더 승격 기준:
+
+- 파일이 길어져 리뷰에서 한 번에 맥락을 파악하기 어려운가?
+- 타입, 상수, 유틸리티, 하위 컴포넌트가 서로 다른 속도로 변경되는가?
+- 일부 코드가 같은 slice 안의 다른 파일에서도 재사용되는가?
+- 테스트나 Storybook 등 보조 파일을 같은 단위로 묶어야 하는가?
+
+반대로 재사용되지 않는 작은 타입/상수/유틸리티를 습관적으로 별도 파일로 빼지 않는다. 파일 수를 늘리는 것보다 변경 맥락을 보존하는 것을 우선한다.
+
+## 유틸리티 그룹화
+
+`lib` segment의 유틸리티는 비슷한 동작끼리 namespace class의 static method로 묶는다. 흩어진 top-level 함수 모음보다 `MoneyUtils.format`, `DateRangeUtils.contains`처럼 호출 이름에서 맥락이 드러나는 형태를 우선한다.
+
+```ts
+export class MoneyUtils {
+  private constructor() {}
+
+  static format(value: number) {
+    return new Intl.NumberFormat('ko-KR').format(value)
+  }
+}
+```
+
+단일 컴포넌트/함수에만 쓰이는 private helper는 해당 파일 안에 둘 수 있다. slice 밖으로 공개되는 공용 유틸리티는 top-level standalone 함수로 export하지 않고 namespace class의 static method로 공개한다.
+
 ## Public API
 
 slice 외부에서 접근할 수 있는 것은 `index.ts`로 명시적으로 노출한다.
@@ -107,6 +149,8 @@ slice 외부에서 접근할 수 있는 것은 `index.ts`로 명시적으로 노
 // src/features/add-to-cart/index.ts
 export { AddToCartButton } from './ui/add-to-cart-button'
 ```
+
+`index.ts`는 slice의 공개 계약을 보여주는 파일이다. 어떤 API가 외부로 나가는지 리뷰에서 바로 보이도록 `export * from './...'`를 사용하지 않고, 외부 공개 이름을 직접 나열한다.
 
 다른 slice나 레이어에서는 public API만 import한다.
 
@@ -135,5 +179,6 @@ FSD 위반 여부를 볼 때는 다음 질문을 사용한다.
 - 이 파일의 책임이 레이어 이름과 일치하는가?
 - 상위 레이어를 하위 레이어에서 import하지 않았는가?
 - 다른 slice의 내부 구현을 deep import하지 않았는가?
+- `index.ts`가 `export *` 없이 공개 API를 명시적으로 나열하는가?
 - public API가 너무 많은 내부 구현을 노출하지 않는가?
 - 컴포넌트가 화면 조립, 도메인 로직, 공용 유틸 책임을 동시에 갖고 있지 않은가?
