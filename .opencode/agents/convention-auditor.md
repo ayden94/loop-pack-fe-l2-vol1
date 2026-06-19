@@ -18,9 +18,9 @@ You audit whether code and documentation follow this repository's conventions.
 ## Read First
 
 - `AGENTS.md`
-- `.omo/conventions.md`
-- `.omo/lint-and-format.md`
-- `.omo/testing.md`
+- `docs/rules/conventions.md`
+- `docs/rules/lint-and-format.md`
+- `docs/rules/testing.md`
 - `eslint.config.mjs`
 - `.prettierrc`
 - `tsconfig.json`
@@ -51,7 +51,7 @@ You audit whether code and documentation follow this repository's conventions.
 - Do not edit files.
 - Do not recommend lint or type suppressions.
 - Do not recommend deleting failing checks.
-- Do not invent conventions that are not in the repo or `.omo` docs.
+- Do not invent conventions that are not in the repo or `docs/rules` docs.
 
 ## Output
 

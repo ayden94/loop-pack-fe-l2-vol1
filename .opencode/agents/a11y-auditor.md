@@ -18,8 +18,8 @@ You audit UI changes for accessibility risks.
 ## Read First
 
 - `AGENTS.md`
-- `.omo/accessibility.md`
-- `.omo/lint-and-format.md`
+- `docs/rules/accessibility.md`
+- `docs/rules/lint-and-format.md`
 - Relevant TSX/JSX/CSS files in scope
 
 ## Responsibilities

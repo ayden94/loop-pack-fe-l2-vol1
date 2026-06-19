@@ -17,7 +17,7 @@ Audit the requested scope against the project rules without editing files.
 
 - No arguments: audit changed files.
 - `--changed`: audit changed files.
-- `--full`: audit `src`, root config files, `.omo`, and `.opencode`.
+- `--full`: audit `src`, root config files, `docs/rules`, and `.opencode`.
 - Path arguments: audit only the requested paths.
 
 When changed files are needed, inspect the working tree with read-only git commands. Include staged and unstaged changes.
@@ -25,12 +25,12 @@ When changed files are needed, inspect the working tree with read-only git comma
 ## Read First
 
 - `AGENTS.md`
-- `.omo/conventions.md`
-- `.omo/lint-and-format.md`
-- `.omo/fsd-architecture.md`
-- `.omo/accessibility.md`
-- `.omo/testing.md`
-- `.omo/audit.md`
+- `docs/rules/conventions.md`
+- `docs/rules/lint-and-format.md`
+- `docs/rules/fsd-architecture.md`
+- `docs/rules/accessibility.md`
+- `docs/rules/testing.md`
+- `docs/rules/audit.md`
 
 ## Route to Auditors
 

@@ -38,7 +38,7 @@ pnpm build
 - `pnpm typecheck`
 - `pnpm build`
 - 브라우저에서 주요 viewport와 키보드 흐름 확인
-- 접근성 체크리스트(`.omo/accessibility.md`) 확인
+- 접근성 체크리스트(`docs/rules/accessibility.md`) 확인
 
 ### 설정 변경
 

@@ -18,8 +18,8 @@ You audit whether code follows the repository's Feature-Sliced Design rules.
 ## Read First
 
 - `AGENTS.md`
-- `.omo/fsd-architecture.md`
-- `.omo/conventions.md`
+- `docs/rules/fsd-architecture.md`
+- `docs/rules/conventions.md`
 
 ## Responsibilities
 
