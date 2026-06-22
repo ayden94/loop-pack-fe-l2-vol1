@@ -1,9 +1,11 @@
 import { useState } from 'react'
 
+import { Textarea } from '../shared/ui'
+
 export function DeliveryMemo() {
   const [memo, setMemo] = useState('')
   return (
-    <textarea
+    <Textarea
       value={memo}
       onChange={(e) => {
         setMemo(e.target.value)
