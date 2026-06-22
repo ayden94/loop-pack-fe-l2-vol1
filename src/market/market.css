@@ -5,20 +5,6 @@
   text-align: left;
   color: var(--text);
 }
-.checkout h1 {
-  font-size: 26px;
-  letter-spacing: -0.5px;
-  margin: 8px 0 20px;
-}
-.checkout h2 {
-  font-size: 15px;
-  letter-spacing: 0;
-  margin: 0 0 12px;
-}
-.checkout h3 {
-  margin: 0 0 10px;
-  color: var(--text-h);
-}
 .checkout .line {
   display: flex;
   align-items: center;
