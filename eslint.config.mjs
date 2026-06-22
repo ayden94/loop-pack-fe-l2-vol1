@@ -168,6 +168,7 @@ const eslintConfig = defineConfig([
         },
       ],
       '@typescript-eslint/no-explicit-any': 'error',
+      '@typescript-eslint/no-extraneous-class': 'off',
       '@typescript-eslint/no-unnecessary-type-assertion': 'error',
       '@typescript-eslint/no-unused-vars': 'off',
 
@@ -240,6 +241,7 @@ const eslintConfig = defineConfig([
         },
       ],
       'react/self-closing-comp': 'error',
+      'react-refresh/only-export-components': 'off',
     },
   },
   {
@@ -321,7 +323,6 @@ const eslintConfig = defineConfig([
       'no-restricted-syntax': ['error', ...restrictedSyntaxLibUtilities],
     },
   },
-
   prettier,
 ])
 
