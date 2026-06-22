@@ -1,4 +1,5 @@
 export { Button } from './button'
+export { Heading } from './heading'
 export { Modal } from './modal'
 export { SectionCard } from './section-card'
 export { Textarea } from './textarea'
