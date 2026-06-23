@@ -12,26 +12,17 @@ const heading = tv({
   },
 })
 
-type HeadingVariant = VariantProps<typeof heading>['variant']
+type HeadingVariants = VariantProps<typeof heading>
 
-type H1Props = ComponentProps<'h1'> & {
-  variant?: HeadingVariant
-}
-
-type H2Props = ComponentProps<'h2'> & {
-  variant?: HeadingVariant
-}
-
-type H3Props = ComponentProps<'h3'> & {
-  variant?: HeadingVariant
-}
+type HeadingProps<T extends 'h1' | 'h2' | 'h3'> = ComponentProps<T> &
+  HeadingVariants
 
 function H1({
   children,
   className,
   variant = 'page',
   ...headingProps
-}: H1Props) {
+}: HeadingProps<'h1'>) {
   return (
     <h1 {...headingProps} className={heading({ className, variant })}>
       {children}
@@ -44,7 +35,7 @@ function H2({
   className,
   variant = 'section',
   ...headingProps
-}: H2Props) {
+}: HeadingProps<'h2'>) {
   return (
     <h2 {...headingProps} className={heading({ className, variant })}>
       {children}
@@ -57,7 +48,7 @@ function H3({
   className,
   variant = 'dialog',
   ...headingProps
-}: H3Props) {
+}: HeadingProps<'h3'>) {
   return (
     <h3 {...headingProps} className={heading({ className, variant })}>
       {children}
