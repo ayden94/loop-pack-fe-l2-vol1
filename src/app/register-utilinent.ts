@@ -1,6 +1,6 @@
 import { PluginManager } from '@ilokesto/utilinent'
 
-import { Button } from '../shared/ui'
+import { Button } from '@/shared/ui'
 
 PluginManager.register({
   show: {
