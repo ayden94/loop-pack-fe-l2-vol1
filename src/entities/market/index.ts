@@ -15,4 +15,4 @@ export {
   type PastOrderData,
   type PaymentMethod,
 } from './model'
-export { OrderStatusTag } from './ui'
+export { OrderLine, OrderStatusTag } from './ui'
