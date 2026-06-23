@@ -18,7 +18,7 @@ export function OrderStatusTag({ status }: Props) {
 
   return (
     <span
-      className="whitespace-nowrap rounded-full border px-2.25 py-0.75 text-xs"
+      className="rounded-full border px-2.25 py-0.75 text-xs whitespace-nowrap"
       style={{ color, borderColor: color }}
     >
       {label}
