@@ -1,7 +1,7 @@
 import type { ComponentProps, ReactNode } from 'react'
 import { cn } from 'tailwind-variants'
 
-import { Heading } from './heading'
+import { Heading } from './Heading'
 
 type ModalProps = ComponentProps<'div'> & {
   heading: ReactNode

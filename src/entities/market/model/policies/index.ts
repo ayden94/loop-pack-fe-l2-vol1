@@ -1,2 +1,2 @@
-export { MarketPricingPolicy } from './pricing-policy'
+export { MarketPricingPolicy } from './MarketPricingPolicy'
 export { resolveDeliveryAddress } from './resolveDeliveryAddress'

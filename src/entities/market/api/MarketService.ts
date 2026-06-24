@@ -1,5 +1,5 @@
 import { Address, CartItem, Coupon, Member, PastOrder } from '../model'
-import { MarketRepository } from './market.repository'
+import { MarketRepository } from './MarketRepository'
 
 export class MarketService {
   constructor(private readonly repository = new MarketRepository()) {}

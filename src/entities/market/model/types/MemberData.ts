@@ -1,4 +1,4 @@
-import type { MemberGrade } from './member-grade'
+import type { MemberGrade } from './MemberGrade'
 
 export type MemberData = {
   name: string

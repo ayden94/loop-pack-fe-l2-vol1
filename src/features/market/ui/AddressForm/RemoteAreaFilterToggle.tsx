@@ -1,4 +1,4 @@
-export function RemortAreaFilterToggle({
+export function RemoteAreaFilterToggle({
   onlyNear,
   setOnlyNear,
 }: {

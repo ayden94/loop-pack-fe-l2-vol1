@@ -1,4 +1,4 @@
-import type { OrderStatus } from './order-status'
+import type { OrderStatus } from './OrderStatus'
 
 export type PastOrderData = {
   id: string
