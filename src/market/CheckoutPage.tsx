@@ -1,15 +1,17 @@
 import { For, Show } from '@ilokesto/utilinent'
+import { ErrorBoundary } from '@suspensive/react'
 import { useState } from 'react'
 
 import {
-  type Address,
   type Coupon,
   MarketPricingPolicy,
   marketService,
+  NoDeliveryAddressConfiguredError,
   OrderLine,
   type PaymentMethod,
+  resolveDeliveryAddress,
 } from '@/entities/market'
-import { AddressForm, OrderLineRow, SelectedAddress } from '@/features/market'
+import { OrderLineRow } from '@/features/market'
 import {
   Button,
   Heading,
@@ -18,7 +20,7 @@ import {
   SectionCard,
   Textarea,
 } from '@/shared/ui'
-import { OrderItemsSection } from '@/widgets/market'
+import { DeliverySection, OrderItemsSection } from '@/widgets/market'
 
 const PAYMENT_LABEL: Record<PaymentMethod, string> = {
   card: '신용/체크카드',
@@ -27,55 +29,6 @@ const PAYMENT_LABEL: Record<PaymentMethod, string> = {
 }
 
 const PAYMENT_METHODS: Array<PaymentMethod> = ['card', 'transfer', 'kakao']
-
-// 배송지 — 접기/펼치기와 선택 요약은 스스로 책임진다.
-// 단, 실제 선택 동작(onSelectAddress)은 AddressForm → AddressField 로 통과시킨다.
-function DeliverySection({
-  addresses,
-  selectedAddressId,
-  onSelectAddress,
-}: {
-  addresses: Array<Address>
-  selectedAddressId: string
-  onSelectAddress: (id: string) => void
-}) {
-  const [expanded, setExpanded] = useState(false)
-  const selected =
-    addresses.find((address) => address.id === selectedAddressId) ??
-    addresses.at(0)
-
-  if (!selected) {
-    return null
-  }
-
-  return (
-    <SectionCard>
-      <div className="flex items-center justify-between gap-2">
-        <Heading.H2>배송지</Heading.H2>
-
-        <Show.Button
-          when={expanded}
-          fallback="변경"
-          type="button"
-          variant="link"
-          onClick={() => {
-            setExpanded((v) => !v)
-          }}
-        >
-          접기
-        </Show.Button>
-      </div>
-
-      <Show when={expanded} fallback={<SelectedAddress selected={selected} />}>
-        <AddressForm
-          addresses={addresses}
-          selectedAddressId={selectedAddressId}
-          onSelectAddress={onSelectAddress}
-        />
-      </Show>
-    </SectionCard>
-  )
-}
 
 export function CheckoutPage() {
   const addresses = marketService.getAddresses()
@@ -96,17 +49,12 @@ export function CheckoutPage() {
   const [agreed, setAgreed] = useState(false)
   const [placed, setPlaced] = useState(false)
 
-  const address =
-    addresses.find((item) => item.id === selectedAddressId) ?? addresses.at(0)
-
-  if (!address) {
-    throw new Error('No delivery address configured')
-  }
+  const selectedAddress = resolveDeliveryAddress(addresses, selectedAddressId)
 
   const itemTotal = MarketPricingPolicy.calculateItemTotal(cartItems)
   const shippingFee = MarketPricingPolicy.calculateShippingFee(
     itemTotal,
-    address,
+    selectedAddress,
   )
   const couponDiscount =
     MarketPricingPolicy.calculateCouponDiscount(appliedCoupon)
@@ -160,11 +108,16 @@ export function CheckoutPage() {
     <div className="mx-auto max-w-120 px-4 pt-6 pb-24 text-left text-(--text)">
       <Heading.H1>주문/결제</Heading.H1>
 
-      <DeliverySection
-        addresses={addresses}
-        selectedAddressId={selectedAddressId}
-        onSelectAddress={setSelectedAddressId}
-      />
+      <ErrorBoundary
+        shouldCatch={NoDeliveryAddressConfiguredError}
+        fallback={null}
+      >
+        <DeliverySection
+          addresses={addresses}
+          selectedAddressId={selectedAddressId}
+          onSelectAddress={setSelectedAddressId}
+        />
+      </ErrorBoundary>
 
       <SectionCard>
         <Heading.H2>배송 요청사항</Heading.H2>

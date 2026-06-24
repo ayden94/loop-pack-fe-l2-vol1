@@ -1,5 +1,6 @@
+export { NoDeliveryAddressConfiguredError } from './errors'
 export { Address, CartItem, Coupon, Member, PastOrder } from './objects'
-export { MarketPricingPolicy } from './policies'
+export { MarketPricingPolicy, resolveDeliveryAddress } from './policies'
 export type {
   AddressData,
   CartItemData,

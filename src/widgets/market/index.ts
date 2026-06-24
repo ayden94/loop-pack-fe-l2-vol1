@@ -1,1 +1,1 @@
-export { OrderItemsSection } from './ui'
+export { DeliverySection, OrderItemsSection } from './ui'
