@@ -97,20 +97,21 @@ const restrictedSyntaxLibUtilities = [
   },
   {
     message:
-      'Group exported utilities as namespace class static methods instead of exporting standalone functions from lib files.',
-    selector: 'ExportNamedDeclaration > FunctionDeclaration',
+      'Group exported utilities as namespace class static methods instead of exporting standalone functions from lib files. React hooks named useX are exempt.',
+    selector:
+      'ExportNamedDeclaration > FunctionDeclaration:not([id.name=/^use[A-Z0-9]/])',
   },
   {
     message:
-      'Group exported utilities as namespace class static methods instead of exporting standalone arrow functions from lib files.',
+      'Group exported utilities as namespace class static methods instead of exporting standalone arrow functions from lib files. React hooks named useX are exempt.',
     selector:
-      "ExportNamedDeclaration > VariableDeclaration > VariableDeclarator[init.type='ArrowFunctionExpression']",
+      "ExportNamedDeclaration > VariableDeclaration > VariableDeclarator[init.type='ArrowFunctionExpression']:not([id.name=/^use[A-Z0-9]/])",
   },
   {
     message:
-      'Group exported utilities as namespace class static methods instead of exporting standalone function expressions from lib files.',
+      'Group exported utilities as namespace class static methods instead of exporting standalone function expressions from lib files. React hooks named useX are exempt.',
     selector:
-      "ExportNamedDeclaration > VariableDeclaration > VariableDeclarator[init.type='FunctionExpression']",
+      "ExportNamedDeclaration > VariableDeclaration > VariableDeclarator[init.type='FunctionExpression']:not([id.name=/^use[A-Z0-9]/])",
   },
 ]
 

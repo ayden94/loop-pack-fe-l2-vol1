@@ -9,7 +9,7 @@ export type UseToggleReturn = {
   setFalse: () => void
 }
 
-function useToggle(initialValue = false): UseToggleReturn {
+export function useToggle(initialValue = false): UseToggleReturn {
   const [value, setValue] = useState(initialValue)
 
   const toggle = useCallback(() => {
@@ -32,5 +32,3 @@ function useToggle(initialValue = false): UseToggleReturn {
     setFalse,
   }
 }
-
-export { useToggle }
