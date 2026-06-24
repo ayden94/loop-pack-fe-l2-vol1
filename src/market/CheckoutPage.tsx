@@ -6,7 +6,7 @@ import {
   type Coupon,
   MarketPricingPolicy,
   marketService,
-  OrderStatusTag,
+  OrderLine,
   type PaymentMethod,
 } from '@/entities/market'
 import { AddressForm, OrderLineRow } from '@/features/market'
@@ -82,8 +82,11 @@ function DeliverySection({
 }
 
 export function CheckoutPage() {
-  const { addresses, cartItems, coupons, member, pastOrders } =
-    marketService.getMarketSnapshot()
+  const addresses = marketService.getAddresses()
+  const cartItems = marketService.getCartItems()
+  const coupons = marketService.getCoupons()
+  const member = marketService.getMember()
+  const pastOrders = marketService.getPastOrders()
 
   const [selectedAddressId, setSelectedAddressId] = useState(
     addresses[0]?.id ?? '',
@@ -199,9 +202,7 @@ export function CheckoutPage() {
         </div>
         <Show when={appliedCoupon}>
           {(coupon) => (
-            <small className="mt-0.5 block text-[13px] text-(--text) opacity-70">
-              {coupon.label} 적용됨
-            </small>
+            <OrderLine.Description>{coupon.label} 적용됨</OrderLine.Description>
           )}
         </Show>
       </SectionCard>
@@ -333,10 +334,7 @@ export function CheckoutPage() {
         <Heading.H2>최근 주문</Heading.H2>
         <For each={pastOrders}>
           {(order) => (
-            <div key={order.id} className="flex items-center gap-2.5 py-2">
-              <div className="min-w-0 flex-1">{order.summary}</div>
-              <OrderStatusTag status={order.status} />
-            </div>
+            <OrderLineRow key={order.id} kind="past-order" order={order} />
           )}
         </For>
       </SectionCard>
