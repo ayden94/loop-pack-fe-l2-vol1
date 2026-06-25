@@ -10,7 +10,6 @@ import {
   type PaymentMethod,
   resolveDeliveryAddress,
 } from '@/entities/market'
-import { OrderLineRow } from '@/features/market'
 import {
   Button,
   Checkbox,
@@ -27,6 +26,7 @@ import {
   CouponCodeSection,
   DeliverySection,
   OrderItemsSection,
+  PaymentSummarySection,
   PointSection,
   RecentOrderSection,
 } from '@/widgets/market'
@@ -135,38 +135,14 @@ export function CheckoutPage() {
         </RadioGroup>
       </SectionCard>
 
-      <SectionCard>
-        <Heading.H2>결제 금액</Heading.H2>
-        <OrderLineRow
-          kind="amount"
-          label="상품 금액"
-          amount={priceQuote.itemTotal}
-        />
-        <OrderLineRow
-          kind="amount"
-          label="배송비"
-          amount={priceQuote.shippingFee}
-        />
-        <Show when={appliedCoupon}>
-          {(coupon) => (
-            <OrderLineRow
-              kind="coupon-discount"
-              coupon={coupon}
-              amount={priceQuote.couponDiscount}
-            />
-          )}
-        </Show>
-        <Show when={priceQuote.pointDiscount > 0}>
-          <OrderLineRow
-            kind="point-discount"
-            amount={priceQuote.pointDiscount}
-          />
-        </Show>
-        <div className="mt-2 flex items-center justify-between border-t border-(--border) pt-3 font-semibold text-(--text-h)">
-          <span>최종 결제 금액</span>
-          <Price value={priceQuote.memberDisplayPrice} />
-        </div>
-      </SectionCard>
+      <PaymentSummarySection
+        itemTotal={priceQuote.itemTotal}
+        shippingFee={priceQuote.shippingFee}
+        couponDiscount={priceQuote.couponDiscount}
+        pointDiscount={priceQuote.pointDiscount}
+        memberDisplayPrice={priceQuote.memberDisplayPrice}
+        appliedCoupon={appliedCoupon}
+      />
 
       <SectionCard>
         <Label>

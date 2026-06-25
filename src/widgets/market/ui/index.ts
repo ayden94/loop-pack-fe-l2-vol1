@@ -1,5 +1,6 @@
 export { CouponCodeSection } from './CouponCodeSection'
 export { DeliverySection } from './DeliverySection'
 export { OrderItemsSection } from './OrderItemsSection'
+export { PaymentSummarySection } from './PaymentSummarySection'
 export { PointSection } from './PointSection'
 export { RecentOrderSection } from './RecentOrderSection'
