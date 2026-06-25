@@ -9,7 +9,6 @@ type CheckoutPriceQuoteParams = {
   cartItems: ReadonlyArray<CartItem>
   selectedAddress: Address
   appliedCoupon: Coupon | null
-  usePoint: boolean
   pointInput: number
   member: Member
 }
@@ -37,7 +36,7 @@ export class CheckoutPriceQuote {
   }
 
   get pointDiscount() {
-    if (!this.params.usePoint) {
+    if (this.params.pointInput <= 0) {
       return 0
     }
 

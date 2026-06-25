@@ -15,7 +15,6 @@ import {
   Button,
   Checkbox,
   Heading,
-  Input,
   Label,
   Modal,
   Price,
@@ -28,6 +27,7 @@ import {
   CouponCodeSection,
   DeliverySection,
   OrderItemsSection,
+  PointSection,
 } from '@/widgets/market'
 
 const PAYMENT_LABEL: Record<PaymentMethod, string> = {
@@ -48,7 +48,6 @@ export function CheckoutPage() {
     addresses[0]?.id ?? '',
   )
   const [appliedCoupon, setAppliedCoupon] = useState<Coupon | null>(null)
-  const [usePoint, setUsePoint] = useState(false)
   const [pointInput, setPointInput] = useState(0)
   const [payment, setPayment] = useState<PaymentMethod>('card')
   const [isTermsOpen, setIsTermsOpen] = useState(false)
@@ -60,7 +59,6 @@ export function CheckoutPage() {
     cartItems,
     selectedAddress,
     appliedCoupon,
-    usePoint,
     pointInput,
     member,
   })
@@ -113,28 +111,10 @@ export function CheckoutPage() {
 
       <CouponCodeSection onAppliedCoupon={setAppliedCoupon} />
 
-      <SectionCard>
-        <Heading.H2>적립금</Heading.H2>
-        <Label>
-          <Checkbox
-            checked={usePoint}
-            onChange={(e) => {
-              setUsePoint(e.target.checked)
-            }}
-          />
-          적립금 사용 (보유 {member.point.toLocaleString()}P)
-        </Label>
-        <Show when={usePoint}>
-          <Input
-            aria-label="사용할 적립금"
-            type="number"
-            value={pointInput}
-            onChange={(e) => {
-              setPointInput(Number(e.target.value))
-            }}
-          />
-        </Show>
-      </SectionCard>
+      <PointSection
+        currentPoint={member.point}
+        onPointInputChange={setPointInput}
+      />
 
       <SectionCard>
         <Heading.H2>결제수단</Heading.H2>
@@ -177,7 +157,7 @@ export function CheckoutPage() {
             />
           )}
         </Show>
-        <Show when={usePoint}>
+        <Show when={priceQuote.pointDiscount > 0}>
           <OrderLineRow
             kind="point-discount"
             amount={priceQuote.pointDiscount}
