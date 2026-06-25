@@ -7,7 +7,6 @@ import {
   type Coupon,
   marketService,
   NoDeliveryAddressConfiguredError,
-  OrderLine,
   type PaymentMethod,
   resolveDeliveryAddress,
 } from '@/entities/market'
@@ -25,7 +24,11 @@ import {
   SectionCard,
   Textarea,
 } from '@/shared/ui'
-import { DeliverySection, OrderItemsSection } from '@/widgets/market'
+import {
+  CouponCodeSection,
+  DeliverySection,
+  OrderItemsSection,
+} from '@/widgets/market'
 
 const PAYMENT_LABEL: Record<PaymentMethod, string> = {
   card: '신용/체크카드',
@@ -38,14 +41,12 @@ const PAYMENT_METHODS: Array<PaymentMethod> = ['card', 'transfer', 'kakao']
 export function CheckoutPage() {
   const addresses = marketService.getAddresses()
   const cartItems = marketService.getCartItems()
-  const coupons = marketService.getCoupons()
   const member = marketService.getMember()
   const pastOrders = marketService.getPastOrders()
 
   const [selectedAddressId, setSelectedAddressId] = useState(
     addresses[0]?.id ?? '',
   )
-  const [couponCode, setCouponCode] = useState('')
   const [appliedCoupon, setAppliedCoupon] = useState<Coupon | null>(null)
   const [usePoint, setUsePoint] = useState(false)
   const [pointInput, setPointInput] = useState(0)
@@ -63,12 +64,6 @@ export function CheckoutPage() {
     pointInput,
     member,
   })
-
-  const applyCoupon = () => {
-    const found = coupons.find((coupon) => coupon.code === couponCode.trim())
-    setAppliedCoupon(found ?? null)
-    if (!found) alert('존재하지 않는 쿠폰이에요')
-  }
 
   if (placed) {
     return (
@@ -116,28 +111,7 @@ export function CheckoutPage() {
 
       <OrderItemsSection items={cartItems} />
 
-      <SectionCard>
-        <Heading.H2>쿠폰</Heading.H2>
-        <div className="flex gap-2">
-          <Input
-            aria-label="쿠폰 코드"
-            type="text"
-            value={couponCode}
-            onChange={(e) => {
-              setCouponCode(e.target.value)
-            }}
-            placeholder="쿠폰 코드 (예: WELCOME5000)"
-          />
-          <Button type="button" onClick={applyCoupon}>
-            적용
-          </Button>
-        </div>
-        <Show when={appliedCoupon}>
-          {(coupon) => (
-            <OrderLine.Description>{coupon.label} 적용됨</OrderLine.Description>
-          )}
-        </Show>
-      </SectionCard>
+      <CouponCodeSection onAppliedCoupon={setAppliedCoupon} />
 
       <SectionCard>
         <Heading.H2>적립금</Heading.H2>
