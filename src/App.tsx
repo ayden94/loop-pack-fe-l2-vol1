@@ -1,4 +1,4 @@
-import { CheckoutPage } from './market/CheckoutPage'
+import { CheckoutPage } from '@/pages/market'
 
 export function App() {
   return <CheckoutPage />

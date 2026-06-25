@@ -10,6 +10,7 @@ import {
   type PaymentMethod,
   resolveDeliveryAddress,
 } from '@/entities/market'
+import type { PaymentMethodOption } from '@/features/market'
 import {
   Button,
   Checkbox,
@@ -30,16 +31,18 @@ import {
   RecentOrderSection,
 } from '@/widgets/market'
 
-const PAYMENT_DICT: Record<PaymentMethod, string> = {
-  card: '신용/체크카드',
-  transfer: '계좌이체',
-  kakao: '카카오페이',
-}
+const PAYMENT_OPTIONS = [
+  { value: 'card', label: '신용/체크카드' },
+  { value: 'transfer', label: '계좌이체' },
+  { value: 'kakao', label: '카카오페이' },
+] satisfies Array<PaymentMethodOption<PaymentMethod>>
 
 export function CheckoutPage() {
   const addresses = marketService.getAddresses()
   const cartItems = marketService.getCartItems()
+  const coupons = marketService.getCoupons()
   const member = marketService.getMember()
+  const pastOrders = marketService.getPastOrders()
 
   const [selectedAddressId, setSelectedAddressId] = useState(
     addresses[0]?.id ?? '',
@@ -66,7 +69,9 @@ export function CheckoutPage() {
       className="mx-auto max-w-120 px-4 pt-6 pb-24 text-left text-(--text)"
       fallback={
         <OrderCompleteSection
-          setPlaced={setPlaced}
+          onReturnToOrder={() => {
+            setPlaced(false)
+          }}
           memberDisplayPrice={priceQuote.memberDisplayPrice}
         />
       }
@@ -91,7 +96,11 @@ export function CheckoutPage() {
 
       <OrderItemsSection items={cartItems} />
 
-      <CouponCodeSection onAppliedCoupon={setAppliedCoupon} />
+      <CouponCodeSection
+        coupons={coupons}
+        appliedCoupon={appliedCoupon}
+        onAppliedCoupon={setAppliedCoupon}
+      />
 
       <PointSection
         currentPoint={member.point}
@@ -99,9 +108,9 @@ export function CheckoutPage() {
       />
 
       <PaymentMethodSection
-        paymentOptions={PAYMENT_DICT}
-        defaultPayment={payment}
-        onChangePayment={setPayment}
+        options={PAYMENT_OPTIONS}
+        value={payment}
+        onChange={setPayment}
       />
 
       <PaymentSummarySection
@@ -160,7 +169,7 @@ export function CheckoutPage() {
         {priceQuote.memberDisplayPrice.toLocaleString()}원 결제하기
       </Button>
 
-      <RecentOrderSection />
+      <RecentOrderSection orders={pastOrders} />
     </Show.div>
   )
 }

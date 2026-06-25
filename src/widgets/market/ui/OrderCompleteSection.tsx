@@ -1,12 +1,12 @@
 import { Button, Heading, Price, SectionCard } from '@/shared/ui'
 
 type OrderCompleteSectionProps = {
-  setPlaced: (value: boolean) => void
+  onReturnToOrder: () => void
   memberDisplayPrice: number
 }
 
 export function OrderCompleteSection({
-  setPlaced,
+  onReturnToOrder,
   memberDisplayPrice,
 }: OrderCompleteSectionProps) {
   return (
@@ -21,9 +21,7 @@ export function OrderCompleteSection({
         type="button"
         className="sticky bottom-4 mt-2 w-full rounded-xl p-3.75 text-base font-semibold"
         variant="primary"
-        onClick={() => {
-          setPlaced(false)
-        }}
+        onClick={onReturnToOrder}
       >
         주문서로 돌아가기
       </Button>
