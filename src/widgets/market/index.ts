@@ -1,4 +1,5 @@
 export {
+  CheckoutTermsSection,
   CouponCodeSection,
   DeliverySection,
   OrderCompleteSection,

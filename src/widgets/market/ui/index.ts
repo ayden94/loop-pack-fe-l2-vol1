@@ -1,3 +1,4 @@
+export { CheckoutTermsSection } from './CheckoutTermsSection'
 export { CouponCodeSection } from './CouponCodeSection'
 export { DeliverySection } from './DeliverySection'
 export { OrderCompleteSection } from './OrderCompleteSection'

@@ -1,3 +1,4 @@
+export { AgreeCheckoutTermsControl } from './agreeCheckoutTerms'
 export { ApplyCouponForm } from './applyCoupon'
 export {
   type PaymentMethodOption,

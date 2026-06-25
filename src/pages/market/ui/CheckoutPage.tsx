@@ -11,16 +11,9 @@ import {
   resolveDeliveryAddress,
 } from '@/entities/market'
 import type { PaymentMethodOption } from '@/features/market'
+import { Button, Heading, SectionCard, Textarea } from '@/shared/ui'
 import {
-  Button,
-  Checkbox,
-  Heading,
-  Label,
-  Modal,
-  SectionCard,
-  Textarea,
-} from '@/shared/ui'
-import {
+  CheckoutTermsSection,
   CouponCodeSection,
   DeliverySection,
   OrderCompleteSection,
@@ -50,7 +43,6 @@ export function CheckoutPage() {
   const [appliedCoupon, setAppliedCoupon] = useState<Coupon | null>(null)
   const [pointInput, setPointInput] = useState(0)
   const [payment, setPayment] = useState<PaymentMethod>('card')
-  const [isTermsOpen, setIsTermsOpen] = useState(false)
   const [agreed, setAgreed] = useState(false)
   const [placed, setPlaced] = useState(false)
 
@@ -118,44 +110,7 @@ export function CheckoutPage() {
         appliedCoupon={appliedCoupon}
       />
 
-      <SectionCard>
-        <Label>
-          <Checkbox
-            checked={agreed}
-            onChange={(e) => {
-              setAgreed(e.target.checked)
-            }}
-          />
-          주문 내용 및 약관에 동의합니다
-        </Label>
-        <Button
-          type="button"
-          variant="link"
-          onClick={() => {
-            setIsTermsOpen(true)
-          }}
-        >
-          약관 보기
-        </Button>
-      </SectionCard>
-
-      <Show when={isTermsOpen}>
-        <Modal headingId="terms-title">
-          <Heading.H3 id="terms-title">이용 약관</Heading.H3>
-          <p>
-            주문 후 7일 이내 단순 변심 반품이 가능하며, 도서산간은 배송비가
-            추가됩니다.
-          </p>
-          <Button
-            type="button"
-            onClick={() => {
-              setIsTermsOpen(false)
-            }}
-          >
-            닫기
-          </Button>
-        </Modal>
-      </Show>
+      <CheckoutTermsSection checked={agreed} onCheckedChange={setAgreed} />
 
       <Button
         type="button"
