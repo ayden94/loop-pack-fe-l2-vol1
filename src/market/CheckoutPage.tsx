@@ -106,11 +106,7 @@ export function CheckoutPage() {
         />
 
         <PaymentSummarySection
-          itemTotal={priceQuote.itemTotal}
-          shippingFee={priceQuote.shippingFee}
-          couponDiscount={priceQuote.couponDiscount}
-          pointDiscount={priceQuote.pointDiscount}
-          memberDisplayPrice={priceQuote.memberDisplayPrice}
+          priceQuote={priceQuote}
           appliedCoupon={appliedCoupon}
         />
 

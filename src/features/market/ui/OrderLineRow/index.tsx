@@ -1,6 +1,7 @@
 import { CartItemOrderLine } from './CartItemOrderLine'
 import { CheckoutAmountOrderLine } from './CheckoutAmountOrderLine'
 import { CouponDiscountOrderLine } from './CouponDiscountOrderLine'
+import { MemberDiscountOrderLine } from './MemberDiscountOrderLine'
 import { PastOrderLine } from './PastOrderLine'
 import { PointDiscountOrderLine } from './PointDiscountOrderLine'
 import type { OrderLineRowProps } from './types'
@@ -20,6 +21,9 @@ export function OrderLineRow(props: OrderLineRowProps) {
 
     case 'point-discount':
       return <PointDiscountOrderLine {...props} />
+
+    case 'member-discount':
+      return <MemberDiscountOrderLine {...props} />
 
     case 'past-order':
       return <PastOrderLine {...props} />

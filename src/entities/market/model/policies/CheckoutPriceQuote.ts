@@ -48,11 +48,15 @@ export class CheckoutPriceQuote {
   }
 
   get memberDisplayPrice() {
+    return this.finalPrice - this.memberDiscount
+  }
+
+  get memberDiscount() {
     if (this.params.member.grade !== 'VIP') {
-      return this.finalPrice
+      return 0
     }
 
-    return Math.round(this.finalPrice * (1 - VIP_DISPLAY_DISCOUNT_RATE))
+    return Math.round(this.finalPrice * VIP_DISPLAY_DISCOUNT_RATE)
   }
 
   private get finalPrice() {
