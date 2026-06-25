@@ -3,8 +3,8 @@ import { ErrorBoundary } from '@suspensive/react'
 import { useState } from 'react'
 
 import {
+  CheckoutPriceQuote,
   type Coupon,
-  MarketPricingPolicy,
   marketService,
   NoDeliveryAddressConfiguredError,
   OrderLine,
@@ -55,30 +55,14 @@ export function CheckoutPage() {
   const [placed, setPlaced] = useState(false)
 
   const selectedAddress = resolveDeliveryAddress(addresses, selectedAddressId)
-
-  const itemTotal = MarketPricingPolicy.calculateItemTotal(cartItems)
-  const shippingFee = MarketPricingPolicy.calculateShippingFee(
-    itemTotal,
+  const priceQuote = new CheckoutPriceQuote({
+    cartItems,
     selectedAddress,
-  )
-  const couponDiscount =
-    MarketPricingPolicy.calculateCouponDiscount(appliedCoupon)
-  const pointDiscount = MarketPricingPolicy.calculatePointDiscount({
-    enabled: usePoint,
+    appliedCoupon,
+    usePoint,
     pointInput,
     member,
-    itemTotal,
   })
-  const finalPrice = MarketPricingPolicy.calculateFinalPrice({
-    itemTotal,
-    shippingFee,
-    couponDiscount,
-    pointDiscount,
-  })
-  const memberDisplayPrice = MarketPricingPolicy.calculateMemberDisplayPrice(
-    finalPrice,
-    member,
-  )
 
   const applyCoupon = () => {
     const found = coupons.find((coupon) => coupon.code === couponCode.trim())
@@ -92,7 +76,8 @@ export function CheckoutPage() {
         <Heading.H1>주문 완료</Heading.H1>
         <SectionCard>
           <p className="text-(--text-h)">
-            주문이 접수되었어요. 결제 금액 <Price value={memberDisplayPrice} />
+            주문이 접수되었어요. 결제 금액{' '}
+            <Price value={priceQuote.memberDisplayPrice} />
           </p>
         </SectionCard>
         <Button
@@ -199,23 +184,34 @@ export function CheckoutPage() {
 
       <SectionCard>
         <Heading.H2>결제 금액</Heading.H2>
-        <OrderLineRow kind="amount" label="상품 금액" amount={itemTotal} />
-        <OrderLineRow kind="amount" label="배송비" amount={shippingFee} />
+        <OrderLineRow
+          kind="amount"
+          label="상품 금액"
+          amount={priceQuote.itemTotal}
+        />
+        <OrderLineRow
+          kind="amount"
+          label="배송비"
+          amount={priceQuote.shippingFee}
+        />
         <Show when={appliedCoupon}>
           {(coupon) => (
             <OrderLineRow
               kind="coupon-discount"
               coupon={coupon}
-              amount={couponDiscount}
+              amount={priceQuote.couponDiscount}
             />
           )}
         </Show>
         <Show when={usePoint}>
-          <OrderLineRow kind="point-discount" amount={pointDiscount} />
+          <OrderLineRow
+            kind="point-discount"
+            amount={priceQuote.pointDiscount}
+          />
         </Show>
         <div className="mt-2 flex items-center justify-between border-t border-(--border) pt-3 font-semibold text-(--text-h)">
           <span>최종 결제 금액</span>
-          <Price value={memberDisplayPrice} />
+          <Price value={priceQuote.memberDisplayPrice} />
         </div>
       </SectionCard>
 
@@ -249,7 +245,7 @@ export function CheckoutPage() {
           setPlaced(true)
         }}
       >
-        {memberDisplayPrice.toLocaleString()}원 결제하기
+        {priceQuote.memberDisplayPrice.toLocaleString()}원 결제하기
       </Button>
 
       <Show when={isTermsOpen}>
