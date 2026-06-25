@@ -71,98 +71,96 @@ export function CheckoutPage() {
         />
       }
     >
-      <>
-        <Heading.H1>주문/결제</Heading.H1>
+      <Heading.H1>주문/결제</Heading.H1>
 
-        <ErrorBoundary
-          shouldCatch={NoDeliveryAddressConfiguredError}
-          fallback={null}
-        >
-          <DeliverySection
-            addresses={addresses}
-            selectedAddressId={selectedAddressId}
-            onSelectAddress={setSelectedAddressId}
-          />
-        </ErrorBoundary>
-
-        <SectionCard>
-          <Heading.H2>배송 요청사항</Heading.H2>
-          <Textarea placeholder="배송 시 요청사항 (예: 부재 시 문 앞에 두세요)" />
-        </SectionCard>
-
-        <OrderItemsSection items={cartItems} />
-
-        <CouponCodeSection onAppliedCoupon={setAppliedCoupon} />
-
-        <PointSection
-          currentPoint={member.point}
-          onPointInputChange={setPointInput}
+      <ErrorBoundary
+        shouldCatch={NoDeliveryAddressConfiguredError}
+        fallback={null}
+      >
+        <DeliverySection
+          addresses={addresses}
+          selectedAddressId={selectedAddressId}
+          onSelectAddress={setSelectedAddressId}
         />
+      </ErrorBoundary>
 
-        <PaymentMethodSection
-          paymentOptions={PAYMENT_DICT}
-          defaultPayment={payment}
-          onChangePayment={setPayment}
-        />
+      <SectionCard>
+        <Heading.H2>배송 요청사항</Heading.H2>
+        <Textarea placeholder="배송 시 요청사항 (예: 부재 시 문 앞에 두세요)" />
+      </SectionCard>
 
-        <PaymentSummarySection
-          priceQuote={priceQuote}
-          appliedCoupon={appliedCoupon}
-        />
+      <OrderItemsSection items={cartItems} />
 
-        <SectionCard>
-          <Label>
-            <Checkbox
-              checked={agreed}
-              onChange={(e) => {
-                setAgreed(e.target.checked)
-              }}
-            />
-            주문 내용 및 약관에 동의합니다
-          </Label>
-          <Button
-            type="button"
-            variant="link"
-            onClick={() => {
-              setIsTermsOpen(true)
+      <CouponCodeSection onAppliedCoupon={setAppliedCoupon} />
+
+      <PointSection
+        currentPoint={member.point}
+        onPointInputChange={setPointInput}
+      />
+
+      <PaymentMethodSection
+        paymentOptions={PAYMENT_DICT}
+        defaultPayment={payment}
+        onChangePayment={setPayment}
+      />
+
+      <PaymentSummarySection
+        priceQuote={priceQuote}
+        appliedCoupon={appliedCoupon}
+      />
+
+      <SectionCard>
+        <Label>
+          <Checkbox
+            checked={agreed}
+            onChange={(e) => {
+              setAgreed(e.target.checked)
             }}
-          >
-            약관 보기
-          </Button>
-        </SectionCard>
-
+          />
+          주문 내용 및 약관에 동의합니다
+        </Label>
         <Button
           type="button"
-          className="sticky bottom-4 mt-2 w-full rounded-xl p-3.75 text-base font-semibold"
-          disabled={!agreed}
-          variant="primary"
+          variant="link"
           onClick={() => {
-            setPlaced(true)
+            setIsTermsOpen(true)
           }}
         >
-          {priceQuote.memberDisplayPrice.toLocaleString()}원 결제하기
+          약관 보기
         </Button>
+      </SectionCard>
 
-        <Show when={isTermsOpen}>
-          <Modal headingId="terms-title">
-            <Heading.H3 id="terms-title">이용 약관</Heading.H3>
-            <p>
-              주문 후 7일 이내 단순 변심 반품이 가능하며, 도서산간은 배송비가
-              추가됩니다.
-            </p>
-            <Button
-              type="button"
-              onClick={() => {
-                setIsTermsOpen(false)
-              }}
-            >
-              닫기
-            </Button>
-          </Modal>
-        </Show>
+      <Show when={isTermsOpen}>
+        <Modal headingId="terms-title">
+          <Heading.H3 id="terms-title">이용 약관</Heading.H3>
+          <p>
+            주문 후 7일 이내 단순 변심 반품이 가능하며, 도서산간은 배송비가
+            추가됩니다.
+          </p>
+          <Button
+            type="button"
+            onClick={() => {
+              setIsTermsOpen(false)
+            }}
+          >
+            닫기
+          </Button>
+        </Modal>
+      </Show>
 
-        <RecentOrderSection />
-      </>
+      <Button
+        type="button"
+        className="sticky bottom-4 mt-2 w-full rounded-xl p-3.75 text-base font-semibold"
+        disabled={!agreed}
+        variant="primary"
+        onClick={() => {
+          setPlaced(true)
+        }}
+      >
+        {priceQuote.memberDisplayPrice.toLocaleString()}원 결제하기
+      </Button>
+
+      <RecentOrderSection />
     </Show.div>
   )
 }
