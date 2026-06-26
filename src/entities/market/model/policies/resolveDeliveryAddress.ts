@@ -5,13 +5,13 @@ export function resolveDeliveryAddress(
   addresses: ReadonlyArray<Address>,
   selectedAddressId: string,
 ) {
-  const selected =
+  const resolvedAddress =
     addresses.find((address) => address.id === selectedAddressId) ??
     addresses.at(0)
 
-  if (!selected) {
+  if (!resolvedAddress) {
     throw new NoDeliveryAddressConfiguredError()
   }
 
-  return selected
+  return resolvedAddress
 }

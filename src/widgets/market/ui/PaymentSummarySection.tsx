@@ -51,7 +51,7 @@ export function PaymentSummarySection({
 
       <div className="mt-2 flex items-center justify-between border-t border-(--border) pt-3 font-semibold text-(--text-h)">
         <span>최종 결제 금액</span>
-        <Price value={priceQuote.memberDisplayPrice} />
+        <Price amount={priceQuote.payableAmount} />
       </div>
     </SectionCard>
   )

@@ -12,7 +12,7 @@ export function RecentOrderSection() {
       <Heading.H2>최근 주문</Heading.H2>
       <For each={pastOrders}>
         {(order) => (
-          <OrderLineRow key={order.id} kind="past-order" order={order} />
+          <OrderLineRow key={order.id} kind="past-order" pastOrder={order} />
         )}
       </For>
     </SectionCard>

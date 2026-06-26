@@ -18,13 +18,19 @@ export function AddressForm({
   selectedAddressId: string
   onSelectAddress: (id: string) => void
 }) {
-  const [onlyNear, setOnlyNear] = useState(false)
-  const list = onlyNear ? addresses.filter((a) => !a.isRemote) : addresses
+  const [excludeRemoteAreas, setExcludeRemoteAreas] = useState(false)
+  const visibleAddresses = excludeRemoteAreas
+    ? addresses.filter((address) => !address.isRemote)
+    : addresses
+
   return (
     <>
-      <RemoteAreaFilterToggle onlyNear={onlyNear} setOnlyNear={setOnlyNear} />
+      <RemoteAreaFilterToggle
+        excludeRemoteAreas={excludeRemoteAreas}
+        setExcludeRemoteAreas={setExcludeRemoteAreas}
+      />
       <RadioGroup legend="배송지 선택" legendClassName="sr-only">
-        <For each={list}>
+        <For each={visibleAddresses}>
           {(address) => (
             <AddressField
               key={address.id}

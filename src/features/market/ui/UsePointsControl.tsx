@@ -6,49 +6,49 @@ import { Checkbox, Input, Label } from '@/shared/ui'
 
 type UsePointsControlProps = {
   currentPoint: number
-  onChangePoint: (value: number) => void
+  onChangePointsToUse: (pointsToUse: number) => void
 }
 
 export function UsePointsControl({
   currentPoint,
-  onChangePoint,
+  onChangePointsToUse,
 }: UsePointsControlProps) {
-  const [pointInput, setPointInput] = useState(0)
-  const [usePoint, setUsePoint] = useState(false)
+  const [pointsToUse, setPointsToUse] = useState(0)
+  const [isUsingPoints, setIsUsingPoints] = useState(false)
 
-  const handlePointInputChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const nextPointInput = Math.min(
+  const handlePointsToUseChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const nextPointsToUse = Math.min(
       Math.max(Number(e.target.value), 0),
       currentPoint,
     )
 
-    setPointInput(nextPointInput)
-    onChangePoint(nextPointInput)
+    setPointsToUse(nextPointsToUse)
+    onChangePointsToUse(nextPointsToUse)
   }
 
-  const handleUsePointChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setUsePoint(e.target.checked)
+  const handlePointUsageChange = (e: ChangeEvent<HTMLInputElement>) => {
+    setIsUsingPoints(e.target.checked)
 
     if (!e.target.checked) {
-      setPointInput(0)
-      onChangePoint(0)
+      setPointsToUse(0)
+      onChangePointsToUse(0)
     }
   }
 
   return (
     <>
       <Label>
-        <Checkbox checked={usePoint} onChange={handleUsePointChange} />
+        <Checkbox checked={isUsingPoints} onChange={handlePointUsageChange} />
         적립금 사용 (보유 {currentPoint.toLocaleString()}P)
       </Label>
-      <Show when={usePoint}>
+      <Show when={isUsingPoints}>
         <Input
           aria-label="사용할 적립금"
           type="number"
-          value={pointInput}
+          value={pointsToUse}
           min={0}
           max={currentPoint}
-          onChange={handlePointInputChange}
+          onChange={handlePointsToUseChange}
         />
       </Show>
     </>

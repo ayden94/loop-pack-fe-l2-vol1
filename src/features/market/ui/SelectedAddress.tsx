@@ -1,9 +1,14 @@
 import type { Address } from '@/entities/market'
 
-export function SelectedAddress({ selected }: { selected: Address }) {
+export function SelectedAddress({
+  selectedAddress,
+}: {
+  selectedAddress: Address
+}) {
   return (
     <p className="m-0 text-sm text-(--text-h)">
-      {selected.label} · {selected.recipient} ({selected.detail})
+      {selectedAddress.label} · {selectedAddress.recipient} (
+      {selectedAddress.detail})
     </p>
   )
 }

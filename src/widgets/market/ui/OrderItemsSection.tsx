@@ -5,15 +5,21 @@ import { OrderLineRow } from '@/features/market'
 import { Heading, SectionCard } from '@/shared/ui'
 
 type OrderItemsSectionProps = {
-  items: Array<CartItem>
+  cartItems: Array<CartItem>
 }
 
-export function OrderItemsSection({ items }: OrderItemsSectionProps) {
+export function OrderItemsSection({ cartItems }: OrderItemsSectionProps) {
   return (
     <SectionCard>
       <Heading.H2>주문 상품</Heading.H2>
-      <For each={items}>
-        {(item) => <OrderLineRow key={item.id} kind="cart-item" item={item} />}
+      <For each={cartItems}>
+        {(cartItem) => (
+          <OrderLineRow
+            key={cartItem.id}
+            kind="cart-item"
+            cartItem={cartItem}
+          />
+        )}
       </For>
     </SectionCard>
   )

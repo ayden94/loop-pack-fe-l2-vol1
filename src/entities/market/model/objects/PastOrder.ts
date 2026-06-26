@@ -1,4 +1,4 @@
-import type { OrderStatus, PastOrderData } from '../types'
+import type { OrderStatus, PastOrderDto } from '../types'
 
 export class PastOrder {
   readonly id: string
@@ -6,10 +6,10 @@ export class PastOrder {
   readonly status: OrderStatus
   readonly amount: number
 
-  constructor(data: PastOrderData) {
-    this.id = data.id
-    this.summary = data.summary
-    this.status = data.status
-    this.amount = data.amount
+  constructor(pastOrderDto: PastOrderDto) {
+    this.id = pastOrderDto.id
+    this.summary = pastOrderDto.summary
+    this.status = pastOrderDto.status
+    this.amount = pastOrderDto.amount
   }
 }

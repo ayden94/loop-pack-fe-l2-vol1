@@ -37,7 +37,7 @@ export function DeliverySection({
 
       <Show
         when={isExpanded}
-        fallback={<SelectedAddress selected={selectedAddress} />}
+        fallback={<SelectedAddress selectedAddress={selectedAddress} />}
       >
         <AddressForm
           addresses={addresses}

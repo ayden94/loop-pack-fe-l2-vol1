@@ -1,12 +1,12 @@
 import type {
-  AddressData,
-  CartItemData,
-  CouponData,
-  MemberData,
-  PastOrderData,
+  AddressDto,
+  CartItemDto,
+  CouponDto,
+  MemberDto,
+  PastOrderDto,
 } from '../model'
 
-const CART: Array<CartItemData> = [
+const CART: Array<CartItemDto> = [
   {
     id: 'p1',
     name: '무지 코튼 반팔티',
@@ -25,12 +25,12 @@ const CART: Array<CartItemData> = [
   },
 ]
 
-const COUPONS: Array<CouponData> = [
+const COUPONS: Array<CouponDto> = [
   { code: 'WELCOME5000', label: '신규 가입 5,000원 할인', discount: 5000 },
   { code: 'SUMMER3000', label: '여름맞이 3,000원 할인', discount: 3000 },
 ]
 
-const ADDRESSES: Array<AddressData> = [
+const ADDRESSES: Array<AddressDto> = [
   {
     id: 'a1',
     label: '집',
@@ -54,9 +54,9 @@ const ADDRESSES: Array<AddressData> = [
   },
 ]
 
-const MEMBER: MemberData = { name: '김루퍼', grade: 'VIP', point: 4200 }
+const MEMBER: MemberDto = { name: '김루퍼', grade: 'VIP', point: 4200 }
 
-const PAST_ORDERS: Array<PastOrderData> = [
+const PAST_ORDERS: Array<PastOrderDto> = [
   {
     id: 'o1',
     summary: '나이키 에어포스 외 1건',
@@ -72,36 +72,36 @@ const PAST_ORDERS: Array<PastOrderData> = [
   { id: 'o3', summary: '무선 마우스', status: 'cancelled', amount: 32000 },
 ]
 
-type MarketSnapshotData = {
-  cartItems: Array<CartItemData>
-  coupons: Array<CouponData>
-  addresses: Array<AddressData>
-  member: MemberData
-  pastOrders: Array<PastOrderData>
+type MarketSnapshotDto = {
+  cartItems: Array<CartItemDto>
+  coupons: Array<CouponDto>
+  addresses: Array<AddressDto>
+  member: MemberDto
+  pastOrders: Array<PastOrderDto>
 }
 
 export class MarketRepository {
-  getCartItems(): Array<CartItemData> {
+  getCartItems(): Array<CartItemDto> {
     return CART
   }
 
-  getCoupons(): Array<CouponData> {
+  getCoupons(): Array<CouponDto> {
     return COUPONS
   }
 
-  getAddresses(): Array<AddressData> {
+  getAddresses(): Array<AddressDto> {
     return ADDRESSES
   }
 
-  getMember(): MemberData {
+  getMember(): MemberDto {
     return MEMBER
   }
 
-  getPastOrders(): Array<PastOrderData> {
+  getPastOrders(): Array<PastOrderDto> {
     return PAST_ORDERS
   }
 
-  getMarketSnapshot(): MarketSnapshotData {
+  getMarketSnapshot(): MarketSnapshotDto {
     return {
       cartItems: this.getCartItems(),
       coupons: this.getCoupons(),

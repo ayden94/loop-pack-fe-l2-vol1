@@ -1,6 +1,6 @@
 import type { OrderStatus } from './OrderStatus'
 
-export type PastOrderData = {
+export type PastOrderDto = {
   id: string
   summary: string
   status: OrderStatus

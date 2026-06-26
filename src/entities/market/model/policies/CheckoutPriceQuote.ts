@@ -9,7 +9,7 @@ type CheckoutPriceQuoteParams = {
   cartItems: ReadonlyArray<CartItem>
   selectedAddress: Address
   appliedCoupon: Coupon | null
-  pointInput: number
+  pointsToUse: number
   member: Member
 }
 
@@ -36,19 +36,19 @@ export class CheckoutPriceQuote {
   }
 
   get pointDiscount() {
-    if (this.params.pointInput <= 0) {
+    if (this.params.pointsToUse <= 0) {
       return 0
     }
 
     return Math.min(
-      this.params.pointInput,
+      this.params.pointsToUse,
       this.params.member.point,
       this.itemTotal,
     )
   }
 
-  get memberDisplayPrice() {
-    return this.finalPrice - this.memberDiscount
+  get payableAmount() {
+    return this.discountedSubtotal - this.memberDiscount
   }
 
   get memberDiscount() {
@@ -56,10 +56,10 @@ export class CheckoutPriceQuote {
       return 0
     }
 
-    return Math.round(this.finalPrice * VIP_DISPLAY_DISCOUNT_RATE)
+    return Math.round(this.discountedSubtotal * VIP_DISPLAY_DISCOUNT_RATE)
   }
 
-  private get finalPrice() {
+  private get discountedSubtotal() {
     return (
       this.itemTotal +
       this.shippingFee -

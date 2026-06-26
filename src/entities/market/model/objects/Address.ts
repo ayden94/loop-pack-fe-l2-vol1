@@ -1,4 +1,4 @@
-import type { AddressData } from '../types'
+import type { AddressDto } from '../types'
 
 export class Address {
   readonly id: string
@@ -7,11 +7,11 @@ export class Address {
   readonly detail: string
   readonly isRemote: boolean
 
-  constructor(data: AddressData) {
-    this.id = data.id
-    this.label = data.label
-    this.recipient = data.recipient
-    this.detail = data.detail
-    this.isRemote = data.isRemote
+  constructor(addressDto: AddressDto) {
+    this.id = addressDto.id
+    this.label = addressDto.label
+    this.recipient = addressDto.recipient
+    this.detail = addressDto.detail
+    this.isRemote = addressDto.isRemote
   }
 }

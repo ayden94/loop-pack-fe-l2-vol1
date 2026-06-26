@@ -3,17 +3,17 @@ import { Heading, SectionCard } from '@/shared/ui'
 
 export function PointSection({
   currentPoint,
-  onPointInputChange,
+  onPointsToUseChange,
 }: {
   currentPoint: number
-  onPointInputChange: (value: number) => void
+  onPointsToUseChange: (pointsToUse: number) => void
 }) {
   return (
     <SectionCard>
       <Heading.H2>적립금</Heading.H2>
       <UsePointsControl
         currentPoint={currentPoint}
-        onChangePoint={onPointInputChange}
+        onChangePointsToUse={onPointsToUseChange}
       />
     </SectionCard>
   )

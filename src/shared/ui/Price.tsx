@@ -1,7 +1,7 @@
 type PriceProps = {
-  value: number
+  amount: number
 }
 
-export function Price({ value }: PriceProps) {
-  return <strong>{value.toLocaleString()}원</strong>
+export function Price({ amount }: PriceProps) {
+  return <strong>{amount.toLocaleString()}원</strong>
 }

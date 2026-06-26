@@ -1,4 +1,4 @@
-export type CartItemData = {
+export type CartItemDto = {
   id: string
   name: string
   option: string

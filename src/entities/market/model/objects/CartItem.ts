@@ -1,4 +1,4 @@
-import type { CartItemData } from '../types'
+import type { CartItemDto } from '../types'
 
 export class CartItem {
   readonly id: string
@@ -8,13 +8,13 @@ export class CartItem {
   readonly quantity: number
   readonly thumbnail: string
 
-  constructor(data: CartItemData) {
-    this.id = data.id
-    this.name = data.name
-    this.option = data.option
-    this.price = data.price
-    this.quantity = data.quantity
-    this.thumbnail = data.thumbnail
+  constructor(cartItemDto: CartItemDto) {
+    this.id = cartItemDto.id
+    this.name = cartItemDto.name
+    this.option = cartItemDto.option
+    this.price = cartItemDto.price
+    this.quantity = cartItemDto.quantity
+    this.thumbnail = cartItemDto.thumbnail
   }
 
   get totalPrice() {

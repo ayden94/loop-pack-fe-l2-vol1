@@ -39,30 +39,30 @@ export function CheckoutPage() {
     addresses[0]?.id ?? '',
   )
   const [appliedCoupon, setAppliedCoupon] = useState<Coupon | null>(null)
-  const [pointInput, setPointInput] = useState(0)
-  const [payment, setPayment] = useState<PaymentMethod>('card')
-  const [agreed, setAgreed] = useState(false)
-  const [placed, setPlaced] = useState(false)
+  const [pointsToUse, setPointsToUse] = useState(0)
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('card')
+  const [hasAgreedToTerms, setHasAgreedToTerms] = useState(false)
+  const [isOrderPlaced, setIsOrderPlaced] = useState(false)
 
   const selectedAddress = resolveDeliveryAddress(addresses, selectedAddressId)
   const priceQuote = new CheckoutPriceQuote({
     cartItems,
     selectedAddress,
     appliedCoupon,
-    pointInput,
+    pointsToUse,
     member,
   })
 
   return (
     <Show.div
-      when={!placed}
+      when={!isOrderPlaced}
       className="mx-auto max-w-120 px-4 pt-6 pb-24 text-left text-(--text)"
       fallback={
         <OrderCompleteSection
           onReturnToOrder={() => {
-            setPlaced(false)
+            setIsOrderPlaced(false)
           }}
-          memberDisplayPrice={priceQuote.memberDisplayPrice}
+          payableAmount={priceQuote.payableAmount}
         />
       }
     >
@@ -84,7 +84,7 @@ export function CheckoutPage() {
         <Textarea placeholder="배송 시 요청사항 (예: 부재 시 문 앞에 두세요)" />
       </SectionCard>
 
-      <OrderItemsSection items={cartItems} />
+      <OrderItemsSection cartItems={cartItems} />
 
       <CouponCodeSection
         appliedCoupon={appliedCoupon}
@@ -93,13 +93,13 @@ export function CheckoutPage() {
 
       <PointSection
         currentPoint={member.point}
-        onPointInputChange={setPointInput}
+        onPointsToUseChange={setPointsToUse}
       />
 
       <PaymentMethodSection
         options={PAYMENT_OPTIONS}
-        value={payment}
-        onChange={setPayment}
+        value={paymentMethod}
+        onChange={setPaymentMethod}
       />
 
       <PaymentSummarySection
@@ -107,18 +107,21 @@ export function CheckoutPage() {
         appliedCoupon={appliedCoupon}
       />
 
-      <CheckoutTermsSection checked={agreed} onCheckedChange={setAgreed} />
+      <CheckoutTermsSection
+        checked={hasAgreedToTerms}
+        onCheckedChange={setHasAgreedToTerms}
+      />
 
       <Button
         type="button"
         className="sticky bottom-4 mt-2 w-full rounded-xl p-3.75 text-base font-semibold"
-        disabled={!agreed}
+        disabled={!hasAgreedToTerms}
         variant="primary"
         onClick={() => {
-          setPlaced(true)
+          setIsOrderPlaced(true)
         }}
       >
-        {priceQuote.memberDisplayPrice.toLocaleString()}원 결제하기
+        {priceQuote.payableAmount.toLocaleString()}원 결제하기
       </Button>
 
       <RecentOrderSection />

@@ -1,18 +1,18 @@
 import { Checkbox, Label } from '@/shared/ui'
 
 export function RemoteAreaFilterToggle({
-  onlyNear,
-  setOnlyNear,
+  excludeRemoteAreas,
+  setExcludeRemoteAreas,
 }: {
-  onlyNear: boolean
-  setOnlyNear: (value: boolean) => void
+  excludeRemoteAreas: boolean
+  setExcludeRemoteAreas: (value: boolean) => void
 }) {
   return (
     <Label className="mb-1 text-[13px] opacity-80">
       <Checkbox
-        checked={onlyNear}
+        checked={excludeRemoteAreas}
         onChange={(e) => {
-          setOnlyNear(e.target.checked)
+          setExcludeRemoteAreas(e.target.checked)
         }}
       />
       도서산간 제외

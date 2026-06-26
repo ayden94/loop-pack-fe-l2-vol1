@@ -1,13 +1,13 @@
-import type { CouponData } from '../types'
+import type { CouponDto } from '../types'
 
 export class Coupon {
   readonly code: string
   readonly label: string
   readonly discount: number
 
-  constructor(data: CouponData) {
-    this.code = data.code
-    this.label = data.label
-    this.discount = data.discount
+  constructor(couponDto: CouponDto) {
+    this.code = couponDto.code
+    this.label = couponDto.label
+    this.discount = couponDto.discount
   }
 }

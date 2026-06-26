@@ -2,12 +2,12 @@ export { NoDeliveryAddressConfiguredError } from './errors'
 export { Address, CartItem, Coupon, Member, PastOrder } from './objects'
 export { CheckoutPriceQuote, resolveDeliveryAddress } from './policies'
 export type {
-  AddressData,
-  CartItemData,
-  CouponData,
-  MemberData,
+  AddressDto,
+  CartItemDto,
+  CouponDto,
+  MemberDto,
   MemberGrade,
   OrderStatus,
-  PastOrderData,
+  PastOrderDto,
   PaymentMethod,
 } from './types'

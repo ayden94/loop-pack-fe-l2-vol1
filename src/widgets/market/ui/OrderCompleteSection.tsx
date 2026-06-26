@@ -2,19 +2,19 @@ import { Button, Heading, Price, SectionCard } from '@/shared/ui'
 
 type OrderCompleteSectionProps = {
   onReturnToOrder: () => void
-  memberDisplayPrice: number
+  payableAmount: number
 }
 
 export function OrderCompleteSection({
   onReturnToOrder,
-  memberDisplayPrice,
+  payableAmount,
 }: OrderCompleteSectionProps) {
   return (
     <>
       <Heading.H1>주문 완료</Heading.H1>
       <SectionCard>
         <p className="text-(--text-h)">
-          주문이 접수되었어요. 결제 금액 <Price value={memberDisplayPrice} />
+          주문이 접수되었어요. 결제 금액 <Price amount={payableAmount} />
         </p>
       </SectionCard>
       <Button

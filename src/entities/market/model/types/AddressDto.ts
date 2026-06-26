@@ -1,4 +1,4 @@
-export type AddressData = {
+export type AddressDto = {
   id: string
   label: string
   recipient: string
