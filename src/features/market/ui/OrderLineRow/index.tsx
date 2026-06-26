@@ -27,5 +27,12 @@ export function OrderLineRow(props: OrderLineRowProps) {
 
     case 'past-order':
       return <PastOrderLine {...props} />
+
+    default:
+      return assertNeverOrderLineRowProps(props)
   }
+}
+
+function assertNeverOrderLineRowProps(value: never): never {
+  throw new Error(`Unhandled order line row props: ${JSON.stringify(value)}`)
 }
