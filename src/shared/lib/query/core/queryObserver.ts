@@ -48,6 +48,7 @@ export class QueryObserver<
   }
 
   subscribe(listener: () => void): () => void {
+    this.addObserver(this.query)
     this.listeners.add(listener)
     QueryLifecycle.cancelGc(this.query)
 
@@ -55,6 +56,7 @@ export class QueryObserver<
       this.listeners.delete(listener)
 
       if (this.listeners.size === 0) {
+        this.removeObserver(this.query)
         QueryLifecycle.scheduleGc(
           this.query,
           this.client.getQueryCache(),
@@ -155,8 +157,16 @@ export class QueryObserver<
       this.options.gcTime ?? defaultGcTime,
     )
     this.query = newQuery
-    this.query.observers.push(this)
+    this.addObserver(this.query)
     QueryLifecycle.cancelGc(this.query)
+  }
+
+  private addObserver(
+    query: Query<TQueryFnData, TError, TData, TQueryKey>,
+  ): void {
+    if (!query.observers.includes(this)) {
+      query.observers.push(this)
+    }
   }
 
   private removeObserver(
@@ -184,15 +194,6 @@ export class QueryObserver<
     isPlaceholderData: boolean
   } {
     if (this.query.state.data !== undefined) {
-      if (this.options.select !== undefined) {
-        return {
-          data: this.options.select(
-            this.query.state.data as unknown as TQueryFnData,
-          ),
-          isPlaceholderData: false,
-        }
-      }
-
       return { data: this.query.state.data, isPlaceholderData: false }
     }
 

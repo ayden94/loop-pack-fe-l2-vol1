@@ -1,5 +1,6 @@
 export type { QueryProviderProps } from './QueryProvider'
 export { QueryClientContext, QueryProvider } from './QueryProvider'
+export { suspenseQueryOptions } from './suspenseQueryOptions'
 export { useInfiniteQuery } from './useInfiniteQuery'
 export { useMutation } from './useMutation'
 export { useQuery } from './useQuery'

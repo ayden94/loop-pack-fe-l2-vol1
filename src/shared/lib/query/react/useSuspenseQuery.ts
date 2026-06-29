@@ -98,7 +98,15 @@ function useSuspenseQuery<
     throw snapshot.error
   }
 
-  return snapshot as unknown as SuspenseQueryObserverResult<TData, TError>
+  if (snapshot.data === undefined) {
+    throw new Error('Suspense query resolved without data')
+  }
+
+  return {
+    ...snapshot,
+    data: snapshot.data,
+    status: snapshot.status,
+  }
 }
 
 export type { SuspenseQueryOptions }

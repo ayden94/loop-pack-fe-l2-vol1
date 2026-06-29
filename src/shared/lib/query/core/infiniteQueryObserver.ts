@@ -80,6 +80,7 @@ export class InfiniteQueryObserver<
   }
 
   subscribe(listener: () => void): () => void {
+    this.addObserver(this.query)
     this.listeners.add(listener)
     QueryLifecycle.cancelGc(this.query)
 
@@ -87,6 +88,7 @@ export class InfiniteQueryObserver<
       this.listeners.delete(listener)
 
       if (this.listeners.size === 0) {
+        this.removeObserver(this.query)
         QueryLifecycle.scheduleGc(
           this.query,
           this.client.getQueryCache(),
@@ -336,6 +338,19 @@ export class InfiniteQueryObserver<
 
     if (observerIndex > -1) {
       query.observers.splice(observerIndex, 1)
+    }
+  }
+
+  private addObserver(
+    query: Query<
+      InfiniteData<TQueryFnData, TPageParam>,
+      TError,
+      InfiniteData<TQueryFnData, TPageParam>,
+      TQueryKey
+    >,
+  ): void {
+    if (!query.observers.includes(this)) {
+      query.observers.push(this)
     }
   }
 
