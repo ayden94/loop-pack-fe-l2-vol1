@@ -1,8 +1,5 @@
 export {
-  type LocalStorageStateValue,
   useLocalStorageState,
-  type UseLocalStorageStateOptions,
-  type UseLocalStorageStateReturn,
   useScrollToTopOnChange,
   useToggle,
   type UseToggleReturn,
