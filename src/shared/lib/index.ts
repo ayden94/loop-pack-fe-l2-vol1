@@ -1,4 +1,8 @@
-export { useToggle, type UseToggleReturn } from './hooks'
+export {
+  useScrollToTopOnChange,
+  useToggle,
+  type UseToggleReturn,
+} from './hooks'
 export type {
   DefaultOptions,
   FetchStatus,

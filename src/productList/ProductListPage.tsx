@@ -1,6 +1,8 @@
 import { For, Show } from '@ilokesto/utilinent'
 import { useEffect, useState } from 'react'
 
+import { useScrollToTopOnChange } from '@/shared/lib'
+
 // ─────────────────────────────────────────────────────────
 // 타입도 한 파일에 (실무에서 흔히 보는 모습)
 // ─────────────────────────────────────────────────────────
@@ -226,11 +228,7 @@ export function ProductListPage() {
   }, [recentlyViewed])
 
   // ─── 페이지가 바뀔 때 스크롤 맨 위로 ────────────────────
-  useEffect(() => {
-    if (page > 0) {
-      window.scrollTo({ top: 0, behavior: 'smooth' })
-    }
-  }, [page])
+  useScrollToTopOnChange(page, { enabled: page > 0 })
 
   // ─── 필터·검색·페이지 상태가 바뀔 때마다 URL 쿼리 동기화 ──
   useEffect(() => {
