@@ -1,7 +1,7 @@
 import { For, Show } from '@ilokesto/utilinent'
 import { useEffect, useState } from 'react'
 
-import { useScrollToTopOnChange } from '@/shared/lib'
+import { useLocalStorageState, useScrollToTopOnChange } from '@/shared/lib'
 
 // ─────────────────────────────────────────────────────────
 // 타입도 한 파일에 (실무에서 흔히 보는 모습)
@@ -26,6 +26,8 @@ type ProductListResponse = {
 }
 
 type SortBy = 'latest' | 'popular' | 'price-asc' | 'price-desc'
+
+const EMPTY_PRODUCT_ID_LIST: Array<number> = []
 
 // ─────────────────────────────────────────────────────────
 // 카테고리 / 정렬 옵션 — 컴포넌트 안에 들고 다닌다
@@ -74,15 +76,6 @@ const isProductCategory = (value: unknown): value is Product['category'] =>
 
 const isFiniteNumber = (value: unknown): value is number =>
   typeof value === 'number' && Number.isFinite(value)
-
-const parseNumberArray = (value: string | null): Array<number> => {
-  if (!value) {
-    return []
-  }
-
-  const parsed: unknown = JSON.parse(value)
-  return Array.isArray(parsed) && parsed.every(isFiniteNumber) ? parsed : []
-}
 
 const isProduct = (value: unknown): value is Product => {
   if (!isRecord(value)) {
@@ -154,21 +147,15 @@ export function ProductListPage() {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
 
   // ─── 위시리스트 (localStorage 동기화) ───────────────────
-  const [wishlist, setWishlist] = useState<Array<number>>(() => {
-    try {
-      return parseNumberArray(localStorage.getItem('wishlist'))
-    } catch {
-      return []
-    }
+  const [wishlist, setWishlist] = useLocalStorageState({
+    key: 'wishlist',
+    initialState: EMPTY_PRODUCT_ID_LIST,
   })
 
   // ─── 최근 본 상품 (localStorage 동기화) ─────────────────
-  const [recentlyViewed, setRecentlyViewed] = useState<Array<number>>(() => {
-    try {
-      return parseNumberArray(localStorage.getItem('recentlyViewed'))
-    } catch {
-      return []
-    }
+  const [, setRecentlyViewed] = useLocalStorageState({
+    key: 'recentlyViewed',
+    initialState: EMPTY_PRODUCT_ID_LIST,
   })
 
   useEffect(() => {
@@ -208,24 +195,6 @@ export function ProductListPage() {
     }
     void fetchProducts()
   }, [category, minPrice, maxPrice, sortBy, searchQuery, page, inStockOnly])
-
-  // ─── 위시리스트가 바뀔 때마다 localStorage 동기화 ───────
-  useEffect(() => {
-    try {
-      localStorage.setItem('wishlist', JSON.stringify(wishlist))
-    } catch {
-      // localStorage 사용 불가 시 무시
-    }
-  }, [wishlist])
-
-  // ─── 최근 본 상품도 localStorage 동기화 ─────────────────
-  useEffect(() => {
-    try {
-      localStorage.setItem('recentlyViewed', JSON.stringify(recentlyViewed))
-    } catch {
-      // localStorage 사용 불가 시 무시
-    }
-  }, [recentlyViewed])
 
   // ─── 페이지가 바뀔 때 스크롤 맨 위로 ────────────────────
   useScrollToTopOnChange(page, { enabled: page > 0 })
