@@ -1,6 +1,7 @@
 export {
   useLocalStorageState,
   useScrollToTopOnChange,
+  useSearchParams,
   useToggle,
   type UseToggleReturn,
 } from './hooks'
