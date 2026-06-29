@@ -1,7 +1,11 @@
-import { CheckoutPage } from './market/CheckoutPage'
+import { ModalProvider } from '@ilokesto/modal'
 
-function App() {
-  return <CheckoutPage />
+import { CheckoutPage } from '@/pages/market'
+
+export function App() {
+  return (
+    <ModalProvider>
+      <CheckoutPage />
+    </ModalProvider>
+  )
 }
-
-export default App
