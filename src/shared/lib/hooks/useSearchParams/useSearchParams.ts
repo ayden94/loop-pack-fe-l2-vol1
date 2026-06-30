@@ -24,16 +24,16 @@ export function useSearchParams<
   )
 
   const setSearchParams = useCallback<SearchParamsSetState<TParams>>(
-    (nextParams) => {
+    (nextParams, options) => {
       const resolvedParams =
         typeof nextParams === 'function'
           ? nextParams(SearchParamsValue.read<TParams>(window.location.search))
           : nextParams
 
-      SearchParamsValue.write(resolvedParams)
+      SearchParamsValue.write(resolvedParams, options)
     },
     [],
   )
 
-  return [searchParams, setSearchParams]
+  return [searchParams, setSearchParams] as const
 }

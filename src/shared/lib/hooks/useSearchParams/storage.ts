@@ -1,6 +1,10 @@
-import type { SearchParams, SearchParamValue } from './types'
+import { Store } from '../../utils'
+import type {
+  SearchParams,
+  SearchParamsSetOptions,
+  SearchParamValue,
+} from './types'
 
-const SEARCH_PARAMS_CHANGE_EVENT = 'searchparamschange'
 const DECIMAL_NUMBER_PATTERN = /^-?(?:\d+|\d*\.\d+)$/u
 const NUMBER_PARAM_KEY_PATTERN =
   /^(?:page|pageSize|size|limit|offset|count|quantity|amount|price|rating|score|total|\w*(?:Count|Price|Amount|Quantity|Rate|Score|Total)|min[A-Z]\w*|max[A-Z]\w*)$/u
@@ -8,6 +12,9 @@ const BOOLEAN_PARAM_KEY_PATTERN =
   /^(?:is[A-Z]\w*|has[A-Z]\w*|can[A-Z]\w*|should[A-Z]\w*|inStock|\w*(?:Only|Enabled|Disabled|Visible|Checked|Selected))$/u
 
 export class SearchParamsValue {
+  private static popStateListenerAttached = false
+  private static store: Store<string> | undefined
+
   private constructor() {}
 
   static read<TParams extends object>(search: string): SearchParams<TParams> {
@@ -27,12 +34,14 @@ export class SearchParamsValue {
 
   static write(
     patch: Readonly<Record<string, SearchParamValue | null | undefined>>,
+    options: SearchParamsSetOptions = {},
   ): void {
     if (typeof window === 'undefined') {
       return
     }
 
     const url = new URL(window.location.href)
+    const currentUrl = SearchParamsValue.toRelativeUrl(url)
 
     for (const key in patch) {
       const value = patch[key]
@@ -52,38 +61,28 @@ export class SearchParamsValue {
       url.searchParams.set(key, serializedValue)
     }
 
-    window.history.replaceState(
-      window.history.state,
-      '',
-      SearchParamsValue.toRelativeUrl(url),
-    )
-    window.dispatchEvent(new Event(SEARCH_PARAMS_CHANGE_EVENT))
+    const nextUrl = SearchParamsValue.toRelativeUrl(url)
+
+    if (currentUrl === nextUrl) {
+      return
+    }
+
+    if (options.history === 'replace') {
+      window.history.replaceState(window.history.state, '', nextUrl)
+    } else {
+      window.history.pushState(window.history.state, '', nextUrl)
+    }
+
+    SearchParamsValue.getStore().setState(url.search)
   }
 
   static subscribe(listener: () => void): () => void {
-    if (typeof window === 'undefined') {
-      return () => {}
-    }
-
-    const handleChange = () => {
-      listener()
-    }
-
-    window.addEventListener('popstate', handleChange)
-    window.addEventListener(SEARCH_PARAMS_CHANGE_EVENT, handleChange)
-
-    return () => {
-      window.removeEventListener('popstate', handleChange)
-      window.removeEventListener(SEARCH_PARAMS_CHANGE_EVENT, handleChange)
-    }
+    SearchParamsValue.attachPopStateListener()
+    return SearchParamsValue.getStore().subscribe(listener)
   }
 
   static getSnapshot(): string {
-    if (typeof window === 'undefined') {
-      return ''
-    }
-
-    return window.location.search
+    return SearchParamsValue.getStore().getState()
   }
 
   static getServerSnapshot(): string {
@@ -130,6 +129,38 @@ export class SearchParamsValue {
 
   private static isBooleanKey(key: string): boolean {
     return BOOLEAN_PARAM_KEY_PATTERN.test(key)
+  }
+
+  private static attachPopStateListener(): void {
+    if (
+      typeof window === 'undefined' ||
+      SearchParamsValue.popStateListenerAttached
+    ) {
+      return
+    }
+
+    window.addEventListener('popstate', () => {
+      SearchParamsValue.getStore().setState(window.location.search)
+    })
+    SearchParamsValue.popStateListenerAttached = true
+  }
+
+  private static getStore(): Store<string> {
+    if (SearchParamsValue.store === undefined) {
+      SearchParamsValue.store = new Store(
+        SearchParamsValue.getInitialSnapshot(),
+      )
+    }
+
+    return SearchParamsValue.store
+  }
+
+  private static getInitialSnapshot(): string {
+    if (typeof window === 'undefined') {
+      return SearchParamsValue.getServerSnapshot()
+    }
+
+    return window.location.search
   }
 
   private static toRelativeUrl(url: URL): string {
