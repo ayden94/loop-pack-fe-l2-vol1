@@ -1,7 +1,7 @@
 import { For, Show } from '@ilokesto/utilinent'
 import { useEffect, useState } from 'react'
 
-import { useLocalStorageState, useScrollToTopOnChange } from '@/shared/lib'
+import { useLocalStorage, useScrollToTopOnChange } from '@/shared/lib'
 
 // ─────────────────────────────────────────────────────────
 // 타입도 한 파일에 (실무에서 흔히 보는 모습)
@@ -147,13 +147,13 @@ export function ProductListPage() {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
 
   // ─── 위시리스트 (localStorage 동기화) ───────────────────
-  const [wishlist, setWishlist] = useLocalStorageState({
+  const [wishlist, setWishlist] = useLocalStorage({
     key: 'wishlist',
     initialState: EMPTY_PRODUCT_ID_LIST,
   })
 
   // ─── 최근 본 상품 (localStorage 동기화) ─────────────────
-  const [, setRecentlyViewed] = useLocalStorageState({
+  const [, setRecentlyViewed] = useLocalStorage({
     key: 'recentlyViewed',
     initialState: EMPTY_PRODUCT_ID_LIST,
   })
