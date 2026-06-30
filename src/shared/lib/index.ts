@@ -1,5 +1,5 @@
 export {
-  useLocalStorageState,
+  useLocalStorage,
   useScrollToTopOnChange,
   useSearchParams,
   useToggle,

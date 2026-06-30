@@ -9,7 +9,7 @@ import type {
   UseLocalStorageStateReturn,
 } from './types'
 
-export function useLocalStorageState<T extends LocalStorageStateValue>(
+export function useLocalStorage<T extends LocalStorageStateValue>(
   options: UseLocalStorageStateOptions<T>,
 ): UseLocalStorageStateReturn<T> {
   const { key } = options
