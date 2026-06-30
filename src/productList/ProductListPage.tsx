@@ -1,6 +1,7 @@
 import { For, Show } from '@ilokesto/utilinent'
 import { useEffect, useState } from 'react'
 
+import { useProductListSearchParams } from '@/features/product-list'
 import { useLocalStorage, useScrollToTopOnChange } from '@/shared/lib'
 
 // ─────────────────────────────────────────────────────────
@@ -130,21 +131,26 @@ export function ProductListPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<Error | null>(null)
 
-  // ─── 필터 상태 ──────────────────────────────────────────
-  const [category, setCategory] = useState<'all' | Product['category']>('all')
-  const [minPrice, setMinPrice] = useState<number | ''>('')
-  const [maxPrice, setMaxPrice] = useState<number | ''>('')
-  const [sortBy, setSortBy] = useState<SortBy>('latest')
-
-  // ─── 검색 상태 ──────────────────────────────────────────
-  const [searchQuery, setSearchQuery] = useState('')
-
-  // ─── 페이지네이션 상태 ──────────────────────────────────
-  const [page, setPage] = useState(1)
-
-  // ─── 옵션 토글 ──────────────────────────────────────────
-  const [inStockOnly, setInStockOnly] = useState(false)
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
+  const {
+    category,
+    minPrice,
+    maxPrice,
+    sortBy,
+    searchQuery,
+    page,
+    inStockOnly,
+    viewMode,
+    apiQueryString,
+    handleCategoryChange,
+    handleMinPriceChange,
+    handleMaxPriceChange,
+    handleSortChange,
+    handleSearchChange,
+    handleInStockToggle,
+    handleViewModeChange,
+    handlePageChange,
+    handleResetFilters,
+  } = useProductListSearchParams({ pageSize: PAGE_SIZE })
 
   // ─── 위시리스트 (localStorage 동기화) ───────────────────
   const [wishlist, setWishlist] = useLocalStorage({
@@ -162,17 +168,8 @@ export function ProductListPage() {
     const fetchProducts = async () => {
       setIsLoading(true)
       setError(null)
-      const params = new URLSearchParams({
-        category,
-        sort: sortBy,
-        q: searchQuery,
-        page: String(page),
-        size: String(PAGE_SIZE),
-      })
-      if (minPrice !== '') params.set('minPrice', String(minPrice))
-      if (maxPrice !== '') params.set('maxPrice', String(maxPrice))
       try {
-        const res = await fetch(`/api/products?${params.toString()}`)
+        const res = await fetch(`/api/products?${apiQueryString}`)
         if (!res.ok) {
           throw new Error(`API 호출 실패 (status: ${String(res.status)})`)
         }
@@ -194,69 +191,10 @@ export function ProductListPage() {
       }
     }
     void fetchProducts()
-  }, [category, minPrice, maxPrice, sortBy, searchQuery, page, inStockOnly])
+  }, [apiQueryString, inStockOnly])
 
   // ─── 페이지가 바뀔 때 스크롤 맨 위로 ────────────────────
   useScrollToTopOnChange(page, { enabled: page > 0 })
-
-  // ─── 필터·검색·페이지 상태가 바뀔 때마다 URL 쿼리 동기화 ──
-  useEffect(() => {
-    const params = new URLSearchParams()
-    if (category !== 'all') params.set('category', category)
-    if (searchQuery) params.set('q', searchQuery)
-    if (page > 1) params.set('page', String(page))
-    if (sortBy !== 'latest') params.set('sort', sortBy)
-    if (minPrice !== '') params.set('minPrice', String(minPrice))
-    if (maxPrice !== '') params.set('maxPrice', String(maxPrice))
-    if (inStockOnly) params.set('inStock', 'true')
-    window.history.replaceState(null, '', `?${params.toString()}`)
-  }, [category, searchQuery, page, sortBy, minPrice, maxPrice, inStockOnly])
-
-  const handleCategoryChange = (cat: 'all' | Product['category']) => {
-    setCategory(cat)
-    setPage(1)
-  }
-
-  const handleMinPriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const v = e.target.value
-    setMinPrice(v === '' ? '' : Number(v))
-    setPage(1)
-  }
-
-  const handleMaxPriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const v = e.target.value
-    setMaxPrice(v === '' ? '' : Number(v))
-    setPage(1)
-  }
-
-  const handleSortChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setSortBy(e.target.value as SortBy)
-    setPage(1)
-  }
-
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchQuery(e.target.value)
-    setPage(1)
-  }
-
-  const handleInStockToggle = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setInStockOnly(e.target.checked)
-    setPage(1)
-  }
-
-  const handlePageChange = (next: number) => {
-    setPage(next)
-  }
-
-  const handleResetFilters = () => {
-    setCategory('all')
-    setMinPrice('')
-    setMaxPrice('')
-    setSortBy('latest')
-    setSearchQuery('')
-    setInStockOnly(false)
-    setPage(1)
-  }
 
   const handleWishlistToggle = (productId: number) => {
     setWishlist((prev) =>
@@ -410,9 +348,7 @@ export function ProductListPage() {
           aria-label="보기 방식"
           className={selectClassName}
           value={viewMode}
-          onChange={(e) => {
-            setViewMode(e.target.value as 'grid' | 'list')
-          }}
+          onChange={handleViewModeChange}
         >
           <option value="grid">그리드</option>
           <option value="list">리스트</option>
@@ -447,8 +383,9 @@ export function ProductListPage() {
                 return (
                   <>
                     <For each={parts}>
-                      {(part) => (
+                      {(part, index) => (
                         <Show
+                          key={`${part}-${String(index)}`}
                           when={
                             part.toLowerCase() === searchQuery.toLowerCase()
                           }
