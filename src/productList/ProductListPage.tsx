@@ -1,16 +1,17 @@
-import { For, Show } from '@ilokesto/utilinent'
-import { cn } from 'tailwind-variants'
+import { Show } from '@ilokesto/utilinent'
 
 import { productService } from '@/entities/product'
 import {
-  ProductCard,
-  ProductListFilterPanel,
-  ProductListToolbar,
   useProductInteraction,
   useProductListSearchParams,
 } from '@/features/product-list'
 import { useAsync, useScrollToTopOnChange } from '@/shared/lib'
 import { Pagination } from '@/shared/ui'
+import {
+  ProductGrid,
+  ProductListFilterPanel,
+  ProductListToolbar,
+} from '@/widgets/product-list'
 
 const PAGE_SIZE = 12
 
@@ -115,38 +116,14 @@ export function ProductListPage() {
         onViewModeChange={handleViewModeChange}
       />
 
-      {/* ─── 상품 그리드 ────────────────────────────────── */}
-
-      <For.section
-        each={products}
-        fallback={
-          <div className="col-span-full py-15 text-center text-[#888]">
-            조건에 맞는 상품이 없습니다.
-          </div>
-        }
-        className={cn(
-          'mb-8 grid gap-5',
-          viewMode === 'list'
-            ? 'grid-cols-1'
-            : 'grid-cols-[repeat(auto-fill,minmax(220px,1fr))]',
-        )}
-      >
-        {(product) => {
-          // ─── 위시리스트 여부 ────────────────────────
-          const isWished = wishlist.includes(product.id)
-
-          return (
-            <ProductCard
-              key={product.id}
-              isWished={isWished}
-              product={product}
-              searchQuery={searchQuery}
-              onProductClick={handleProductClick}
-              onWishlistToggle={handleWishlistToggle}
-            />
-          )
-        }}
-      </For.section>
+      <ProductGrid
+        products={products}
+        searchQuery={searchQuery}
+        viewMode={viewMode}
+        wishlist={wishlist}
+        onProductClick={handleProductClick}
+        onWishlistToggle={handleWishlistToggle}
+      />
 
       <Pagination
         currentPage={page}
