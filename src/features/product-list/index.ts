@@ -1,1 +1,4 @@
-export { useProductListSearchParams } from './model/hooks'
+export {
+  useProductInteraction,
+  useProductListSearchParams,
+} from './model/hooks'
