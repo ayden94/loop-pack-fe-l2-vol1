@@ -8,3 +8,4 @@ export {
   ProductList,
   type ProductListResponse,
 } from './model'
+export { ProductCard } from './ui'
