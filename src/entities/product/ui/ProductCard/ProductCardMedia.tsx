@@ -1,5 +1,4 @@
-import type { Product } from '@/entities/product'
-
+import type { Product } from '../../model'
 import { ProductCardBadges } from './ProductCardBadges'
 
 type ProductCardMediaProps = {
