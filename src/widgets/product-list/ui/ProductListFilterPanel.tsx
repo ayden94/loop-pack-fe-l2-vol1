@@ -1,13 +1,13 @@
 import type { ChangeEventHandler } from 'react'
 
-import type {
-  ProductListCategoryFilter,
-  ProductListPriceFilter,
-} from '../../model'
-import { CategoryFilters } from './CategoryFilters'
-import { InStockToggle } from './InStockToggle'
-import { PriceRangeFields } from './PriceRangeFields'
-import { ResetFiltersButton } from './ResetFiltersButton'
+import {
+  CategoryFilters,
+  InStockToggle,
+  PriceRangeFields,
+  type ProductListCategoryFilter,
+  type ProductListPriceFilter,
+  ResetFiltersButton,
+} from '@/features/product-list'
 
 type ProductListFilterPanelProps = {
   readonly category: ProductListCategoryFilter
