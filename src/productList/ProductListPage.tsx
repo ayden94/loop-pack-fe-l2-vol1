@@ -10,6 +10,7 @@ import { Pagination } from '@/shared/ui'
 import {
   ProductGrid,
   ProductListFilterPanel,
+  ProductListHeader,
   ProductListToolbar,
 } from '@/widgets/product-list'
 
@@ -85,15 +86,10 @@ export function ProductListPage() {
 
   return (
     <div className="mx-auto max-w-300 p-6 font-[-apple-system,BlinkMacSystemFont,'Segoe_UI',Roboto,sans-serif]">
-      <header className="mb-6">
-        <h1 className="m-0 mb-1 text-[28px]">상품 목록</h1>
-        <p className="m-0 text-sm text-[#666]">
-          총 {totalCount.toLocaleString()}개의 상품
-          <Show when={wishlist.length > 0}>
-            <span> · 위시리스트 {wishlist.length}개</span>
-          </Show>
-        </p>
-      </header>
+      <ProductListHeader
+        totalCount={totalCount}
+        wishlistCount={wishlist.length}
+      />
 
       <ProductListFilterPanel
         category={category}
