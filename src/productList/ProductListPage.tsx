@@ -1,8 +1,11 @@
 import { For, Show } from '@ilokesto/utilinent'
 
 import { productRepository } from '@/entities/product'
-import { useProductListSearchParams } from '@/features/product-list'
-import { useAsync, useLocalStorage, useScrollToTopOnChange } from '@/shared/lib'
+import {
+  useProductInteraction,
+  useProductListSearchParams,
+} from '@/features/product-list'
+import { useAsync, useScrollToTopOnChange } from '@/shared/lib'
 
 // ─────────────────────────────────────────────────────────
 // 타입도 한 파일에 (실무에서 흔히 보는 모습)
@@ -27,8 +30,6 @@ type ProductListResponse = {
 }
 
 type SortBy = 'latest' | 'popular' | 'price-asc' | 'price-desc'
-
-const EMPTY_PRODUCT_ID_LIST: Array<number> = []
 
 // ─────────────────────────────────────────────────────────
 // 카테고리 / 정렬 옵션 — 컴포넌트 안에 들고 다닌다
@@ -146,17 +147,8 @@ export function ProductListPage() {
     handleResetFilters,
   } = useProductListSearchParams({ pageSize: PAGE_SIZE })
 
-  // ─── 위시리스트 (localStorage 동기화) ───────────────────
-  const [wishlist, setWishlist] = useLocalStorage({
-    key: 'wishlist',
-    initialState: EMPTY_PRODUCT_ID_LIST,
-  })
-
-  // ─── 최근 본 상품 (localStorage 동기화) ─────────────────
-  const [, setRecentlyViewed] = useLocalStorage({
-    key: 'recentlyViewed',
-    initialState: EMPTY_PRODUCT_ID_LIST,
-  })
+  const { wishlist, handleWishlistToggle, handleProductClick } =
+    useProductInteraction()
 
   const {
     data: productListData,
@@ -185,21 +177,6 @@ export function ProductListPage() {
 
   // ─── 페이지가 바뀔 때 스크롤 맨 위로 ────────────────────
   useScrollToTopOnChange(page, { enabled: page > 0 })
-
-  const handleWishlistToggle = (productId: number) => {
-    setWishlist((prev) =>
-      prev.includes(productId)
-        ? prev.filter((id) => id !== productId)
-        : [...prev, productId],
-    )
-  }
-
-  const handleProductClick = (productId: number) => {
-    setRecentlyViewed((prev) => {
-      const without = prev.filter((id) => id !== productId)
-      return [productId, ...without].slice(0, 10)
-    })
-  }
 
   // ─── 페이지네이션 계산 (인라인) ─────────────────────────
   const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE))
