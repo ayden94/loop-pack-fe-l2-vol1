@@ -1,4 +1,4 @@
-export { productRepository } from './api'
+export { productService } from './api'
 export {
   InvalidProductListDataError,
   InvalidProductListResponseError,

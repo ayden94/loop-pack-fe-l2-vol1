@@ -1,3 +1,3 @@
-import { ProductRepository } from './ProductRepository'
+import { ProductService } from './ProductService'
 
-export const productRepository = new ProductRepository()
+export const productService = new ProductService()

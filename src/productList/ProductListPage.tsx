@@ -1,11 +1,6 @@
 import { For, Show } from '@ilokesto/utilinent'
 
-import {
-  type Product,
-  ProductList,
-  type ProductListResponse,
-  productRepository,
-} from '@/entities/product'
+import { type Product, productService } from '@/entities/product'
 import {
   useProductInteraction,
   useProductListSearchParams,
@@ -87,24 +82,9 @@ export function ProductListPage() {
     error,
     isLoading,
     refetch: refetchProducts,
-  } = useAsync({
-    asyncFn: async () => {
-      await productRepository.getProductList(apiQueryString)
-    },
-    deps: [apiQueryString],
-    keepPreviousData: true,
-    selectFn: (data: unknown): ProductListResponse => {
-      const parsedData = new ProductList(data)
-
-      return {
-        products: inStockOnly
-          ? parsedData.products.filter((product) => product.stock > 0)
-          : parsedData.products,
-        totalCount: parsedData.totalCount,
-      }
-    },
-    selectDeps: [inStockOnly],
-  })
+  } = useAsync(
+    productService.getProductListOptions({ apiQueryString, inStockOnly }),
+  )
 
   const products = productListData?.products ?? []
   const totalCount = productListData?.totalCount ?? 0
