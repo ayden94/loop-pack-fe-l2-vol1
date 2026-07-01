@@ -14,4 +14,13 @@ export {
   useProductInteraction,
   useProductListSearchParams,
 } from './model/hooks'
-export { ProductCard, ProductListFilterPanel, ProductListToolbar } from './ui'
+export {
+  CategoryFilters,
+  InStockToggle,
+  PriceRangeFields,
+  ResetFiltersButton,
+  SearchInput,
+  SortSelect,
+  ViewModeSelect,
+  WishlistToggleButton,
+} from './ui'
