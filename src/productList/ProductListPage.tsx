@@ -245,9 +245,9 @@ export function ProductListPage() {
         }
         className={cn(
           'mb-8 grid gap-5',
-          viewMode === 'list' && 'grid-cols-1',
-          viewMode !== 'list' &&
-            'grid-cols-[repeat(auto-fill,minmax(220px,1fr))]',
+          viewMode === 'list'
+            ? 'grid-cols-1'
+            : 'grid-cols-[repeat(auto-fill,minmax(220px,1fr))]',
         )}
       >
         {(product) => {
