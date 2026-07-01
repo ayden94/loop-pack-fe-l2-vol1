@@ -1,33 +1,16 @@
 import { For, Show } from '@ilokesto/utilinent'
 
-import { productRepository } from '@/entities/product'
+import {
+  type Product,
+  ProductList,
+  type ProductListResponse,
+  productRepository,
+} from '@/entities/product'
 import {
   useProductInteraction,
   useProductListSearchParams,
 } from '@/features/product-list'
 import { useAsync, useScrollToTopOnChange } from '@/shared/lib'
-
-// ─────────────────────────────────────────────────────────
-// 타입도 한 파일에 (실무에서 흔히 보는 모습)
-// ─────────────────────────────────────────────────────────
-
-type Product = {
-  id: number
-  name: string
-  category: 'electronics' | 'fashion' | 'home' | 'beauty'
-  price: number
-  originalPrice?: number
-  stock: number
-  imageUrl: string
-  createdAt: string
-  rating: number
-  reviewCount: number
-}
-
-type ProductListResponse = {
-  products: Array<Product>
-  totalCount: number
-}
 
 type SortBy = 'latest' | 'popular' | 'price-asc' | 'price-desc'
 
@@ -66,57 +49,6 @@ const badgeClassName =
   'absolute rounded px-2 py-1 text-[11px] font-semibold text-white'
 const paginationButtonClassName =
   'h-9 min-w-9 cursor-pointer rounded-md border border-[#ddd] bg-white text-[13px] disabled:cursor-not-allowed disabled:opacity-40'
-
-const isRecord = (value: unknown): value is Record<string, unknown> =>
-  typeof value === 'object' && value !== null
-
-const isProductCategory = (value: unknown): value is Product['category'] =>
-  value === 'electronics' ||
-  value === 'fashion' ||
-  value === 'home' ||
-  value === 'beauty'
-
-const isFiniteNumber = (value: unknown): value is number =>
-  typeof value === 'number' && Number.isFinite(value)
-
-const isProduct = (value: unknown): value is Product => {
-  if (!isRecord(value)) {
-    return false
-  }
-
-  return (
-    isFiniteNumber(value.id) &&
-    typeof value.name === 'string' &&
-    isProductCategory(value.category) &&
-    isFiniteNumber(value.price) &&
-    (value.originalPrice === undefined ||
-      isFiniteNumber(value.originalPrice)) &&
-    isFiniteNumber(value.stock) &&
-    typeof value.imageUrl === 'string' &&
-    typeof value.createdAt === 'string' &&
-    isFiniteNumber(value.rating) &&
-    isFiniteNumber(value.reviewCount)
-  )
-}
-
-const parseProductListResponse = (value: unknown): ProductListResponse => {
-  if (!isRecord(value)) {
-    throw new Error('상품 목록 응답 형식이 올바르지 않습니다.')
-  }
-
-  if (!Array.isArray(value.products) || !value.products.every(isProduct)) {
-    throw new Error('상품 목록 데이터 형식이 올바르지 않습니다.')
-  }
-
-  if (!isFiniteNumber(value.totalCount)) {
-    throw new Error('상품 개수 데이터 형식이 올바르지 않습니다.')
-  }
-
-  return {
-    products: value.products,
-    totalCount: value.totalCount,
-  }
-}
 
 // 검색어를 정규식에 안전하게 넣기 위한 escape (특수문자로 인한 RegExp 크래시 방지)
 const escapeRegExp = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
@@ -157,18 +89,20 @@ export function ProductListPage() {
     refetch: refetchProducts,
   } = useAsync({
     asyncFn: async () => {
-      return parseProductListResponse(
-        await productRepository.getProductList(apiQueryString),
-      )
+      await productRepository.getProductList(apiQueryString)
     },
     deps: [apiQueryString],
     keepPreviousData: true,
-    selectFn: (data: ProductListResponse): ProductListResponse => ({
-      products: inStockOnly
-        ? data.products.filter((product) => product.stock > 0)
-        : data.products,
-      totalCount: data.totalCount,
-    }),
+    selectFn: (data: unknown): ProductListResponse => {
+      const parsedData = new ProductList(data)
+
+      return {
+        products: inStockOnly
+          ? parsedData.products.filter((product) => product.stock > 0)
+          : parsedData.products,
+        totalCount: parsedData.totalCount,
+      }
+    },
     selectDeps: [inStockOnly],
   })
 
