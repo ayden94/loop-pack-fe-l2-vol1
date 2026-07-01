@@ -18,10 +18,6 @@ const PAGE_SIZE = 12
 
 const loadingStateClassName = 'py-20 px-5 text-center text-[#555]'
 
-// ─────────────────────────────────────────────────────────
-// 500줄+ 컴포넌트 — UI, 비즈니스 로직, API, 포맷, 도메인 규칙이 한 파일에
-// ─────────────────────────────────────────────────────────
-
 export function ProductListPage() {
   const {
     category,
