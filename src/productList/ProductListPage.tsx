@@ -6,6 +6,7 @@ import {
   useProductListSearchParams,
 } from '@/features/product-list'
 import { useAsync, useScrollToTopOnChange } from '@/shared/lib'
+import { Pagination } from '@/shared/ui'
 
 type SortBy = 'latest' | 'popular' | 'price-asc' | 'price-desc'
 
@@ -42,9 +43,6 @@ const selectClassName =
   'rounded-md border border-[#ddd] bg-white px-3.5 py-2.5 text-sm'
 const badgeClassName =
   'absolute rounded px-2 py-1 text-[11px] font-semibold text-white'
-const paginationButtonClassName =
-  'h-9 min-w-9 cursor-pointer rounded-md border border-[#ddd] bg-white text-[13px] disabled:cursor-not-allowed disabled:opacity-40'
-
 // 검색어를 정규식에 안전하게 넣기 위한 escape (특수문자로 인한 RegExp 크래시 방지)
 const escapeRegExp = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
 
@@ -91,13 +89,6 @@ export function ProductListPage() {
 
   // ─── 페이지가 바뀔 때 스크롤 맨 위로 ────────────────────
   useScrollToTopOnChange(page, { enabled: page > 0 })
-
-  // ─── 페이지네이션 계산 (인라인) ─────────────────────────
-  const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE))
-  const pageNumbers: Array<number> = []
-  const startPage = Math.max(1, page - 2)
-  const endPage = Math.min(totalPages, page + 2)
-  for (let i = startPage; i <= endPage; i++) pageNumbers.push(i)
 
   // ─── 로딩/에러는 early return ───────────────────────────
   if (isLoading && products.length === 0) {
@@ -416,71 +407,12 @@ export function ProductListPage() {
         </Show>
       </section>
 
-      {/* ─── 페이지네이션 ───────────────────────────────── */}
-      <Show when={totalPages > 1}>
-        <nav className="mb-6 flex justify-center gap-1">
-          <button
-            type="button"
-            className={paginationButtonClassName}
-            onClick={() => {
-              handlePageChange(1)
-            }}
-            disabled={page === 1}
-            aria-label="첫 페이지"
-          >
-            «
-          </button>
-          <button
-            type="button"
-            className={paginationButtonClassName}
-            onClick={() => {
-              handlePageChange(page - 1)
-            }}
-            disabled={page === 1}
-            aria-label="이전 페이지"
-          >
-            ‹
-          </button>
-          <For each={pageNumbers}>
-            {(p) => (
-              <button
-                type="button"
-                key={p}
-                className={`${paginationButtonClassName} ${
-                  p === page ? activeButtonClassName : ''
-                }`}
-                onClick={() => {
-                  handlePageChange(p)
-                }}
-              >
-                {p}
-              </button>
-            )}
-          </For>
-          <button
-            type="button"
-            className={paginationButtonClassName}
-            onClick={() => {
-              handlePageChange(page + 1)
-            }}
-            disabled={page === totalPages}
-            aria-label="다음 페이지"
-          >
-            ›
-          </button>
-          <button
-            type="button"
-            className={paginationButtonClassName}
-            onClick={() => {
-              handlePageChange(totalPages)
-            }}
-            disabled={page === totalPages}
-            aria-label="마지막 페이지"
-          >
-            »
-          </button>
-        </nav>
-      </Show>
+      <Pagination
+        currentPage={page}
+        totalCount={totalCount}
+        pageSize={PAGE_SIZE}
+        onPageChange={handlePageChange}
+      />
 
       {/* ─── 백그라운드 로딩 인디케이터 ─────────────────── */}
       <Show when={isLoading && products.length > 0}>
