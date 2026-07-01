@@ -235,7 +235,14 @@ export function ProductListPage() {
       </section>
 
       {/* ─── 상품 그리드 ────────────────────────────────── */}
-      <section
+
+      <For.section
+        each={products}
+        fallback={
+          <div className="col-span-full py-[60px] text-center text-[#888]">
+            조건에 맞는 상품이 없습니다.
+          </div>
+        }
         className={cn(
           'mb-8 grid gap-5',
           viewMode === 'list' && 'grid-cols-1',
@@ -243,33 +250,22 @@ export function ProductListPage() {
             'grid-cols-[repeat(auto-fill,minmax(220px,1fr))]',
         )}
       >
-        <Show
-          when={products.length > 0}
-          fallback={
-            <div className="col-span-full py-[60px] text-center text-[#888]">
-              조건에 맞는 상품이 없습니다.
-            </div>
-          }
-        >
-          <For each={products}>
-            {(product) => {
-              // ─── 위시리스트 여부 ────────────────────────
-              const isWished = wishlist.includes(product.id)
+        {(product) => {
+          // ─── 위시리스트 여부 ────────────────────────
+          const isWished = wishlist.includes(product.id)
 
-              return (
-                <ProductCard
-                  key={product.id}
-                  isWished={isWished}
-                  product={product}
-                  searchQuery={searchQuery}
-                  onProductClick={handleProductClick}
-                  onWishlistToggle={handleWishlistToggle}
-                />
-              )
-            }}
-          </For>
-        </Show>
-      </section>
+          return (
+            <ProductCard
+              key={product.id}
+              isWished={isWished}
+              product={product}
+              searchQuery={searchQuery}
+              onProductClick={handleProductClick}
+              onWishlistToggle={handleWishlistToggle}
+            />
+          )
+        }}
+      </For.section>
 
       <Pagination
         currentPage={page}
