@@ -1,4 +1,5 @@
 import { For, Show } from '@ilokesto/utilinent'
+import { cn } from 'tailwind-variants'
 
 import { type Product, productService } from '@/entities/product'
 import {
@@ -134,7 +135,10 @@ export function ProductListPage() {
                 <button
                   type="button"
                   key={cat.value}
-                  className={`${categoryButtonClassName} ${category === cat.value ? activeButtonClassName : ''}`}
+                  className={cn(
+                    categoryButtonClassName,
+                    category === cat.value && activeButtonClassName,
+                  )}
                   onClick={() => {
                     handleCategoryChange(cat.value)
                   }}
