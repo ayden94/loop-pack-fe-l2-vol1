@@ -1,57 +1,20 @@
 import { For, Show } from '@ilokesto/utilinent'
-import { cn, tv } from 'tailwind-variants'
+import { cn } from 'tailwind-variants'
 
-import { type Product, productService } from '@/entities/product'
+import { productService } from '@/entities/product'
 import {
   ProductCard,
+  ProductListFilterPanel,
+  ProductListToolbar,
   useProductInteraction,
   useProductListSearchParams,
 } from '@/features/product-list'
 import { useAsync, useScrollToTopOnChange } from '@/shared/lib'
 import { Pagination } from '@/shared/ui'
 
-type SortBy = 'latest' | 'popular' | 'price-asc' | 'price-desc'
-
-// ─────────────────────────────────────────────────────────
-// 카테고리 / 정렬 옵션 — 컴포넌트 안에 들고 다닌다
-// ─────────────────────────────────────────────────────────
-
-const CATEGORIES: Array<{ value: 'all' | Product['category']; label: string }> =
-  [
-    { value: 'all', label: '전체' },
-    { value: 'electronics', label: '전자제품' },
-    { value: 'fashion', label: '패션' },
-    { value: 'home', label: '홈' },
-    { value: 'beauty', label: '뷰티' },
-  ]
-
-const SORT_OPTIONS: Array<{ value: SortBy; label: string }> = [
-  { value: 'latest', label: '최신순' },
-  { value: 'popular', label: '인기순' },
-  { value: 'price-asc', label: '가격 낮은순' },
-  { value: 'price-desc', label: '가격 높은순' },
-]
-
 const PAGE_SIZE = 12
 
 const loadingStateClassName = 'py-20 px-5 text-center text-[#555]'
-const filterLabelClassName = 'text-[13px] font-semibold text-[#444]'
-const categoryButton = tv({
-  base: 'cursor-pointer rounded-2xl border border-[#ddd] bg-white px-3 py-1.5 text-[13px]',
-  variants: {
-    active: {
-      false: '',
-      true: 'border-[#111] bg-[#111] text-white',
-    },
-  },
-  defaultVariants: {
-    active: false,
-  },
-})
-const priceInputClassName =
-  'w-[100px] rounded-md border border-[#ddd] px-2.5 py-1.5 text-[13px]'
-const selectClassName =
-  'rounded-md border border-[#ddd] bg-white px-3.5 py-2.5 text-sm'
 
 // ─────────────────────────────────────────────────────────
 // 500줄+ 컴포넌트 — UI, 비즈니스 로직, API, 포맷, 도메인 규칙이 한 파일에
@@ -131,108 +94,26 @@ export function ProductListPage() {
         </p>
       </header>
 
-      {/* ─── 필터 패널 ──────────────────────────────────── */}
-      <section className="mb-4 flex flex-wrap items-end gap-6 rounded-lg bg-[#f7f7f8] p-4">
-        <div className="flex flex-col gap-2">
-          <span className={filterLabelClassName}>카테고리</span>
-          <div className="flex flex-wrap gap-1.5">
-            <For each={CATEGORIES}>
-              {(cat) => (
-                <button
-                  type="button"
-                  key={cat.value}
-                  className={categoryButton({ active: category === cat.value })}
-                  onClick={() => {
-                    handleCategoryChange(cat.value)
-                  }}
-                >
-                  {cat.label}
-                </button>
-              )}
-            </For>
-          </div>
-        </div>
+      <ProductListFilterPanel
+        category={category}
+        inStockOnly={inStockOnly}
+        maxPrice={maxPrice}
+        minPrice={minPrice}
+        onCategoryChange={handleCategoryChange}
+        onInStockToggle={handleInStockToggle}
+        onMaxPriceChange={handleMaxPriceChange}
+        onMinPriceChange={handleMinPriceChange}
+        onResetFilters={handleResetFilters}
+      />
 
-        <div className="flex flex-col gap-2">
-          <span className={filterLabelClassName}>가격 범위</span>
-          <div className="flex items-center gap-2">
-            <input
-              aria-label="최소 가격"
-              type="number"
-              placeholder="최소"
-              value={minPrice}
-              onChange={handleMinPriceChange}
-              min={0}
-              className={priceInputClassName}
-            />
-            <span>~</span>
-            <input
-              aria-label="최대 가격"
-              type="number"
-              placeholder="최대"
-              value={maxPrice}
-              onChange={handleMaxPriceChange}
-              min={0}
-              className={priceInputClassName}
-            />
-          </div>
-        </div>
-
-        <div className="flex flex-col gap-2">
-          <span className={filterLabelClassName}>옵션</span>
-          <label className="flex items-center gap-1.5 text-[13px] font-normal">
-            <input
-              type="checkbox"
-              checked={inStockOnly}
-              onChange={handleInStockToggle}
-            />
-            재고 있는 것만
-          </label>
-        </div>
-
-        <button
-          type="button"
-          className="ml-auto cursor-pointer rounded-md border border-[#ddd] bg-white px-4 py-2 text-[13px]"
-          onClick={handleResetFilters}
-        >
-          필터 초기화
-        </button>
-      </section>
-
-      {/* ─── 검색 + 정렬 + 보기 모드 ───────────────────── */}
-      <section className="mb-6 flex gap-3">
-        <input
-          aria-label="상품 검색"
-          type="search"
-          placeholder="상품 검색..."
-          value={searchQuery}
-          onChange={handleSearchChange}
-          className="flex-1 rounded-md border border-[#ddd] px-3.5 py-2.5 text-sm"
-        />
-        <select
-          aria-label="정렬 방식"
-          className={selectClassName}
-          value={sortBy}
-          onChange={handleSortChange}
-        >
-          <For each={SORT_OPTIONS}>
-            {(opt) => (
-              <option key={opt.value} value={opt.value}>
-                {opt.label}
-              </option>
-            )}
-          </For>
-        </select>
-        <select
-          aria-label="보기 방식"
-          className={selectClassName}
-          value={viewMode}
-          onChange={handleViewModeChange}
-        >
-          <option value="grid">그리드</option>
-          <option value="list">리스트</option>
-        </select>
-      </section>
+      <ProductListToolbar
+        searchQuery={searchQuery}
+        sortBy={sortBy}
+        viewMode={viewMode}
+        onSearchChange={handleSearchChange}
+        onSortChange={handleSortChange}
+        onViewModeChange={handleViewModeChange}
+      />
 
       {/* ─── 상품 그리드 ────────────────────────────────── */}
 

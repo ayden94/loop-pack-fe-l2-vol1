@@ -2,10 +2,10 @@ import type { ChangeEvent } from 'react'
 
 import { useSearchParams } from '@/shared/lib'
 
+import type { ProductListCategoryFilter } from '../../types'
 import { DEFAULT_PRODUCT_LIST_SEARCH_PARAMS } from './constants'
 import { ProductListSearchParamsUtils } from './searchParams'
 import type {
-  ProductListCategoryFilter,
   ProductListUrlSearchParams,
   ProductListUrlSearchParamsPatch,
   UseProductListSearchParamsOptions,

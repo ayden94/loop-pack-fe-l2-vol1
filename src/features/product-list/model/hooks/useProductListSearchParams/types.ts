@@ -1,16 +1,12 @@
 import type { ChangeEvent } from 'react'
 
 import type {
-  PRODUCT_LIST_CATEGORIES,
-  PRODUCT_LIST_SORT_OPTIONS,
-  PRODUCT_LIST_VIEW_MODES,
-} from './constants'
-
-export type ProductListCategory = (typeof PRODUCT_LIST_CATEGORIES)[number]
-export type ProductListCategoryFilter = 'all' | ProductListCategory
-export type ProductListSortBy = (typeof PRODUCT_LIST_SORT_OPTIONS)[number]
-export type ProductListViewMode = (typeof PRODUCT_LIST_VIEW_MODES)[number]
-export type ProductListPriceFilter = number | ''
+  ProductListCategory,
+  ProductListCategoryFilter,
+  ProductListPriceFilter,
+  ProductListSortBy,
+  ProductListViewMode,
+} from '../../types'
 
 export type ProductListUrlSearchParams = {
   readonly category?: ProductListCategory

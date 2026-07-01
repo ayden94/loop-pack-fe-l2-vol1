@@ -1,17 +1,19 @@
 import {
-  DEFAULT_PRODUCT_LIST_SEARCH_PARAMS,
   PRODUCT_LIST_CATEGORIES,
   PRODUCT_LIST_SORT_OPTIONS,
   PRODUCT_LIST_VIEW_MODES,
-} from './constants'
+} from '../../../config'
 import type {
   ProductListCategory,
   ProductListCategoryFilter,
   ProductListPriceFilter,
-  ProductListSearchParamsState,
   ProductListSortBy,
-  ProductListUrlSearchParams,
   ProductListViewMode,
+} from '../../types'
+import { DEFAULT_PRODUCT_LIST_SEARCH_PARAMS } from './constants'
+import type {
+  ProductListSearchParamsState,
+  ProductListUrlSearchParams,
 } from './types'
 
 export class ProductListSearchParamsUtils {
