@@ -11,7 +11,7 @@ type PriceRangeFieldsProps = {
 
 const filterLabelClassName = 'text-[13px] font-semibold text-[#444]'
 const priceInputClassName =
-  'w-[100px] rounded-md border border-[#ddd] px-2.5 py-1.5 text-[13px]'
+  'w-25 rounded-md border border-[#ddd] px-2.5 py-1.5 text-[13px]'
 
 export function PriceRangeFields({
   maxPrice,

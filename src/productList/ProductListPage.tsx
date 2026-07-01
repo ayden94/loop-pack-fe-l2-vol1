@@ -83,7 +83,7 @@ export function ProductListPage() {
   }
 
   return (
-    <div className="mx-auto max-w-[1200px] p-6 font-[-apple-system,BlinkMacSystemFont,'Segoe_UI',Roboto,sans-serif]">
+    <div className="mx-auto max-w-300 p-6 font-[-apple-system,BlinkMacSystemFont,'Segoe_UI',Roboto,sans-serif]">
       <header className="mb-6">
         <h1 className="m-0 mb-1 text-[28px]">상품 목록</h1>
         <p className="m-0 text-sm text-[#666]">
@@ -120,7 +120,7 @@ export function ProductListPage() {
       <For.section
         each={products}
         fallback={
-          <div className="col-span-full py-[60px] text-center text-[#888]">
+          <div className="col-span-full py-15 text-center text-[#888]">
             조건에 맞는 상품이 없습니다.
           </div>
         }
