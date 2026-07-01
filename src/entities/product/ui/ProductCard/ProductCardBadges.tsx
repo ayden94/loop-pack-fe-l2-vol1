@@ -1,7 +1,7 @@
 import { Show } from '@ilokesto/utilinent'
 import { tv } from 'tailwind-variants'
 
-import type { Product } from '@/entities/product'
+import type { Product } from '../../model'
 
 type ProductCardBadgesProps = {
   readonly product: Product
