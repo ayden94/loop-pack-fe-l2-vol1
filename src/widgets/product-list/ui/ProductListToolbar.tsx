@@ -1,9 +1,12 @@
 import type { ChangeEventHandler } from 'react'
 
-import type { ProductListSortBy, ProductListViewMode } from '../../model'
-import { SearchInput } from './SearchInput'
-import { SortSelect } from './SortSelect'
-import { ViewModeSelect } from './ViewModeSelect'
+import {
+  type ProductListSortBy,
+  type ProductListViewMode,
+  SearchInput,
+  SortSelect,
+  ViewModeSelect,
+} from '@/features/product-list'
 
 type ProductListToolbarProps = {
   readonly onSearchChange: ChangeEventHandler<HTMLInputElement>
