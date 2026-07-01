@@ -1,0 +1,1 @@
+export { productRepository } from './api'
