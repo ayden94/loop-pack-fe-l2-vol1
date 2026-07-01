@@ -1,8 +1,9 @@
 import { For, Show } from '@ilokesto/utilinent'
-import { cn } from 'tailwind-variants'
+import { cn, tv } from 'tailwind-variants'
 
 import { type Product, productService } from '@/entities/product'
 import {
+  ProductCard,
   useProductInteraction,
   useProductListSearchParams,
 } from '@/features/product-list'
@@ -35,17 +36,22 @@ const PAGE_SIZE = 12
 
 const loadingStateClassName = 'py-20 px-5 text-center text-[#555]'
 const filterLabelClassName = 'text-[13px] font-semibold text-[#444]'
-const categoryButtonClassName =
-  'cursor-pointer rounded-2xl border border-[#ddd] bg-white px-3 py-1.5 text-[13px]'
-const activeButtonClassName = 'border-[#111] bg-[#111] text-white'
+const categoryButton = tv({
+  base: 'cursor-pointer rounded-2xl border border-[#ddd] bg-white px-3 py-1.5 text-[13px]',
+  variants: {
+    active: {
+      false: '',
+      true: 'border-[#111] bg-[#111] text-white',
+    },
+  },
+  defaultVariants: {
+    active: false,
+  },
+})
 const priceInputClassName =
   'w-[100px] rounded-md border border-[#ddd] px-2.5 py-1.5 text-[13px]'
 const selectClassName =
   'rounded-md border border-[#ddd] bg-white px-3.5 py-2.5 text-sm'
-const badgeClassName =
-  'absolute rounded px-2 py-1 text-[11px] font-semibold text-white'
-// 검색어를 정규식에 안전하게 넣기 위한 escape (특수문자로 인한 RegExp 크래시 방지)
-const escapeRegExp = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
 
 // ─────────────────────────────────────────────────────────
 // 500줄+ 컴포넌트 — UI, 비즈니스 로직, API, 포맷, 도메인 규칙이 한 파일에
@@ -135,10 +141,7 @@ export function ProductListPage() {
                 <button
                   type="button"
                   key={cat.value}
-                  className={cn(
-                    categoryButtonClassName,
-                    category === cat.value && activeButtonClassName,
-                  )}
+                  className={categoryButton({ active: category === cat.value })}
                   onClick={() => {
                     handleCategoryChange(cat.value)
                   }}
@@ -233,11 +236,12 @@ export function ProductListPage() {
 
       {/* ─── 상품 그리드 ────────────────────────────────── */}
       <section
-        className={`mb-8 grid gap-5 ${
-          viewMode === 'list'
-            ? 'grid-cols-1'
-            : 'grid-cols-[repeat(auto-fill,minmax(220px,1fr))]'
-        }`}
+        className={cn(
+          'mb-8 grid gap-5',
+          viewMode === 'list' && 'grid-cols-1',
+          viewMode !== 'list' &&
+            'grid-cols-[repeat(auto-fill,minmax(220px,1fr))]',
+        )}
       >
         <Show
           when={products.length > 0}
@@ -249,162 +253,18 @@ export function ProductListPage() {
         >
           <For each={products}>
             {(product) => {
-              // ─── 검색어 하이라이팅 로직 인라인 ──────────
-              const highlightMatch = (text: string) => {
-                if (!searchQuery) return <>{text}</>
-                const escapedSearchQuery = escapeRegExp(searchQuery)
-                const parts = text.split(
-                  new RegExp(`(${escapedSearchQuery})`, 'gi'),
-                )
-                return (
-                  <>
-                    <For each={parts}>
-                      {(part, index) => (
-                        <Show
-                          key={`${part}-${String(index)}`}
-                          when={
-                            part.toLowerCase() === searchQuery.toLowerCase()
-                          }
-                          fallback={part}
-                        >
-                          <mark className="bg-[#fff176] p-0">{part}</mark>
-                        </Show>
-                      )}
-                    </For>
-                  </>
-                )
-              }
-
-              // ─── 도메인 규칙 인라인 계산 ─────────────────
-              const discountRate = product.originalPrice
-                ? Math.round((1 - product.price / product.originalPrice) * 100)
-                : 0
-              const formattedPrice = `${product.price.toLocaleString()}원`
-              const formattedOriginal = product.originalPrice
-                ? `${product.originalPrice.toLocaleString()}원`
-                : null
-              const isAlmostSoldOut = product.stock > 0 && product.stock <= 5
-              const isSoldOut = product.stock === 0
-              const isHot = discountRate >= 30
-              const isBest = product.rating >= 4.5 && product.reviewCount >= 100
-              const isFreeShipping = product.price >= 50000
-
-              // ─── 날짜 포맷팅 인라인 ─────────────────────
-              const createdDate = new Date(product.createdAt)
-              const now = new Date()
-              const daysSinceCreated = Math.floor(
-                (now.getTime() - createdDate.getTime()) / (1000 * 60 * 60 * 24),
-              )
-              const isNew = daysSinceCreated <= 7
-
               // ─── 위시리스트 여부 ────────────────────────
               const isWished = wishlist.includes(product.id)
 
               return (
-                <div
+                <ProductCard
                   key={product.id}
-                  className="relative overflow-hidden rounded-lg border border-[#eee] bg-white transition-transform duration-150 hover:-translate-y-0.5 hover:shadow-[0_6px_16px_rgba(0,0,0,0.08)]"
-                >
-                  <button
-                    type="button"
-                    className="absolute inset-0 z-10 cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#111]"
-                    onClick={() => {
-                      handleProductClick(product.id)
-                    }}
-                    aria-label={`${product.name} 최근 본 상품에 추가`}
-                  />
-                  <div className="relative aspect-square bg-[#f0f0f0]">
-                    <img
-                      src={product.imageUrl}
-                      alt={product.name}
-                      loading="lazy"
-                      className="block size-full object-cover"
-                    />
-                    <Show when={discountRate > 0}>
-                      <span
-                        className={`${badgeClassName} top-2 left-2 bg-[#e53935]`}
-                      >
-                        {discountRate}% 할인
-                      </span>
-                    </Show>
-                    <Show when={isNew}>
-                      <span
-                        className={`${badgeClassName} top-2 right-2 bg-[#1e88e5]`}
-                      >
-                        NEW
-                      </span>
-                    </Show>
-                    <Show when={isHot}>
-                      <span
-                        className={`${badgeClassName} top-9 left-2 bg-[#d81b60]`}
-                      >
-                        특가
-                      </span>
-                    </Show>
-                    <Show when={isBest}>
-                      <span
-                        className={`${badgeClassName} top-9 right-2 bg-[#6a1b9a]`}
-                      >
-                        BEST
-                      </span>
-                    </Show>
-                    <Show when={isSoldOut}>
-                      <span
-                        className={`${badgeClassName} bottom-2 left-2 bg-[#555]`}
-                      >
-                        품절
-                      </span>
-                    </Show>
-                    <Show when={!isSoldOut && isAlmostSoldOut}>
-                      <span
-                        className={`${badgeClassName} bottom-2 left-2 bg-[#fb8c00]`}
-                      >
-                        품절 임박
-                      </span>
-                    </Show>
-                  </div>
-
-                  <div className="p-3">
-                    <h3 className="m-0 mb-2 text-sm leading-[1.35] font-medium">
-                      {highlightMatch(product.name)}
-                    </h3>
-                    <div className="mb-1.5 flex flex-col gap-0.5">
-                      <Show when={formattedOriginal}>
-                        <span className="text-xs text-[#999] line-through">
-                          {formattedOriginal}
-                        </span>
-                      </Show>
-                      <span className="text-base font-bold text-[#111]">
-                        {formattedPrice}
-                      </span>
-                      <Show when={isFreeShipping}>
-                        <span className="ml-1.5 text-[11px] font-semibold text-[#2e7d32]">
-                          무료배송
-                        </span>
-                      </Show>
-                    </div>
-                    <div className="flex items-center gap-1 text-xs text-[#666]">
-                      <span className="font-semibold text-[#f9a825]">
-                        ★ {product.rating.toFixed(1)}
-                      </span>
-                      <span>({product.reviewCount.toLocaleString()})</span>
-                      <button
-                        type="button"
-                        className="relative z-20 ml-auto cursor-pointer border-0 bg-transparent text-base"
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          handleWishlistToggle(product.id)
-                        }}
-                        aria-label={`${product.name} 위시리스트 ${isWished ? '제거' : '추가'}`}
-                        aria-pressed={isWished}
-                      >
-                        <Show when={isWished} fallback="♡">
-                          ♥
-                        </Show>
-                      </button>
-                    </div>
-                  </div>
-                </div>
+                  isWished={isWished}
+                  product={product}
+                  searchQuery={searchQuery}
+                  onProductClick={handleProductClick}
+                  onWishlistToggle={handleWishlistToggle}
+                />
               )
             }}
           </For>
