@@ -1,9 +1,8 @@
 import { For, Show } from '@ilokesto/utilinent'
-import { useEffect, useState } from 'react'
 
 import { productRepository } from '@/entities/product'
 import { useProductListSearchParams } from '@/features/product-list'
-import { useLocalStorage, useScrollToTopOnChange } from '@/shared/lib'
+import { useAsync, useLocalStorage, useScrollToTopOnChange } from '@/shared/lib'
 
 // ─────────────────────────────────────────────────────────
 // 타입도 한 파일에 (실무에서 흔히 보는 모습)
@@ -126,12 +125,6 @@ const escapeRegExp = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
 // ─────────────────────────────────────────────────────────
 
 export function ProductListPage() {
-  // ─── 서버 상태 (직접 관리) ──────────────────────────────
-  const [products, setProducts] = useState<Array<Product>>([])
-  const [totalCount, setTotalCount] = useState(0)
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState<Error | null>(null)
-
   const {
     category,
     minPrice,
@@ -165,32 +158,30 @@ export function ProductListPage() {
     initialState: EMPTY_PRODUCT_ID_LIST,
   })
 
-  useEffect(() => {
-    const fetchProducts = async () => {
-      setIsLoading(true)
-      setError(null)
-      try {
-        const data = parseProductListResponse(
-          await productRepository.getProductList(apiQueryString),
-        )
-        // 클라이언트에서 추가 필터링 — "재고 있는 것만" 토글
-        const filtered = inStockOnly
-          ? data.products.filter((p) => p.stock > 0)
-          : data.products
-        setProducts(filtered)
-        setTotalCount(data.totalCount)
-      } catch (err) {
-        setError(
-          err instanceof Error
-            ? err
-            : new Error('알 수 없는 오류가 발생했습니다.'),
-        )
-      } finally {
-        setIsLoading(false)
-      }
-    }
-    void fetchProducts()
-  }, [apiQueryString, inStockOnly])
+  const {
+    data: productListData,
+    error,
+    isLoading,
+    refetch: refetchProducts,
+  } = useAsync({
+    asyncFn: async () => {
+      return parseProductListResponse(
+        await productRepository.getProductList(apiQueryString),
+      )
+    },
+    deps: [apiQueryString],
+    keepPreviousData: true,
+    selectFn: (data: ProductListResponse): ProductListResponse => ({
+      products: inStockOnly
+        ? data.products.filter((product) => product.stock > 0)
+        : data.products,
+      totalCount: data.totalCount,
+    }),
+    selectDeps: [inStockOnly],
+  })
+
+  const products = productListData?.products ?? []
+  const totalCount = productListData?.totalCount ?? 0
 
   // ─── 페이지가 바뀔 때 스크롤 맨 위로 ────────────────────
   useScrollToTopOnChange(page, { enabled: page > 0 })
@@ -230,7 +221,7 @@ export function ProductListPage() {
           type="button"
           className="mt-3 cursor-pointer rounded-md border border-[#ddd] bg-white px-4 py-2"
           onClick={() => {
-            window.location.reload()
+            void refetchProducts()
           }}
         >
           다시 시도
