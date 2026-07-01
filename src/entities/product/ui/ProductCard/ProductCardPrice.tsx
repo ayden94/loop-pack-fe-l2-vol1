@@ -1,6 +1,6 @@
 import { Show } from '@ilokesto/utilinent'
 
-import type { Product } from '@/entities/product'
+import type { Product } from '../../model'
 
 type ProductCardPriceProps = {
   readonly product: Product
