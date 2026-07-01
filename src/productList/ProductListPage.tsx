@@ -1,6 +1,7 @@
 import { For, Show } from '@ilokesto/utilinent'
 import { useEffect, useState } from 'react'
 
+import { productRepository } from '@/entities/product'
 import { useProductListSearchParams } from '@/features/product-list'
 import { useLocalStorage, useScrollToTopOnChange } from '@/shared/lib'
 
@@ -169,11 +170,9 @@ export function ProductListPage() {
       setIsLoading(true)
       setError(null)
       try {
-        const res = await fetch(`/api/products?${apiQueryString}`)
-        if (!res.ok) {
-          throw new Error(`API 호출 실패 (status: ${String(res.status)})`)
-        }
-        const data = parseProductListResponse(await res.json())
+        const data = parseProductListResponse(
+          await productRepository.getProductList(apiQueryString),
+        )
         // 클라이언트에서 추가 필터링 — "재고 있는 것만" 토글
         const filtered = inStockOnly
           ? data.products.filter((p) => p.stock > 0)
