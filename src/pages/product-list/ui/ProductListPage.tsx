@@ -1,11 +1,11 @@
 import { Show } from '@ilokesto/utilinent'
 
-import { productService } from '@/entities/product'
 import {
   useProductInteraction,
+  useProductList,
   useProductListSearchParams,
 } from '@/features/product-list'
-import { useAsync, useScrollToTopOnChange } from '@/shared/lib'
+import { useScrollToTopOnChange } from '@/shared/lib'
 import { Pagination } from '@/shared/ui'
 import {
   ProductGrid,
@@ -15,8 +15,6 @@ import {
 } from '@/widgets/product-list'
 
 const PAGE_SIZE = 12
-
-const loadingStateClassName = 'py-20 px-5 text-center text-[#555]'
 
 export function ProductListPage() {
   const {
@@ -42,43 +40,15 @@ export function ProductListPage() {
 
   const { wishlist, handleWishlistToggle, handleProductClick } =
     useProductInteraction()
-
   const {
-    data: productListData,
-    error,
-    isLoading,
-    refetch: refetchProducts,
-  } = useAsync(
-    productService.getProductListOptions({ apiQueryString, inStockOnly }),
-  )
-
-  const products = productListData?.products ?? []
-  const totalCount = productListData?.totalCount ?? 0
+    isRefreshing,
+    products,
+    status: productListStatus,
+    totalCount,
+  } = useProductList({ apiQueryString, inStockOnly })
 
   // ─── 페이지가 바뀔 때 스크롤 맨 위로 ────────────────────
   useScrollToTopOnChange(page, { enabled: page > 0 })
-
-  // ─── 로딩/에러는 early return ───────────────────────────
-  if (isLoading && products.length === 0) {
-    return <div className={loadingStateClassName}>로딩 중...</div>
-  }
-
-  if (error) {
-    return (
-      <div className={loadingStateClassName}>
-        <p>오류가 발생했습니다: {error.message}</p>
-        <button
-          type="button"
-          className="mt-3 cursor-pointer rounded-md border border-[#ddd] bg-white px-4 py-2"
-          onClick={() => {
-            void refetchProducts()
-          }}
-        >
-          다시 시도
-        </button>
-      </div>
-    )
-  }
 
   return (
     <div className="mx-auto max-w-300 p-6 font-[-apple-system,BlinkMacSystemFont,'Segoe_UI',Roboto,sans-serif]">
@@ -111,6 +81,7 @@ export function ProductListPage() {
       <ProductGrid
         products={products}
         searchQuery={searchQuery}
+        status={productListStatus}
         viewMode={viewMode}
         wishlist={wishlist}
         onProductClick={handleProductClick}
@@ -125,7 +96,7 @@ export function ProductListPage() {
       />
 
       {/* ─── 백그라운드 로딩 인디케이터 ─────────────────── */}
-      <Show when={isLoading && products.length > 0}>
+      <Show when={isRefreshing}>
         <div className="fixed right-5 bottom-5 rounded-[20px] bg-black/75 px-3.5 py-2 text-xs text-white">
           데이터 갱신 중...
         </div>
