@@ -1,12 +1,11 @@
-import type { ChangeEventHandler } from 'react'
-
-import type { ProductListPriceFilter } from '../../model'
+import { DebouncedInput } from '@/shared/ui'
 
 type PriceRangeFieldsProps = {
-  readonly maxPrice: ProductListPriceFilter
-  readonly minPrice: ProductListPriceFilter
-  readonly onMaxPriceChange: ChangeEventHandler<HTMLInputElement>
-  readonly onMinPriceChange: ChangeEventHandler<HTMLInputElement>
+  readonly maxPrice: string
+  readonly minPrice: string
+  readonly onMaxPriceChange: (maxPrice: string) => void
+  readonly onMinPriceChange: (minPrice: string) => void
+  readonly syncKey: number
 }
 
 const filterLabelClassName = 'text-[13px] font-semibold text-[#444]'
@@ -18,27 +17,30 @@ export function PriceRangeFields({
   minPrice,
   onMaxPriceChange,
   onMinPriceChange,
+  syncKey,
 }: PriceRangeFieldsProps) {
   return (
     <div className="flex flex-col gap-2">
       <span className={filterLabelClassName}>가격 범위</span>
       <div className="flex items-center gap-2">
-        <input
+        <DebouncedInput
           aria-label="최소 가격"
           type="number"
           placeholder="최소"
+          syncKey={syncKey}
           value={minPrice}
-          onChange={onMinPriceChange}
+          onValueChange={onMinPriceChange}
           min={0}
           className={priceInputClassName}
         />
         <span>~</span>
-        <input
+        <DebouncedInput
           aria-label="최대 가격"
           type="number"
           placeholder="최대"
+          syncKey={syncKey}
           value={maxPrice}
-          onChange={onMaxPriceChange}
+          onValueChange={onMaxPriceChange}
           min={0}
           className={priceInputClassName}
         />

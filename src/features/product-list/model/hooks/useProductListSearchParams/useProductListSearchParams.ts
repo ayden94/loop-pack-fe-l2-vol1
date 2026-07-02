@@ -1,4 +1,5 @@
 import type { ChangeEvent } from 'react'
+import { useState } from 'react'
 
 import { useSearchParams } from '@/shared/lib'
 
@@ -15,6 +16,7 @@ import type {
 export function useProductListSearchParams({
   pageSize,
 }: UseProductListSearchParamsOptions): UseProductListSearchParamsReturn {
+  const [filterInputSyncKey, setFilterInputSyncKey] = useState(0)
   const [searchParams, setSearchParams] =
     useSearchParams<ProductListUrlSearchParams>()
   const state = ProductListSearchParamsUtils.toState(searchParams)
@@ -34,16 +36,16 @@ export function useProductListSearchParams({
     })
   }
 
-  const handleMinPriceChange = (event: ChangeEvent<HTMLInputElement>) => {
+  const handleMinPriceChange = (minPrice: string) => {
     updateSearchParams({
-      minPrice: ProductListSearchParamsUtils.toPricePatch(event.target.value),
+      minPrice: ProductListSearchParamsUtils.toPricePatch(minPrice),
       page: null,
     })
   }
 
-  const handleMaxPriceChange = (event: ChangeEvent<HTMLInputElement>) => {
+  const handleMaxPriceChange = (maxPrice: string) => {
     updateSearchParams({
-      maxPrice: ProductListSearchParamsUtils.toPricePatch(event.target.value),
+      maxPrice: ProductListSearchParamsUtils.toPricePatch(maxPrice),
       page: null,
     })
   }
@@ -58,8 +60,8 @@ export function useProductListSearchParams({
     updateSearchParams({ sort: nextSortBy, page: null })
   }
 
-  const handleSearchChange = (event: ChangeEvent<HTMLInputElement>) => {
-    updateSearchParams({ q: event.target.value || null, page: null })
+  const handleSearchChange = (searchQuery: string) => {
+    updateSearchParams({ q: searchQuery || null, page: null })
   }
 
   const handleInStockToggle = (event: ChangeEvent<HTMLInputElement>) => {
@@ -89,6 +91,8 @@ export function useProductListSearchParams({
   }
 
   const handleResetFilters = () => {
+    setFilterInputSyncKey((currentKey) => currentKey + 1)
+
     updateSearchParams({
       category: null,
       q: null,
@@ -103,7 +107,11 @@ export function useProductListSearchParams({
 
   return {
     ...state,
+    maxPrice: ProductListSearchParamsUtils.toPriceInputValue(state.maxPrice),
+    minPrice: ProductListSearchParamsUtils.toPriceInputValue(state.minPrice),
+    searchQuery: state.searchQuery,
     apiQueryString,
+    filterInputSyncKey,
     handleCategoryChange,
     handleMinPriceChange,
     handleMaxPriceChange,

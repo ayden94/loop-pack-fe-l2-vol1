@@ -36,6 +36,10 @@ export class ProductListSearchParamsUtils {
     return Number.isFinite(numericValue) ? numericValue : null
   }
 
+  static toPriceInputValue(value: ProductListPriceFilter): string {
+    return value === '' ? value : String(value)
+  }
+
   static toState(
     searchParams: Readonly<ProductListUrlSearchParams>,
   ): ProductListSearchParamsState {

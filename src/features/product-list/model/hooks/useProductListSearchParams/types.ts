@@ -41,13 +41,22 @@ export type UseProductListSearchParamsOptions = {
   readonly pageSize: number
 }
 
-export type UseProductListSearchParamsReturn = ProductListSearchParamsState & {
+type ProductListSearchInputState = Omit<
+  ProductListSearchParamsState,
+  'maxPrice' | 'minPrice'
+> & {
+  readonly maxPrice: string
+  readonly minPrice: string
+}
+
+export type UseProductListSearchParamsReturn = ProductListSearchInputState & {
   readonly apiQueryString: string
+  readonly filterInputSyncKey: number
   readonly handleCategoryChange: (category: ProductListCategoryFilter) => void
-  readonly handleMinPriceChange: (event: ChangeEvent<HTMLInputElement>) => void
-  readonly handleMaxPriceChange: (event: ChangeEvent<HTMLInputElement>) => void
+  readonly handleMinPriceChange: (minPrice: string) => void
+  readonly handleMaxPriceChange: (maxPrice: string) => void
   readonly handleSortChange: (event: ChangeEvent<HTMLSelectElement>) => void
-  readonly handleSearchChange: (event: ChangeEvent<HTMLInputElement>) => void
+  readonly handleSearchChange: (searchQuery: string) => void
   readonly handleInStockToggle: (event: ChangeEvent<HTMLInputElement>) => void
   readonly handleViewModeChange: (event: ChangeEvent<HTMLSelectElement>) => void
   readonly handlePageChange: (nextPage: number) => void

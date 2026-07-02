@@ -27,6 +27,7 @@ export function ProductListPage() {
     inStockOnly,
     viewMode,
     apiQueryString,
+    filterInputSyncKey,
     handleCategoryChange,
     handleMinPriceChange,
     handleMaxPriceChange,
@@ -62,6 +63,7 @@ export function ProductListPage() {
         inStockOnly={inStockOnly}
         maxPrice={maxPrice}
         minPrice={minPrice}
+        syncKey={filterInputSyncKey}
         onCategoryChange={handleCategoryChange}
         onInStockToggle={handleInStockToggle}
         onMaxPriceChange={handleMaxPriceChange}
@@ -71,6 +73,7 @@ export function ProductListPage() {
 
       <ProductListToolbar
         searchQuery={searchQuery}
+        syncKey={filterInputSyncKey}
         sortBy={sortBy}
         viewMode={viewMode}
         onSearchChange={handleSearchChange}

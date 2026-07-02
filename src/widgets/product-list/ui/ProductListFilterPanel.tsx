@@ -5,20 +5,20 @@ import {
   InStockToggle,
   PriceRangeFields,
   type ProductListCategoryFilter,
-  type ProductListPriceFilter,
   ResetFiltersButton,
 } from '@/features/product-list'
 
 type ProductListFilterPanelProps = {
   readonly category: ProductListCategoryFilter
   readonly inStockOnly: boolean
-  readonly maxPrice: ProductListPriceFilter
-  readonly minPrice: ProductListPriceFilter
+  readonly maxPrice: string
+  readonly minPrice: string
   readonly onCategoryChange: (category: ProductListCategoryFilter) => void
   readonly onInStockToggle: ChangeEventHandler<HTMLInputElement>
-  readonly onMaxPriceChange: ChangeEventHandler<HTMLInputElement>
-  readonly onMinPriceChange: ChangeEventHandler<HTMLInputElement>
+  readonly onMaxPriceChange: (maxPrice: string) => void
+  readonly onMinPriceChange: (minPrice: string) => void
   readonly onResetFilters: () => void
+  readonly syncKey: number
 }
 
 export function ProductListFilterPanel({
@@ -31,6 +31,7 @@ export function ProductListFilterPanel({
   onMaxPriceChange,
   onMinPriceChange,
   onResetFilters,
+  syncKey,
 }: ProductListFilterPanelProps) {
   return (
     <section className="mb-4 flex flex-wrap items-end gap-6 rounded-lg bg-[#f7f7f8] p-4">
@@ -41,6 +42,7 @@ export function ProductListFilterPanel({
       <PriceRangeFields
         maxPrice={maxPrice}
         minPrice={minPrice}
+        syncKey={syncKey}
         onMaxPriceChange={onMaxPriceChange}
         onMinPriceChange={onMinPriceChange}
       />
