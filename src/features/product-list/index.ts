@@ -10,8 +10,10 @@ export type {
   ProductListSortBy,
   ProductListViewMode,
 } from './model'
+export type { ProductListStatus } from './model/hooks'
 export {
   useProductInteraction,
+  useProductList,
   useProductListSearchParams,
 } from './model/hooks'
 export {
