@@ -1,5 +1,6 @@
 export { Button } from './Button'
 export { Checkbox } from './form'
+export { DebouncedInput } from './form'
 export { Field } from './form'
 export { FieldDescription } from './form'
 export { FieldError } from './form'
