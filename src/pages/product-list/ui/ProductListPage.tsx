@@ -46,7 +46,7 @@ export function ProductListPage() {
     products,
     status: productListStatus,
     totalCount,
-  } = useProductList({ apiQueryString, inStockOnly })
+  } = useProductList({ apiQueryString })
 
   // ─── 페이지가 바뀔 때 스크롤 맨 위로 ────────────────────
   useScrollToTopOnChange(page, { enabled: page > 0 })

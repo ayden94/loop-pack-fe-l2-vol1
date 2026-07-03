@@ -1,11 +1,10 @@
-import { type ProductListResponse, productService } from '@/entities/product'
+import { productService } from '@/entities/product'
 import { useAsync } from '@/shared/lib'
 
 import type { UseProductListOptions, UseProductListReturn } from './types'
 
 export function useProductList({
   apiQueryString,
-  inStockOnly,
 }: UseProductListOptions): UseProductListReturn {
   const {
     data: productListData,
@@ -16,13 +15,6 @@ export function useProductList({
     asyncFn: () => productService.getProductList(apiQueryString),
     deps: [apiQueryString],
     keepPreviousData: true,
-    selectFn: (data: ProductListResponse): ProductListResponse => ({
-      products: inStockOnly
-        ? data.products.filter((product) => product.stock > 0)
-        : data.products,
-      totalCount: data.totalCount,
-    }),
-    selectDeps: [inStockOnly],
   })
 
   const products = productListData?.products ?? []

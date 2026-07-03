@@ -11,7 +11,6 @@ export type ProductListStatus =
 
 export type UseProductListOptions = {
   readonly apiQueryString: string
-  readonly inStockOnly: boolean
 }
 
 export type UseProductListReturn = {
