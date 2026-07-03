@@ -1,5 +1,5 @@
 import type { ChangeEvent, ComponentProps } from 'react'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef } from 'react'
 
 const DEBOUNCED_INPUT_DELAY_MS = 400
 
@@ -20,28 +20,39 @@ export function DebouncedInput({
 }: DebouncedInputProps) {
   return (
     <DebouncedInputControl
-      key={`${String(syncKey)}:${value}`}
-      initialValue={value}
+      key={String(syncKey)}
       onValueChange={onValueChange}
+      value={value}
       {...inputProps}
     />
   )
 }
 
-type DebouncedInputControlProps = Omit<
-  DebouncedInputProps,
-  'syncKey' | 'value'
-> & {
-  readonly initialValue: string
+type DebouncedInputControlProps = Omit<DebouncedInputProps, 'syncKey'> & {
+  readonly value: string
 }
 
 function DebouncedInputControl({
-  initialValue,
   onValueChange,
+  value,
   ...inputProps
 }: DebouncedInputControlProps) {
-  const [inputValue, setInputValue] = useState(initialValue)
+  const inputRef = useRef<HTMLInputElement>(null)
   const debounceTimeoutIdRef = useRef<number | undefined>(undefined)
+
+  useEffect(() => {
+    const debounceTimeoutId = debounceTimeoutIdRef.current
+
+    if (debounceTimeoutId !== undefined) {
+      window.clearTimeout(debounceTimeoutId)
+      debounceTimeoutIdRef.current = undefined
+    }
+
+    const input = inputRef.current
+    if (input !== null && input.value !== value) {
+      input.value = value
+    }
+  }, [value])
 
   useEffect(() => {
     return () => {
@@ -55,7 +66,6 @@ function DebouncedInputControl({
 
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
     const nextValue = event.target.value
-    setInputValue(nextValue)
 
     const debounceTimeoutId = debounceTimeoutIdRef.current
     if (debounceTimeoutId !== undefined) {
@@ -68,5 +78,12 @@ function DebouncedInputControl({
     }, DEBOUNCED_INPUT_DELAY_MS)
   }
 
-  return <input {...inputProps} value={inputValue} onChange={handleChange} />
+  return (
+    <input
+      {...inputProps}
+      ref={inputRef}
+      defaultValue={value}
+      onChange={handleChange}
+    />
+  )
 }
