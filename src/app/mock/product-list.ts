@@ -387,6 +387,10 @@ function applyFilters(params: URLSearchParams) {
     list = list.filter((p) => p.name.toLowerCase().includes(q))
   }
 
+  if (params.get('inStock') === 'true') {
+    list = list.filter((p) => p.stock > 0)
+  }
+
   const sort = params.get('sort') ?? 'latest'
   switch (sort) {
     case 'price-asc':

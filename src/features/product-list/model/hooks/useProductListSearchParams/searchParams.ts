@@ -83,6 +83,10 @@ export class ProductListSearchParamsUtils {
       apiSearchParams.set('maxPrice', String(searchParams.maxPrice))
     }
 
+    if (searchParams.inStockOnly) {
+      apiSearchParams.set('inStock', 'true')
+    }
+
     return apiSearchParams.toString()
   }
 
