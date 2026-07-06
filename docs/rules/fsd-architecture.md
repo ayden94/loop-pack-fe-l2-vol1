@@ -96,7 +96,6 @@ src/features/add-to-cart/
 
 - `ui`: 컴포넌트와 화면 표현
 - `model`: 상태, selector, reducer, hook 등 기능 모델. 상태 전이와 그 상태를 사용하는 로직은 컴포넌트에 누적하지 않고 커스텀 훅으로 분리한다.
-- `api`: 해당 slice에 가까운 API 호출
 - `api`: 해당 slice에 가까운 API 호출. 외부 응답은 이 경계에서 Zod로 검증하고, 검증된 DTO를 model 계층으로 넘긴다.
 - `lib`: slice 내부 유틸리티
 - `config`: slice 설정
