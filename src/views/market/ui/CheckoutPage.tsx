@@ -1,3 +1,5 @@
+'use client'
+
 import { Show } from '@ilokesto/utilinent'
 import { ErrorBoundary } from '@suspensive/react'
 import { useState } from 'react'
@@ -59,10 +61,10 @@ export function CheckoutPage() {
       className="mx-auto max-w-120 px-4 pt-6 pb-24 text-left text-(--text)"
       fallback={
         <OrderCompleteSection
+          payableAmount={priceQuote.payableAmount}
           onReturnToOrder={() => {
             setIsOrderPlaced(false)
           }}
-          payableAmount={priceQuote.payableAmount}
         />
       }
     >
@@ -103,8 +105,8 @@ export function CheckoutPage() {
       />
 
       <PaymentSummarySection
-        priceQuote={priceQuote}
         appliedCoupon={appliedCoupon}
+        priceQuote={priceQuote}
       />
 
       <CheckoutTermsSection

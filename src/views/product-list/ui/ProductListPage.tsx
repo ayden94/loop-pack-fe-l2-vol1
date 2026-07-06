@@ -1,3 +1,5 @@
+'use client'
+
 import { Show } from '@ilokesto/utilinent'
 
 import {
@@ -48,7 +50,6 @@ export function ProductListPage() {
     totalCount,
   } = useProductList({ apiQueryString })
 
-  // ─── 페이지가 바뀔 때 스크롤 맨 위로 ────────────────────
   useScrollToTopOnChange(page, { enabled: page > 0 })
 
   return (
@@ -93,12 +94,11 @@ export function ProductListPage() {
 
       <Pagination
         currentPage={page}
-        totalCount={totalCount}
         pageSize={PAGE_SIZE}
+        totalCount={totalCount}
         onPageChange={handlePageChange}
       />
 
-      {/* ─── 백그라운드 로딩 인디케이터 ─────────────────── */}
       <Show when={isRefreshing}>
         <div className="fixed right-5 bottom-5 rounded-[20px] bg-black/75 px-3.5 py-2 text-xs text-white">
           데이터 갱신 중...

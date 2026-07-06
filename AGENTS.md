@@ -33,7 +33,7 @@
 - TypeScript 규칙은 `tsconfig*.json`을 우선한다.
 - ESLint 규칙은 `eslint.config.mjs`를 우선한다.
 - Prettier 규칙은 `.prettierrc`를 우선한다.
-- React Compiler 설치와 Vite 연결은 `package.json`, `pnpm-lock.yaml`, `vite.config.ts`를 우선한다.
+- React, Next, Tailwind 연결은 `package.json`, `pnpm-lock.yaml`, `next.config.ts`, `postcss.config.mjs`를 우선한다.
 - 커밋 메시지 형식은 `commitlint.config.cjs`를 우선한다.
 - Git hook 실행 방식은 `.husky/*`를 우선한다.
 - `docs/rules/*` 문서는 설정 파일로 표현하기 어려운 의도, 아키텍처, 리뷰 기준을 설명한다.

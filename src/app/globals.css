@@ -13,9 +13,9 @@
   --shadow:
     rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
 
-  --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --mono: ui-monospace, Consolas, monospace;
+  --sans: var(--font-geist-sans), system-ui, 'Segoe UI', Roboto, sans-serif;
+  --heading: var(--font-geist-sans), system-ui, 'Segoe UI', Roboto, sans-serif;
+  --mono: var(--font-geist-mono), ui-monospace, Consolas, monospace;
   background: var(--bg);
   color: var(--text);
   letter-spacing: 0.18px;
@@ -46,26 +46,32 @@
     --shadow:
       rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
   }
-
-  #social .button-icon {
-    filter: invert(1) brightness(2);
-  }
 }
 
-#root {
-  display: flex;
-  flex-direction: column;
-  margin: 0 auto;
-  width: 1126px;
-  max-width: 100%;
-  min-height: 100svh;
-  text-align: center;
-  border-inline: 1px solid var(--border);
-  box-sizing: border-box;
+html {
+  min-height: 100%;
+}
+
+html,
+body {
+  max-width: 100vw;
+  overflow-x: hidden;
 }
 
 body {
+  min-height: 100%;
   margin: 0;
+  background: var(--bg);
+  color: var(--text);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
 }
 
 p {
@@ -75,14 +81,14 @@ p {
 code,
 .counter {
   display: inline-flex;
-  font-family: var(--mono);
-  color: var(--text-h);
   border-radius: 4px;
+  color: var(--text-h);
+  font-family: var(--mono);
 }
 
 code {
-  padding: 4px 8px;
   background: var(--code-bg);
+  padding: 4px 8px;
   font-size: 15px;
   line-height: 135%;
 }
