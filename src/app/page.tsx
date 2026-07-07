@@ -1,3 +1,5 @@
+import { SelectDemos } from './_components/SelectDemos.client'
+
 const codeClassName =
   'inline-flex rounded bg-[#f4f3ec] px-2 py-1 font-mono text-[15px] leading-[1.35] text-[#08060d]'
 
@@ -15,6 +17,7 @@ export default function Home() {
         <li>
           Select 자리:{' '}
           <code className={codeClassName}>src/shared/ui/select</code>
+          <SelectDemos />
         </li>
         <li>
           Dialog 자리:{' '}
