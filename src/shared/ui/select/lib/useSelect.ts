@@ -8,7 +8,7 @@ import type {
 } from '../types'
 import { OptionNavigation } from './OptionNavigation'
 
-export function useSelectRootState<TOption extends SelectOption>({
+export function useSelect<TOption extends SelectOption>({
   options,
   value,
   onChange,

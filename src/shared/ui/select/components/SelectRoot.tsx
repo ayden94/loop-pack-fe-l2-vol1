@@ -1,5 +1,5 @@
 import { SelectContext } from '../lib/SelectContext'
-import { useSelectRootState } from '../lib/useSelectRootState'
+import { useSelect } from '../lib/useSelect'
 import type { SelectOption, SelectRootProps } from '../types'
 
 export function SelectRoot<TOption extends SelectOption>({
@@ -8,7 +8,7 @@ export function SelectRoot<TOption extends SelectOption>({
   value,
   onChange,
 }: SelectRootProps<TOption>) {
-  const contextValue = useSelectRootState({ options, value, onChange })
+  const contextValue = useSelect({ options, value, onChange })
 
   return <SelectContext value={contextValue}>{children}</SelectContext>
 }
