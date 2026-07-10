@@ -1,3 +1,4 @@
+import { DialogDemos } from './_components/DialogDemos.client'
 import { SelectDemos } from './_components/SelectDemos.client'
 
 const codeClassName =
@@ -22,6 +23,7 @@ export default function Home() {
         <li>
           Dialog 자리:{' '}
           <code className={codeClassName}>src/shared/ui/dialog</code>
+          <DialogDemos />
         </li>
         <li>
           과제 명세:{' '}
