@@ -27,6 +27,7 @@ export function useSelect<TOption extends SelectOption>({
   }
 
   function close() {
+    setHighlightedId(null)
     setOpen(false)
   }
 

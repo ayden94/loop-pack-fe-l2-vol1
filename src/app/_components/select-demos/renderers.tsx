@@ -66,7 +66,7 @@ export function renderTextOption({
       className={getOptionFrameClassName({ disabled, highlighted, selected })}
     >
       <div className="flex items-start justify-between gap-3">
-        <span>
+        <span className="min-w-0 break-keep">
           <span className="block font-semibold">{option.label}</span>
           <span className="mt-1 block text-xs leading-5">
             {option.description}

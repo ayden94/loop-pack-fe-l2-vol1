@@ -15,9 +15,12 @@ export function SelectTrigger({
   function handleClick(event: MouseEvent<HTMLButtonElement>) {
     onClick?.(event)
 
-    if (!event.defaultPrevented) {
-      select.toggleOpen()
+    if (event.defaultPrevented) {
+      return
     }
+
+    event.preventDefault()
+    select.toggleOpen()
   }
 
   function handleKeyDown(event: KeyboardEvent<HTMLButtonElement>) {
@@ -33,7 +36,9 @@ export function SelectTrigger({
   return (
     <button
       {...buttonProps}
-      aria-activedescendant={select.highlightedOptionElementId}
+      aria-activedescendant={
+        select.open ? select.highlightedOptionElementId : undefined
+      }
       aria-controls={select.listboxId}
       aria-expanded={select.open}
       aria-haspopup="listbox"
