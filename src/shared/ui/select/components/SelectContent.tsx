@@ -75,7 +75,7 @@ export function SelectContent({
     }
 
     triggerElement.popoverTargetElement = contentElement
-    contentElement.showPopover()
+    contentElement.showPopover({ source: triggerElement })
   }, [consumerHidden, listboxId, open, supportsNativePopover])
 
   useLayoutEffect(() => {
