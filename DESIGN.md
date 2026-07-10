@@ -81,12 +81,12 @@ All current spacing is interpreted on a **4px base unit**. The active steps are 
 - **Accessibility**: the trigger is a keyboard-operable combobox; the listbox and options expose their current state, keep focus on the trigger, and retain a visible focus outline.
 - **Motion**: only the existing color transitions are retained; this task adds no Select motion.
 
-### Dialog (planned)
+### Dialog
 
-- **Structure**: a callable `Dialog` root will compose `Trigger`, `Overlay`, `Content`, `Title`, `Description`, and `Close`; Overlay and Content will be independent body portals.
-- **Variants**: uncontrolled, controlled, prevented-close, and nested demonstrations use the same compound surface.
-- **Spacing**: future demo styling uses the 4px scale and the palette in Section 2.
-- **States**: closed, open, close requested, close prevented by the consumer, and nested with only the topmost layer dismissible.
+- **Structure**: a callable `Dialog` root composes `Trigger`, `Overlay`, `Content`, `Title`, `Description`, and `Close`; Overlay and Content are independent body portals.
+- **Variants**: uncontrolled and controlled Dialogs share one demonstration surface with one trigger each.
+- **Spacing**: demo styling uses the 4px scale and the palette in Section 2.
+- **States**: both variants expose closed and open states while differing only in whether the Dialog or its parent owns `open`.
 - **Imperative handle**: the public ref window exposes only `open()`, `close()`, and `toggle()`; each method uses the same state request contract as the compound controls, so controlled state remains parent-owned.
 - **Accessibility**: Trigger, Overlay, and Close use native button semantics with visible focus. The assignment explicitly defers focus trapping, focus restoration, and Dialog ARIA wiring, so this contract does not add them.
 - **Motion**: none. Dialog state changes are immediate and no animation system is planned.
@@ -95,7 +95,7 @@ All current spacing is interpreted on a **4px base unit**. The active steps are 
 
 - No animation system, keyframes, entrance effect, or exit effect is part of the current contract.
 - Existing Select `transition-colors` behavior remains untouched.
-- Planned Dialog open and close changes are immediate; motion must not be added during the scoped implementation.
+- Dialog open and close changes are immediate; motion must not be added during the scoped implementation.
 - Keyboard and pointer actions receive equivalent outcomes, consumer-cancelled actions remain cancelled, and every interactive control keeps a visible `:focus-visible` treatment.
 - With no non-essential animation, reduced-motion users receive the same immediate state changes by default.
 
@@ -106,8 +106,8 @@ The current strategy is **mixed border, tonal shift, and restrained shadow depth
 - Default controls and cards use a `1px` warm border with `--color-border`; outer sections may use the softer `--color-border-soft`.
 - `--color-surface`, `--color-panel`, `--color-surface-muted`, and `--color-surface-soft` form the tonal depth sequence.
 - Existing cards, sections, and Select surfaces use only the current small shadow treatment; no new shadow scale is introduced.
-- Rounded surfaces already range from compact option corners through card and section radii. Planned Dialog styling should reuse that visual language rather than create a new shape family.
-- The planned Dialog Overlay uses `--color-overlay` to separate the top layer without changing underlying page styles.
+- Rounded surfaces range from compact option corners through card and section radii. Dialog styling reuses that visual language rather than creating a new shape family.
+- Dialog Overlay uses `--color-overlay` to separate the top layer without changing underlying page styles.
 
 ## 8. Accessibility Constraints & Accepted Debt
 

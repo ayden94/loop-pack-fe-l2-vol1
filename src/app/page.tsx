@@ -10,8 +10,8 @@ export default function Home() {
       <h1 className="mb-3 text-[28px] font-extrabold text-[#08060d]">
         Commerce
       </h1>
-      <p className="mb-6 leading-[1.7] text-[#5a6675]">
-        4주차부터 여기에 커머스를 쌓아갑니다. 이번 주는 디자인 시스템의 뼈대
+      <p className="mb-6 leading-[1.7] break-keep text-[#5a6675]">
+        4주차부터 여기에 커머스를 쌓아갑니다. 이번 주는 디자인 시스템의 뼈대{' '}
         <b>Select</b>와 <b>Dialog</b>를 직접 만드는 것부터 시작해요.
       </p>
       <ul className="pl-4.5 leading-8 text-[#18212e]">

@@ -55,7 +55,7 @@ function DemoPanel({ children, description, title }: DemoPanelProps) {
   return (
     <article className="rounded-2xl border border-[#d8d2c3] bg-[#fbfaf3] p-4 shadow-sm">
       <h3 className="text-sm font-bold text-[#08060d]">{title}</h3>
-      <p className="mt-1 min-h-10 text-xs leading-5 text-[#5a6675]">
+      <p className="mt-1 min-h-10 text-xs leading-5 break-keep text-[#5a6675]">
         {description}
       </p>
       <div className="mt-4">{children}</div>
@@ -133,7 +133,7 @@ export function SelectDemos() {
         >
           Select 예시
         </h2>
-        <p className="mt-1 text-sm leading-6 text-[#5a6675]">
+        <p className="mt-1 text-sm leading-6 break-keep text-[#5a6675]">
           같은 headless API로 텍스트, 사이즈, 상품형 옵션을 렌더링합니다.
         </p>
       </div>

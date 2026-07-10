@@ -187,7 +187,7 @@ Trigger, Close, Overlay는 native button과 visible focus style을 사용하고 
 - Chromium에서 click, 바깥 클릭, Escape, Tab, Arrow/Home/End, Enter/Space와 disabled skip을 확인했습니다.
 - 375px, 768px, 1280px viewport에서 trigger 너비 일치, 8px 간격, viewport 하단의 위쪽 flip과 레이아웃 비이동을 확인했습니다.
 - Anchor Positioning 지원을 강제로 끈 환경에서 inline fallback을 확인했습니다.
-- 개발/프로덕션 Chromium에서 Dialog의 비제어·제어·닫기 방지·중첩 흐름, callback 횟수, body portal, top-layer Escape, Overlay/Content click, 정확한 overflow 복원을 확인했습니다.
+- 개발/프로덕션 Chromium에서 Dialog의 비제어·제어 흐름, body portal, Escape, Overlay/Close 동작과 정확한 overflow 복원을 확인했습니다.
 - Dialog가 열린 375x812, 768x1024, 1280x800 viewport에서 Content와 Close가 화면 안에 있고 가로 overflow가 없는지 확인했습니다.
 
 ### 남은 작업
