@@ -18,6 +18,8 @@ pnpm dev
 src/
   app/                           # Next App Router entry
     _components/
+      dialog-demos/              # Dialog demo components and tokenized styles
+      DialogDemos.client.tsx
       select-demos/              # Select demo options, renderers, styles
       SelectDemos.client.tsx
     favicon.ico
@@ -34,7 +36,7 @@ src/
 docs/assignments/                # 주차별 과제 명세
 ```
 
-> Next entry와 Select 예시는 `src/app`에, 재사용 가능한 UI 구현은 `src/shared/ui`에 둡니다.
+> Next entry와 Select/Dialog 예시는 `src/app`에, 재사용 가능한 UI 구현은 `src/shared/ui`에 둡니다.
 
 ## 주차별 과제
 
@@ -157,6 +159,25 @@ Base UI처럼 옵션 목록이 주변 레이아웃을 밀지 않고 trigger를 �
 
 세 예시는 같은 Select 상태 로직을 사용하지만 `SelectItem`의 render state를 받아 서로 다른 UI를 그립니다.
 
+### Dialog Compound API와 상태 소유권
+
+`Dialog`는 callable root에 `Trigger`, `Overlay`, `Content`, `Title`, `Description`, `Close`를 조합하는 Compound API입니다. 사용처는 `@/shared/ui/dialog`에서 `Dialog` 하나만 import하고 필요한 part를 같은 상태 계약 위에서 배치합니다.
+
+- 비제어 모드는 `defaultOpen`을 초기값으로 사용하고 Dialog 내부가 열린 상태를 관리합니다.
+- 제어 모드는 own `open` key의 존재로 판별하며, 상태를 직접 바꾸지 않고 `onOpenChange`로 변경을 요청합니다.
+- Trigger, Close, Overlay는 consumer click handler를 먼저 실행하고 `preventDefault()`된 요청은 내부 상태 전이로 이어가지 않습니다.
+- public `DialogHandle`은 `open()`, `close()`, `toggle()`만 노출하며, ref 호출도 같은 상태 변경 요청 경로를 사용해 제어 모드의 부모 소유권을 유지합니다.
+
+### Portal, 닫기 요청과 scroll lock
+
+Overlay와 Content는 서로 독립된 portal로 `document.body` 아래에 렌더링합니다. 서버 렌더와 초기 hydration에서는 portal을 만들지 않아 브라우저 전역 접근을 피합니다. Escape는 가장 위에 열린 Dialog만 닫고, 실제 Overlay button을 누른 경우에만 해당 레이어가 닫기를 요청합니다.
+
+열린 Dialog는 `document.body.style.overflow`의 기존 inline 값을 보존한 뒤 `hidden`으로 바꿉니다. 중첩된 Dialog는 문서별 reference count를 공유하므로 자식만 닫힐 때는 잠금을 유지하고, 마지막 Dialog가 닫힐 때만 정확한 이전 값을 복원합니다.
+
+### Dialog 접근성 범위
+
+Trigger, Close, Overlay는 native button과 visible focus style을 사용하고 Overlay에는 한국어 sr-only 닫기 문구를 제공합니다. 이번 과제 범위에는 자동 focus 이동, focus trap/복원, `role="dialog"`, `aria-modal`, `aria-labelledby`, `aria-describedby`를 포함하지 않았습니다. 실제 서비스 적용 전에는 별도의 승인된 접근성 확장이 필요합니다.
+
 ### 검증
 
 - `pnpm format:check`
@@ -166,11 +187,12 @@ Base UI처럼 옵션 목록이 주변 레이아웃을 밀지 않고 trigger를 �
 - Chromium에서 click, 바깥 클릭, Escape, Tab, Arrow/Home/End, Enter/Space와 disabled skip을 확인했습니다.
 - 375px, 768px, 1280px viewport에서 trigger 너비 일치, 8px 간격, viewport 하단의 위쪽 flip과 레이아웃 비이동을 확인했습니다.
 - Anchor Positioning 지원을 강제로 끈 환경에서 inline fallback을 확인했습니다.
+- 개발/프로덕션 Chromium에서 Dialog의 비제어·제어·닫기 방지·중첩 흐름, callback 횟수, body portal, top-layer Escape, Overlay/Content click, 정확한 overflow 복원을 확인했습니다.
+- Dialog가 열린 375x812, 768x1024, 1280x800 viewport에서 Content와 Close가 화면 안에 있고 가로 overflow가 없는지 확인했습니다.
 
 ### 남은 작업
 
-- Dialog compound API와 controlled/uncontrolled 이중 API는 아직 구현하지 않았습니다.
-- 별도 test runner가 없어 현재 상호작용 검증은 브라우저 수동 QA에 의존합니다.
+- 별도 test runner가 없어 현재 상호작용 검증은 브라우저 QA에 의존합니다.
 
 ### AI 활용
 
