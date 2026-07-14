@@ -1,6 +1,5 @@
 'use client'
 
-import { Show } from '@ilokesto/utilinent'
 import Image from 'next/image'
 
 import { cartSelectors, useCartStore } from '@/features/cart'
@@ -47,21 +46,16 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
         <strong className="text-base font-bold text-(--color-ink)">
           {formatPrice(product.price)}
         </strong>
-        <Show
-          when={product.originalPrice}
-          fallback={<span className="invisible">placeholder</span>}
-        >
-          {(originalPrice) => (
-            <>
-              <span className="text-xs text-(--color-subtle) line-through">
-                {formatPrice(originalPrice)}
-              </span>
-              <span className="text-xs font-semibold text-red-500">
-                {String(discountRate)}%
-              </span>
-            </>
-          )}
-        </Show>
+        {product.originalPrice !== null && discountRate !== null && (
+          <>
+            <span className="text-xs text-(--color-subtle) line-through">
+              {formatPrice(product.originalPrice)}
+            </span>
+            <span className="text-xs font-semibold text-red-500">
+              {String(discountRate)}%
+            </span>
+          </>
+        )}
       </div>
       <div className="flex gap-2">
         <button
@@ -73,9 +67,7 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
           }}
           className="flex-1 rounded border border-(--color-border) px-3 py-2 text-xs text-(--color-text) hover:bg-(--color-surface-muted)"
         >
-          <Show when={isInWishlist} fallback="찜">
-            찜 해제
-          </Show>
+          {isInWishlist ? '찜 해제' : '찜'}
         </button>
         <button
           type="button"
@@ -90,9 +82,7 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
           }}
           className="flex-1 rounded border border-(--color-border) px-3 py-2 text-xs text-(--color-text) hover:bg-(--color-surface-muted)"
         >
-          <Show when={isInCart} fallback="담기">
-            빼기
-          </Show>
+          {isInCart ? '빼기' : '담기'}
         </button>
       </div>
     </article>
