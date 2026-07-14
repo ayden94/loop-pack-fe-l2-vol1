@@ -19,6 +19,8 @@ const parsers = {
 
 type ProductFilters = inferParserType<typeof parsers>
 
+export type { ProductFilters }
+
 export function useProductFilters() {
   const [filters, setFilters] = useQueryStates(parsers, { history: 'push' })
 
