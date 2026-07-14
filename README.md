@@ -119,13 +119,16 @@ pnpm build
 
 ### Select 구조와 책임
 
-| 구성 요소                              | 책임                                                                              | 설계 근거                                                                     |
-| -------------------------------------- | --------------------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
-| `SelectRoot` / `useSelect`             | 열림, 선택값, highlight와 선택 상태 전이를 관리                                   | 모든 사용처가 동일한 상태 전이 규칙을 공유하도록 로직을 한곳에 모았습니다.    |
-| `SelectTrigger`                        | click과 키보드 입력을 상태 전이로 연결                                            | 옵션 UI와 입력 처리 규칙을 분리하고 consumer event를 먼저 실행합니다.         |
-| `SelectContent`                        | listbox DOM, Native Popover, React 상태 동기화와 inline fallback을 관리           | 위치와 top layer 처리는 선택 로직과 무관한 presentation infrastructure입니다. |
-| `SelectItem`                           | `selected` / `highlighted` / `disabled` 상태를 render function과 data 속성에 노출 | 사용처가 상태에 따라 자유롭게 생김새를 결정할 수 있게 했습니다.               |
-| `OptionNavigation` / `TriggerKeyboard` | 활성 옵션 탐색과 Arrow/Home/End/Enter/Space/Escape/Tab 처리                       | DOM 렌더링과 무관한 탐색 규칙을 독립적으로 읽고 검토할 수 있게 했습니다.      |
+| 구성 요소                              | 책임                                                                              | 설계 근거                                                                                                                                                                                                                 |
+| -------------------------------------- | --------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `SelectRoot` / `useSelect`             | 열림, 선택값, highlight와 선택 상태 전이를 관리                                   | 모든 사용처가 동일한 상태 전이 규칙을 공유하도록 로직을 한곳에 모았습니다.                                                                                                                                                |
+| `SelectTriggerRefContext`              | trigger 버튼 요소 ref를 별도 Context로 분리                                       | SelectContent가 `document.querySelectorAll('[aria-controls]')`로 trigger를 검색하지 않고 ref로 바로 참조하도록 했습니다. 상태 Context와 분리해 React refs/불변성 lint가 상태 필드까지 ref로 취급하는 부작용도 피했습니다. |
+| `SelectTrigger`                        | click과 키보드 입력을 상태 전이로 연결하고 자신을 trigger ref에 등록              | 옵션 UI와 입력 처리 규칙을 분리하고 consumer event를 먼저 실행합니다.                                                                                                                                                     |
+| `SelectContent`                        | listbox DOM 렌더링과 consumer `beforeToggle`/`toggle` 이벤트 처리만 담당          | popover 상태 동기화와 highlighted scroll은 `useNativePopoverSync` 훅으로 옮겨 Content를 listbox 렌더링 역할에 가깝게 유지했습니다.                                                                                        |
+| `useNativePopoverSync`                 | popover 상태 ↔ React `open` 동기화, trigger 연결, highlighted `scrollIntoView`    | SelectContent의 presentation infrastructure 효과를 한 훅으로 모아 본문을 가볍게 유지합니다.                                                                                                                               |
+| `PopoverCapability`                    | Native Popover API와 Anchor Positioning 지원 여부를 한곳에서 판정                 | 지원 확인 문자열이 컴포넌트에 흩어지지 않도록 상수와 판정 로직을 모았습니다. 브라우저가 일부 기능만 지원할 때 전체 fallback 정책도 여기서 명확히 합니다.                                                                  |
+| `SelectItem`                           | `selected` / `highlighted` / `disabled` 상태를 render function과 data 속성에 노출 | 사용처가 상태에 따라 자유롭게 생김새를 결정할 수 있게 했습니다.                                                                                                                                                           |
+| `OptionNavigation` / `TriggerKeyboard` | 활성 옵션 탐색과 Arrow/Home/End/Enter/Space/Escape/Tab 처리                       | DOM 렌더링과 무관한 탐색 규칙을 독립적으로 읽고 검토할 수 있게 했습니다.                                                                                                                                                  |
 
 ### 옵션 객체를 value로 사용한 이유
 
@@ -134,7 +137,7 @@ pnpm build
 ### 비활성 옵션 처리
 
 - `OptionNavigation`은 활성 옵션만 대상으로 다음 항목을 계산해 품절 옵션을 건너뜁니다.
-- pointer highlight와 click selection에서도 `disabled`를 다시 확인합니다.
+- pointer highlight, click selection, keydown selection에서 모두 `disabled`를 가장 먼저 확인합니다. `Enter`/`Space`의 `preventDefault()`가 비활성 항목에서 페이지 스크롤까지 막는 부작용을 방지하기 위해, keydown handler도 disabled면 consumer handler 호출 없이 빠져나갑니다.
 - 모든 옵션이 비활성인 경우에는 highlight 없이 열리며 Enter를 눌러도 선택이 발생하지 않습니다.
 
 ### Native Popover와 Anchor Positioning을 선택한 이유
@@ -173,6 +176,16 @@ Base UI처럼 옵션 목록이 주변 레이아웃을 밀지 않고 trigger를 �
 - Trigger, Close, Overlay는 consumer click handler를 먼저 실행하고 `preventDefault()`된 요청은 내부 상태 전이로 이어가지 않습니다.
 - public `DialogHandle`은 `open()`, `close()`, `toggle()`만 노출하며, ref 호출도 같은 상태 변경 요청 경로를 사용해 제어 모드의 부모 소유권을 유지합니다.
 
+#### preventDefault 기반 닫기 정책 시나리오
+
+Trigger, Close, Overlay는 consumer handler를 먼저 실행하므로, 사용처가 `event.preventDefault()`를 호출하면 내부 상태 전이를 막을 수 있습니다. 두 진입점이 갈린다는 점을 사용처가 즉시 이해할 수 있도록, 의도한 정책 몇 가지를 정리합니다.
+
+- **Overlay 클릭 닫기만 막기**: 저장되지 않은 변경이 있을 때 Overlay의 `onClick`에서 `event.preventDefault()`를 호출하면 Overlay 클릭으로는 닫히지 않지만, Escape 키나 Close 버튼으로는 여전히 닫을 수 있습니다. 닫기 경로를 부분적으로 차단하는 정책에 해당합니다.
+- **제어 모드에서 부모가 닫기 거부**: 제어 모드에서 `onOpenChange(false)`를 받은 부모가 `open`을 `true`로 유지하면, 요청은 무시됩니다. Trigger/Close/Overlay의 `preventDefault`와는 별개 경로로, 상태 소유권이 부모에 있을 때 일관성을 유지합니다.
+- **모든 닫기 경로 막기**: Overlay `onClick`과 Close `onClick` 모두에서 `event.preventDefault()`를 호출하고, 제어 모드라면 `onOpenChange`에서도 거부하면, 사용자가 명시적으로 풀어주기 전까지 Dialog가 닫히지 않습니다. 확인 모달 등 강제 대기 상황에 사용합니다.
+
+두 진입점(이벤트 `preventDefault` vs. `onOpenChange` 미호출)이 어떤 닫기 경로를 막는지가 사용처의 정책 결정의 핵심입니다.
+
 ### Portal, 닫기 요청과 scroll lock
 
 Overlay와 Content는 서로 독립된 portal로 `document.body` 아래에 렌더링합니다. 서버 렌더와 초기 hydration에서는 portal을 만들지 않아 브라우저 전역 접근을 피합니다. Escape는 가장 위에 열린 Dialog만 닫고, 실제 Overlay button을 누른 경우에만 해당 레이어가 닫기를 요청합니다.
@@ -181,7 +194,11 @@ Overlay와 Content는 서로 독립된 portal로 `document.body` 아래에 렌�
 
 ### Dialog 접근성 범위
 
-Trigger, Close, Overlay는 native button과 visible focus style을 사용하고 Overlay에는 한국어 sr-only 닫기 문구를 제공합니다. 이번 과제 범위에는 자동 focus 이동, focus trap/복원, `role="dialog"`, `aria-modal`, `aria-labelledby`, `aria-describedby`를 포함하지 않았습니다. 실제 서비스 적용 전에는 별도의 승인된 접근성 확장이 필요합니다.
+Trigger, Close는 native button과 visible focus style을 사용합니다. Overlay는 `<div role="presentation">`으로 클릭으로 닫기만 처리하고, button 내부에 또 다른 상호작용 요소가 중첩되는 HTML 명세 위반을 피합니다. Overlay에는 한국어 sr-only 닫기 문구를 제공합니다.
+
+Content에는 `role="dialog"`, `aria-modal="true"`를 적용하고, Title과 Description이 각각 `useId`로 생성한 id를 Context에 등록해 Content가 `aria-labelledby`, `aria-describedby`로 연결하도록 했습니다. Title/Description이 마운트 해제되면 등록된 id를 해제합니다.
+
+이번 과제 범위에는 자동 focus 이동, focus trap/복원, 형제 요소 `inert` 처리를 포함하지 않았습니다. 실제 서비스 적용 전에는 별도의 승인된 접근성 확장이 필요합니다.
 
 ### 검증
 
