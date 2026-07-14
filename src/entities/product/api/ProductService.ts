@@ -2,7 +2,7 @@ import { queryOptions } from '@tanstack/react-query'
 
 import type { ProductListQuery } from '@/types/commerce'
 
-import { ProductRepository } from './repository'
+import { ProductRepository } from './ProductRepository'
 
 export class ProductService {
   constructor(

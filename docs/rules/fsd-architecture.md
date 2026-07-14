@@ -155,13 +155,13 @@ export class MoneyUtils {
 
 entity의 api segment는 두 계층으로 나눈다.
 
-- **Repository** (`repository.ts`): HTTP 데이터 접근만 담당한다. 공용 ky 인스턴스를 constructor로 주입받아 엔드포인트별 조회 메서드를 인스턴스 메서드로 노출한다. 정적 메서드 대신 인스턴스 메서드를 사용해 테스트에서 mock을 주입할 수 있다.
-- **Service** (`service.ts`): Repository를 constructor로 주입받아 TanStack Query 설정(queryOptions)을 만든다. `queryKeyFactory` static 중첩 객체로 query key 계층을 관리한다. 비즈니스 로직이나 데이터 변환이 필요하면 Service에 둔다.
+- **Repository** (`ProductRepository.ts`): HTTP 데이터 접근만 담당한다. 공용 ky 인스턴스를 constructor로 주입받아 엔드포인트별 조회 메서드를 인스턴스 메서드로 노출한다. 정적 메서드 대신 인스턴스 메서드를 사용해 테스트에서 mock을 주입할 수 있다.
+- **Service** (`ProductService.ts`): Repository를 constructor로 주입받아 TanStack Query 설정(queryOptions)을 만든다. `queryKeyFactory` static 중첩 객체로 query key 계층을 관리한다. 비즈니스 로직이나 데이터 변환이 필요하면 Service에 둔다.
 
 ```txt
 src/entities/product/api/
-  repository.ts    # HTTP 접근 계층 (ky 호출, searchParams 조립)
-  service.ts       # Query 설정 계층 (queryOptions, queryKeyFactory)
+  ProductRepository.ts    # HTTP 접근 계층 (ky 호출, searchParams 조립)
+  ProductService.ts       # Query 설정 계층 (queryOptions, queryKeyFactory)
 ```
 
 entity의 `index.ts`에서 Service 인스턴스를 export한다. 사용처는 인스턴스를 직접 import해 사용하고, 테스트나 커스텀 구성이 필요할 때는 클래스를 import해 별도 인스턴스를 만든다.

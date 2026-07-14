@@ -1,1 +1,1 @@
-export { useProductFilters } from './model/use-product-filters'
+export { useProductFilters } from './model/useProductFilters'

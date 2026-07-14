@@ -10,15 +10,10 @@ import {
 
 import { categorySchema, sortSchema } from '@/entities/product'
 
-const categoryParser = parseAsStringEnum(categorySchema.options).withDefault(
-  'all',
-)
-const sortParser = parseAsStringEnum(sortSchema.options).withDefault('latest')
-
 const parsers = {
   q: parseAsString.withDefault(''),
-  category: categoryParser,
-  sort: sortParser,
+  category: parseAsStringEnum(categorySchema.options).withDefault('all'),
+  sort: parseAsStringEnum(sortSchema.options).withDefault('latest'),
   page: parseAsInteger.withDefault(1),
 } as const
 
