@@ -58,6 +58,7 @@ AI가 생성한 코드도 머지하는 순간 작성자의 코드입니다. 코�
 
 - 하나의 컴포넌트나 동작만을 위해 함께 움직이는 타입, 상수, 작은 helper는 같은 파일에 둔다. 파일이 커지거나 재사용성이 생길 때만 폴더로 승격하고 내부 파일로 나눈다.
 - 재사용 모듈은 named export를 사용한다.
+- 파일 이름은 기본적으로 그 파일에서 내보내는 대표 export 이름을 그대로 따른다. 예: 타입은 `SelectOption.ts`에서 `SelectOption`, 컴포넌트는 `SelectTrigger.tsx`에서 `SelectTrigger`, 훅은 `useSelectRootState.ts`에서 `useSelectRootState`, namespace 유틸은 `OptionNavigation.ts`에서 `OptionNavigation`을 export한다.
 - default export는 거의 허용하지 않는다. Next 라우트 파일, ESLint/Next 설정 파일처럼 외부 도구가 default export를 요구하는 파일만 예외로 둔다.
 - FSD slice 외부에서 접근해야 하는 API는 slice의 public API(`index.ts`)로 노출한다.
 - `index.ts` public API는 `export { Name } from './path'`처럼 명시적으로 나열한다. `export * from './path'`는 slice 경계를 흐리므로 금지한다.
