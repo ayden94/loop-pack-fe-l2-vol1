@@ -50,6 +50,9 @@ importers:
       zustand:
         specifier: ^5.0.14
         version: 5.0.14(@types/react@19.2.17)(react@19.2.4)
+      zustand-middleware-pipe:
+        specifier: ^1.0.0
+        version: 1.0.0(zustand@5.0.14(@types/react@19.2.17)(react@19.2.4))
     devDependencies:
       '@commitlint/cli':
         specifier: ^21.0.2
@@ -2848,6 +2851,18 @@ packages:
 
   zod@4.4.3:
     resolution: {integrity: sha512-ytENFjIJFl2UwYglde2jchW2Hwm4GJFLDiSXWdTrJQBIN9Fcyp7n4DhxJEiWNAJMV1/BqWfW/kkg71UDcHJyTQ==}
+
+  zustand-middleware-pipe@1.0.0:
+    resolution: {integrity: sha512-+cFNzkiN76Vq/N9h5jGrS/sF3hY5LAOF6PupuolKsi6Lg6H+1XGQfe4z+6jbmHsxgQKAsQzwZ5l9gGh5Us8meQ==}
+    peerDependencies:
+      immer: '>=9.0.6'
+      zundo: ^2.3.0
+      zustand: ^5.0.0
+    peerDependenciesMeta:
+      immer:
+        optional: true
+      zundo:
+        optional: true
 
   zustand@5.0.14:
     resolution: {integrity: sha512-/8tAspM5LMPr28b3fwLYrtdj77ECpfZviaP75CMTnwO8ISyaE4GDIG/9rDDYq/cH9D2Xw2A2RXglLInmVBQB/g==}
@@ -5764,6 +5779,10 @@ snapshots:
       zod: 4.4.3
 
   zod@4.4.3: {}
+
+  zustand-middleware-pipe@1.0.0(zustand@5.0.14(@types/react@19.2.17)(react@19.2.4)):
+    dependencies:
+      zustand: 5.0.14(@types/react@19.2.17)(react@19.2.4)
 
   zustand@5.0.14(@types/react@19.2.17)(react@19.2.4):
     optionalDependencies:

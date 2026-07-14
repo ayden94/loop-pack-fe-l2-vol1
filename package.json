@@ -44,7 +44,8 @@
     "tailwind-merge": "^3.6.0",
     "tailwind-variants": "^3.2.2",
     "zod": "^4.4.3",
-    "zustand": "^5.0.14"
+    "zustand": "^5.0.14",
+    "zustand-middleware-pipe": "^1.0.0"
   },
   "devDependencies": {
     "@commitlint/cli": "^21.0.2",
