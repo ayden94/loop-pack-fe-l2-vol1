@@ -45,3 +45,5 @@ export class ProductService {
     })
   }
 }
+
+export const productEntity = new ProductService()

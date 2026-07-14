@@ -2,8 +2,11 @@
 
 import Image from 'next/image'
 
-import { cartSelectors, useCartStore } from '@/features/cart'
-import { useWishlistStore, wishlistSelectors } from '@/features/wishlist'
+import { cartSelectors, useCartStore } from '@/features/cart/model/CartStore'
+import {
+  useWishlistStore,
+  wishlistSelectors,
+} from '@/features/wishlist/model/WishlistStore'
 import type { Product } from '@/types/commerce'
 
 type ProductCardProps = {

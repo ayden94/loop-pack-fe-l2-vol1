@@ -8,7 +8,10 @@ import {
   useQueryStates,
 } from 'nuqs'
 
-import { categorySchema, sortSchema } from '@/entities/product'
+import {
+  categorySchema,
+  sortSchema,
+} from '@/entities/product/model/ProductQuerySchema'
 
 const parsers = {
   q: parseAsString.withDefault(''),

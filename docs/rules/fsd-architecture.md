@@ -198,28 +198,27 @@ src/entities/product/
 4. React 컴포넌트는 DTO 검증이나 domain object 생성 책임을 갖지 않는다.
 5. TanStack Query cache에는 기본적으로 검증된 DTO/plain object를 저장하고, class instance는 필요한 경계에서만 만든다.
 
-## Public API
+## 직접 import (배럴 익스포트 비사용)
 
-slice 외부에서 접근할 수 있는 것은 `index.ts`로 명시적으로 노출한다.
-
-```ts
-// src/features/add-to-cart/index.ts
-export { AddToCartButton } from './ui/add-to-cart-button'
-```
-
-`index.ts`는 slice의 공개 계약을 보여주는 파일이다. 어떤 API가 외부로 나가는지 리뷰에서 바로 보이도록 `export * from './...'`를 사용하지 않고, 외부 공개 이름을 직접 나열한다.
-
-다른 slice나 레이어에서는 public API만 import한다.
+이 저장소는 `index.ts` 배럴 익스포트를 사용하지 않는다. slice 외부에서는 모듈의 실제 파일 경로를 직접 import한다.
 
 ```ts
 // 권장
-import { AddToCartButton } from '@/features/add-to-cart'
+import { AddToCartButton } from '@/features/cart/ui/AddToCartButton'
+import { useCartStore, cartSelectors } from '@/features/cart/model/CartStore'
+import { productEntity } from '@/entities/product/api/ProductService'
 
 // 금지
-import { AddToCartButton } from '@/features/add-to-cart/ui/add-to-cart-button'
+import { AddToCartButton } from '@/features/cart'
+import { useCartStore } from '@/features/cart'
 ```
 
-현재 저장소에는 `@` alias가 설정되어 있다. alias를 변경하려면 `tsconfig`, Next 설정, ESLint import 규칙을 함께 갱신한다. alias가 있더라도 원칙은 동일하다: 외부 slice에서는 public API를 통해 접근한다.
+이유:
+
+- `index.ts`가 없으면 IDE에서 "Go to Definition"이 실제 파일로 바로 이동한다.
+- 트리쉐이킹이 불확실해지는 문제를 피한다.
+- 사용하지 않는 export가 번들에 포함되는 것을 막는다.
+- slice의 공개 계약이 파일 시스템 구조로 드러나며, 변경 시 import 경로가 명시적으로 바뀌어 영향 범위가 보인다.
 
 ## Next 라우트 파일
 
@@ -236,7 +235,7 @@ FSD 위반 여부를 볼 때는 다음 질문을 사용한다.
 - 이 파일의 책임이 레이어 이름과 일치하는가?
 - 상위 레이어를 하위 레이어에서 import하지 않았는가?
 - 다른 slice의 내부 구현을 deep import하지 않았는가?
-- `index.ts`가 `export *` 없이 공개 API를 명시적으로 나열하는가?
-- public API가 너무 많은 내부 구현을 노출하지 않는가?
+- `index.ts` 배럴 익스포트를 만들지 않았는가?
+- 직접 파일 경로로 import하는가?
 - 컴포넌트가 화면 조립, 도메인 로직, 공용 유틸 책임을 동시에 갖고 있지 않은가?
 - 상태와 상태를 사용하는 로직이 컴포넌트 본문에 남아 있지 않고 커스텀 훅으로 분리되어 있는가?

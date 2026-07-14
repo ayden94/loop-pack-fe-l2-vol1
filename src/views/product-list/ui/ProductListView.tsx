@@ -3,12 +3,16 @@
 import { useQuery } from '@tanstack/react-query'
 import Link from 'next/link'
 
-import { categorySchema, productEntity, sortSchema } from '@/entities/product'
-import type { ProductFilters } from '@/features/product-filter'
-import { useProductFilters } from '@/features/product-filter'
+import { productEntity } from '@/entities/product/api/ProductService'
+import {
+  categorySchema,
+  sortSchema,
+} from '@/entities/product/model/ProductQuerySchema'
+import type { ProductFilters } from '@/features/product-filter/model/useProductFilters'
+import { useProductFilters } from '@/features/product-filter/model/useProductFilters'
 import type { Category, Product } from '@/types/commerce'
-import { Header } from '@/widgets/header'
-import { ProductCard } from '@/widgets/product-card'
+import { Header } from '@/widgets/header/ui/Header'
+import { ProductCard } from '@/widgets/product-card/ui/ProductCard'
 
 const categoryOptions = [
   { value: 'all', label: '전체' },

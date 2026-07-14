@@ -1,4 +1,4 @@
-import { apiClient } from '@/shared/api'
+import { apiClient } from '@/shared/api/ApiClient'
 import type {
   HomeResponse,
   ProductListQuery,

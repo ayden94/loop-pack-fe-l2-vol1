@@ -3,10 +3,10 @@
 import { useQuery } from '@tanstack/react-query'
 import Link from 'next/link'
 
-import { productEntity } from '@/entities/product'
+import { productEntity } from '@/entities/product/api/ProductService'
 import type { Category, Product } from '@/types/commerce'
-import { Header } from '@/widgets/header'
-import { ProductCard } from '@/widgets/product-card'
+import { Header } from '@/widgets/header/ui/Header'
+import { ProductCard } from '@/widgets/product-card/ui/ProductCard'
 
 function CategoryLinks({ categories }: { categories: Array<Category> }) {
   return (
