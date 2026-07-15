@@ -10,6 +10,7 @@ import {
 } from '@/entities/product/model/ProductQuerySchema'
 import type { ProductFilters } from '@/features/product-filter/model/useProductFilters'
 import { useProductFilters } from '@/features/product-filter/model/useProductFilters'
+import { DebouncedInput } from '@/shared/ui/DebouncedInput'
 import type { Product } from '@/types/commerce'
 import { ProductCard } from '@/widgets/product-card/ui/ProductCard'
 
@@ -69,19 +70,16 @@ function FilterBar({
         e.preventDefault()
       }}
     >
-      <label className="flex flex-col gap-1">
-        <span className="text-xs text-(--color-subtle)">검색</span>
-        <input
-          type="text"
-          name="q"
-          value={filters.q}
-          onChange={(e) => {
-            updateFilter({ q: e.target.value })
-          }}
-          placeholder="상품명 또는 브랜드"
-          className="min-h-10 rounded border border-(--color-border) px-3 py-2 text-sm text-(--color-text)"
-        />
-      </label>
+      <DebouncedInput
+        key={filters.q}
+        initialValue={filters.q}
+        label="검색"
+        name="q"
+        placeholder="상품명 또는 브랜드"
+        onDebouncedChange={(value) => {
+          updateFilter({ q: value })
+        }}
+      />
       <label className="flex flex-col gap-1">
         <span className="text-xs text-(--color-subtle)">카테고리</span>
         <select
