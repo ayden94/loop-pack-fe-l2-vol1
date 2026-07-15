@@ -3,11 +3,11 @@ import { NextResponse } from 'next/server'
 
 import { categories, products, waitForMockApi } from '@/app/api/_data/commerce'
 import type {
-  ApiErrorResponse,
   MockApiScenario,
   ProductListResponse,
   ProductSort,
-} from '@/types/commerce'
+} from '@/entities/product/model/types'
+import type { ApiErrorResponse } from '@/shared/api/ApiErrorResponse'
 
 const sortValues = [
   'latest',

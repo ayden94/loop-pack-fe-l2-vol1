@@ -1,7 +1,8 @@
 import { NextRequest } from 'next/server'
 import { describe, expect, it } from 'vitest'
 
-import type { ApiErrorResponse, ProductListResponse } from '@/types/commerce'
+import type { ProductListResponse } from '@/entities/product/model/types'
+import type { ApiErrorResponse } from '@/shared/api/ApiErrorResponse'
 
 import { GET } from './route'
 

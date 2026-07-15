@@ -8,10 +8,10 @@ import {
   waitForMockApi,
 } from '@/app/api/_data/commerce'
 import type {
-  ApiErrorResponse,
   HomeResponse,
   MockApiScenario,
-} from '@/types/commerce'
+} from '@/entities/product/model/types'
+import type { ApiErrorResponse } from '@/shared/api/ApiErrorResponse'
 
 const scenarioValues = [
   'empty',

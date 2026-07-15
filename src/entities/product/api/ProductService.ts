@@ -1,6 +1,6 @@
 import { queryOptions } from '@tanstack/react-query'
 
-import type { ProductListQuery } from '@/types/commerce'
+import type { ProductListQuery } from '@/entities/product/model/types'
 
 import { ProductRepository } from './ProductRepository'
 

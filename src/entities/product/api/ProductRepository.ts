@@ -1,9 +1,13 @@
-import { apiClient } from '@/shared/api/ApiClient'
+import {
+  homeResponseSchema,
+  productListResponseSchema,
+} from '@/entities/product/model/ResponseSchema'
 import type {
   HomeResponse,
   ProductListQuery,
   ProductListResponse,
-} from '@/types/commerce'
+} from '@/entities/product/model/types'
+import { apiClient } from '@/shared/api/ApiClient'
 
 export class ProductRepository {
   constructor(private readonly api: typeof apiClient = apiClient) {}
@@ -13,12 +17,13 @@ export class ProductRepository {
     products: 'api/products',
   } as const
 
-  getHome(): Promise<HomeResponse> {
-    return this.api.get(this.endpoints.home).json<HomeResponse>()
+  async getHome(): Promise<HomeResponse> {
+    const json = await this.api.get(this.endpoints.home).json<unknown>()
+    return homeResponseSchema.parse(json)
   }
 
-  getProductList(query: ProductListQuery): Promise<ProductListResponse> {
-    return this.api
+  async getProductList(query: ProductListQuery): Promise<ProductListResponse> {
+    const json = await this.api
       .get(this.endpoints.products, {
         searchParams: {
           q: query.q || undefined,
@@ -28,6 +33,7 @@ export class ProductRepository {
           pageSize: query.pageSize,
         },
       })
-      .json<ProductListResponse>()
+      .json<unknown>()
+    return productListResponseSchema.parse(json)
   }
 }

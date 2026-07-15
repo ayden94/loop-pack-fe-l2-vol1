@@ -8,10 +8,10 @@ import {
   categorySchema,
   sortSchema,
 } from '@/entities/product/model/ProductQuerySchema'
+import type { Product } from '@/entities/product/model/types'
 import type { ProductFilters } from '@/features/product-filter/model/useProductFilters'
 import { useProductFilters } from '@/features/product-filter/model/useProductFilters'
 import { DebouncedInput } from '@/shared/ui/DebouncedInput'
-import type { Product } from '@/types/commerce'
 import { ProductCard } from '@/widgets/product-card/ui/ProductCard'
 
 const categoryOptions = [

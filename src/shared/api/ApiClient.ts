@@ -1,6 +1,6 @@
 import { default as ky, HTTPError } from 'ky'
 
-import type { ApiErrorResponse } from '@/types/commerce'
+import type { ApiErrorResponse } from '@/shared/api/ApiErrorResponse'
 
 export class ApiClientError extends Error {
   constructor(
