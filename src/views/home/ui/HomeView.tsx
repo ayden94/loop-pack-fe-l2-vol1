@@ -4,8 +4,8 @@ import { useQuery } from '@tanstack/react-query'
 import Link from 'next/link'
 
 import { productEntity } from '@/entities/product/api/ProductService'
-import type { Category, Product } from '@/entities/product/model/types'
-import { ProductCard } from '@/widgets/product-card/ui/ProductCard'
+import type { Category } from '@/entities/product/model/types'
+import { ProductGrid } from '@/widgets/product-list/ui/ProductGrid'
 
 function CategoryLinks({ categories }: { categories: Array<Category> }) {
   return (
@@ -20,31 +20,6 @@ function CategoryLinks({ categories }: { categories: Array<Category> }) {
         </Link>
       ))}
     </nav>
-  )
-}
-
-function ProductGrid({
-  title,
-  products,
-}: {
-  title: string
-  products: Array<Product>
-}) {
-  return (
-    <section className="mt-10">
-      <h2 className="mb-4 text-lg font-bold text-(--color-ink)">{title}</h2>
-      {products.length === 0 ? (
-        <p className="py-10 text-center text-(--color-muted)">
-          표시할 상품이 없습니다.
-        </p>
-      ) : (
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
-          {products.map((product) => (
-            <ProductCard key={product.id} product={product} />
-          ))}
-        </div>
-      )}
-    </section>
   )
 }
 
@@ -81,8 +56,25 @@ export function HomeView() {
             <CategoryLinks categories={data.categories} />
           </section>
 
-          <ProductGrid title="인기 상품" products={data.popularProducts} />
-          <ProductGrid title="신상품" products={data.newProducts} />
+          <section className="mt-10">
+            <h2 className="mb-4 text-lg font-bold text-(--color-ink)">
+              인기 상품
+            </h2>
+            <ProductGrid
+              products={data.popularProducts}
+              emptyMessage="표시할 상품이 없습니다."
+            />
+          </section>
+
+          <section className="mt-10">
+            <h2 className="mb-4 text-lg font-bold text-(--color-ink)">
+              신상품
+            </h2>
+            <ProductGrid
+              products={data.newProducts}
+              emptyMessage="표시할 상품이 없습니다."
+            />
+          </section>
         </>
       )}
     </main>
