@@ -4,6 +4,8 @@ import type { Metadata } from 'next'
 import { Geist, Geist_Mono } from 'next/font/google'
 import type { ReactNode } from 'react'
 
+import { Header } from '@/widgets/header/ui/Header'
+
 import { Providers } from './providers'
 
 const geistSans = Geist({
@@ -29,7 +31,10 @@ export default function RootLayout({
   return (
     <html lang="ko" className={`${geistSans.variable} ${geistMono.variable}`}>
       <body>
-        <Providers>{children}</Providers>
+        <Providers>
+          <Header />
+          {children}
+        </Providers>
       </body>
     </html>
   )

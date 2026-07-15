@@ -10,8 +10,7 @@ import {
 } from '@/entities/product/model/ProductQuerySchema'
 import type { ProductFilters } from '@/features/product-filter/model/useProductFilters'
 import { useProductFilters } from '@/features/product-filter/model/useProductFilters'
-import type { Category, Product } from '@/types/commerce'
-import { Header } from '@/widgets/header/ui/Header'
+import type { Product } from '@/types/commerce'
 import { ProductCard } from '@/widgets/product-card/ui/ProductCard'
 
 const categoryOptions = [
@@ -48,18 +47,20 @@ const parseSort = (value: string): ProductFilters['sort'] => {
 
 function FilterBar({
   filters,
-  categories,
+  totalCount,
+  pageSize,
   updateFilter,
   updatePage,
 }: {
   filters: ProductFilters
-  categories: Array<Category>
+  totalCount: number
+  pageSize: number
   updateFilter: (
     patch: Partial<Pick<ProductFilters, 'q' | 'category' | 'sort'>>,
   ) => void
   updatePage: (page: number) => void
 }) {
-  const totalPages = Math.max(1, Math.ceil(categories.length / 12))
+  const totalPages = Math.max(1, Math.ceil(totalCount / pageSize))
 
   return (
     <form
@@ -172,52 +173,50 @@ export function ProductListView() {
   )
 
   return (
-    <div>
-      <Header />
-      <main className="mx-auto max-w-6xl px-6 py-8">
-        <h1 className="mb-6 text-2xl font-extrabold text-(--color-ink)">
-          상품 목록
-        </h1>
+    <main className="mx-auto max-w-6xl px-6 py-8">
+      <h1 className="mb-6 text-2xl font-extrabold text-(--color-ink)">
+        상품 목록
+      </h1>
 
-        <section className="mb-6">
-          <FilterBar
-            filters={filters}
-            categories={data?.categories ?? []}
-            updateFilter={updateFilter}
-            updatePage={updatePage}
-          />
-        </section>
+      <section className="mb-6">
+        <FilterBar
+          filters={filters}
+          totalCount={data?.totalCount ?? 0}
+          pageSize={12}
+          updateFilter={updateFilter}
+          updatePage={updatePage}
+        />
+      </section>
 
-        <section aria-label="상품 검색 결과">
-          {isPending ? (
-            <div className="py-20 text-center text-(--color-muted)">
-              상품을 불러오는 중…
-            </div>
-          ) : isError ? (
-            <div className="py-20 text-center text-(--color-muted)">
-              {error instanceof Error
-                ? error.message
-                : '상품 목록을 불러오지 못했습니다.'}
-            </div>
-          ) : (
-            <>
-              <p className="mb-4 text-sm text-(--color-muted)">
-                총 {String(data.totalCount)}개
-              </p>
-              <ProductGrid products={data.products} />
-            </>
-          )}
-        </section>
+      <section aria-label="상품 검색 결과">
+        {isPending ? (
+          <div className="py-20 text-center text-(--color-muted)">
+            상품을 불러오는 중…
+          </div>
+        ) : isError ? (
+          <div className="py-20 text-center text-(--color-muted)">
+            {error instanceof Error
+              ? error.message
+              : '상품 목록을 불러오지 못했습니다.'}
+          </div>
+        ) : (
+          <>
+            <p className="mb-4 text-sm text-(--color-muted)">
+              총 {String(data.totalCount)}개
+            </p>
+            <ProductGrid products={data.products} />
+          </>
+        )}
+      </section>
 
-        <div className="mt-8">
-          <Link
-            href="/"
-            className="text-sm text-(--color-text) hover:text-(--color-ink)"
-          >
-            ← 홈으로
-          </Link>
-        </div>
-      </main>
-    </div>
+      <div className="mt-8">
+        <Link
+          href="/"
+          className="text-sm text-(--color-text) hover:text-(--color-ink)"
+        >
+          ← 홈으로
+        </Link>
+      </div>
+    </main>
   )
 }
