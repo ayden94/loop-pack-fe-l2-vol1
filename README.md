@@ -128,8 +128,8 @@ pnpm build
 | 카테고리(category)                                       | nuqs(URL 상태)                                 | URL 수명                                  | 공유·새로고침·앞뒤 이동 복원         | 홈의 카테고리 링크로 진입하거나 공유 링크로 복원되어야 한다                                               |
 | 정렬(sort)                                               | nuqs(URL 상태)                                 | URL 수명                                  | 공유·새로고침·앞뒤 이동 복원         | 정렬 조건도 공유·복원 대상. 기본값 `latest`를 URL에 명시해 API 요청과 항상 일치시킨다                     |
 | 페이지(page)                                             | nuqs(URL 상태)                                 | URL 수명                                  | 공유·새로고침·앞뒤 이동 복원         | 페이지 위치도 복원 대상. 검색·카테고리·정렬이 바뀌면 1로 돌아간다                                         |
-| 비로그인 장바구니(cart)                                  | Zustand(전역 클라이언트 상태)                  | 세션 수명, 새로고침 시 초기화             | 홈·목록(헤더 카운트, 상품 담기 버튼) | 여러 페이지에서 함께 쓰는 비로그인 사용자의 로컬 상태. 서버 원본이 없는 동안 Zustand가 임시 소유자다      |
-| 비로그인 위시리스트(wishlist)                            | Zustand(전역 클라이언트 상태)                  | 세션 수명, 새로고침 시 초기화             | 홈·목록(헤더 카운트, 상품 찜 버튼)   | 장바구니와 동일한 근거. 서버 동기화가 생기면 소유권이 서버로 이동한다                                     |
+| 비로그인 장바구니(cart)                                  | Zustand(전역 클라이언트 상태)                  | 세션 수명, persist로 새로고침 후 복원     | 홈·목록(헤더 카운트, 상품 담기 버튼) | 여러 페이지에서 함께 쓰는 비로그인 사용자의 로컬 상태. 서버 원본이 없는 동안 Zustand가 임시 소유자다      |
+| 비로그인 위시리스트(wishlist)                            | Zustand(전역 클라이언트 상태)                  | 세션 수명, persist로 새로고침 후 복원     | 홈·목록(헤더 카운트, 상품 찜 버튼)   | 장바구니와 동일한 근거. 서버 동기화가 생기면 소유권이 서버로 이동한다                                     |
 | 모달·드롭다운 열림 여부                                  | React 로컬 상태                                | 컴포넌트 수명                             | 해당 컴포넌트                        | 한 화면에서만 쓰는 일시적 UI 상태. 공유·복원 필요가 없으므로 전역에 두지 않는다                           |
 | 제출 전 입력 초안(검색 input 값 등)                      | React 로컬 상태 또는 nuqs                      | 컴포넌트 수명 또는 URL 수명               | 해당 화면                            | URL 상태와 동기화해야 하는 값은 nuqs로, 일시적 초안은 React 로컬 상태로 둔다                              |
 
@@ -161,6 +161,17 @@ pnpm build
 
 위시리스트 소유권이 서버로 이동한다. 이때 로컬 익명 위시리스트를 계정 데이터에 합칠지, 버릴지, 충돌을 어떻게 처리할지 정한 뒤 Zustand의 역할을 서버 상태의 임시 입력 또는 UI 상태로 다시 제한한다. 장바구니도 같은 기준으로 서버 동기화 시점을 설계한다.
 
+### Advanced A — 상태 영속화
+
+기본 과제의 장바구니·위시리스트는 새로고침 시 초기화되어도 됐지만, 이번엔 Zustand `persist`로 localStorage에 저장하고 복원한다. 두 store 모두 `zustand-middleware-pipe`의 `pipe.use(devtools(...)).use(persist(...))` 순서로 middleware를 조립한다.
+
+- **저장 대상** — `partialize`로 `items`만 영속화한다. actions과 selector는 store 인스턴스에 묶여있어 저장할 필요 없다.
+- **저장 키·버전** — `commerce-cart` / `commerce-wishlist`, `version: 1`. 버전이 바뀌면 `migrate`가 실행된다.
+- **복구 전략** — `migrate`는 `unknown`을 받아 Zod(`z.record(z.string(), z.literal(true))`)로 검증한다. 스키마를 통과하면 저장값을 그대로 쓰고, 깨지거나 오래된 값이면 빈 상태(`{ items: {} }`)로 폴백한다. 사용자가 손으로 localStorage를 바꿔도 앱이 깨지지 않는다.
+- **Hydration mismatch** — `skipHydration: true`로 두고, 클라이언트에서만 `useHydratePersistedStore` 훅이 `store.persist.rehydrate()`를 호출한다. SSR 시점엔 항상 빈 상태를 렌더하고 클라이언트 마운트 후 영속 상태를 끌어올려 Next.js hydration 불일치를 회피한다. 이 훅은 `hasHydrated()`로 idempotent하게 동작한다.
+- **호출 지점** — Header(root layout에 있음)에서 cart·wishlist 두 store를 한 번씩 hydrate한다. ProductCard는 hydration 후 selector가 자동 리렌더하므로 별도 호출이 필요 없다.
+- **로그인·서버 동기화와의 관계** — 영속화는 어디까지나 비로그인 사용자의 로컬 익명 상태를 보존하기 위한 임시 수단이다. 서버가 위시리스트 원본을 소유하게 되면 persist를 걷어내고 TanStack Query로 대체한다. 이때 마이그레이션은 "로컬 익명 상태를 계정 데이터에 합칠지 버릴지"라는 정책 결정으로 바뀐다.
+
 ### 검증 결과
 
 - **URL 공유**: `?category=fashion&q=stan&page=2` 링크를 새 탭에서 열면 같은 검색·카테고리·정렬·페이지 조건이 복원되고 동일한 상품 목록이 표시된다. ✅
@@ -170,8 +181,10 @@ pnpm build
 - **페이지네이션**: totalCount=30, pageSize=12일 때 `1 / 3`에서 다음 버튼 활성, `2 / 3`에서 양쪽 활성, `3 / 3`에서 다음 비활성. URL `?page=N`이 동기화된다(Playwright로 확인). ✅
 - **store 일관성**: 홈에서 담은 상품이 목록의 헤더 카운트와 상품 버튼 상태에 즉시 반영된다. Zustand store가 단일 인스턴스이므로 두 화면이 같은 상태를 공유한다. ✅
 - **클라이언트 페이지 이동**: 홈→목록→홈 이동 중 장바구니·위시리스트 상태와 헤더 개수가 유지된다. Header를 root layout으로 옮겨 라우트 전환에도 카운트가 초기화되지 않는다. ✅
+- **영속화(persist)**: 상품을 담거나 찜한 뒤 새로고침하면 헤더 카운트와 상품 버튼 상태가 그대로 복원된다. localStorage를 직접 지우면 빈 상태로 돌아간다. 잘못된 값(예: `items`에 `false` 또는 객체)을 주입해도 `migrate`의 Zod 검증이 빈 상태로 폴백해 앱이 깨지지 않는다. ✅
+- **hydration 일치**: SSR HTML은 항상 빈 카운트로 렌더하고, 클라이언트 마운트 후 `useHydratePersistedStore`가 `rehydrate()`를 호출해 영속 상태를 반영한다. React hydration 경고가 발생하지 않는다. ✅
 
 ### AI 활용
 
-- 상태 분류와 캐시 정책 설계, FSD 레이어 배치에 AI 도움을 받았습니다.
+- 상태 분류와 캐시 정책 설계, FSD 레이어 배치, persist·hydration 전략에 AI 도움을 받았습니다.
 - 최종 설계는 과제 명세의 checklist와 `docs/rules/fsd-architecture.md`를 기준으로 직접 검토했습니다.

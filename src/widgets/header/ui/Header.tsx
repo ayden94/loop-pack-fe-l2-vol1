@@ -7,8 +7,12 @@ import {
   useWishlistStore,
   wishlistSelectors,
 } from '@/features/wishlist/model/WishlistStore'
+import { useHydratePersistedStore } from '@/shared/lib/useHydratePersistedStore'
 
 export function Header() {
+  useHydratePersistedStore(useCartStore)
+  useHydratePersistedStore(useWishlistStore)
+
   const cartCount = useCartStore(cartSelectors.count)
   const wishlistCount = useWishlistStore(wishlistSelectors.count)
 
