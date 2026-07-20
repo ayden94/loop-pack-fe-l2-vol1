@@ -17,6 +17,8 @@ export const sortSchema = z.enum([
 export const pageSchema = z.number().int().positive().catch(1)
 export const querySchema = z.string().catch('')
 
+export const DEFAULT_PAGE_SIZE = 12
+
 export const categoryOptions = [
   { value: 'all', label: '전체' },
   { value: 'casual', label: '캐주얼' },

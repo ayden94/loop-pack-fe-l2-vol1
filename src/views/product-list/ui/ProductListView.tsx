@@ -4,11 +4,10 @@ import { useQuery } from '@tanstack/react-query'
 import Link from 'next/link'
 
 import { productEntity } from '@/entities/product/api/ProductService'
+import { DEFAULT_PAGE_SIZE } from '@/entities/product/model/ProductQuerySchema'
 import { useProductFilters } from '@/features/product-filter/model/useProductFilters'
 import { FilterBar } from '@/features/product-filter/ui/FilterBar'
 import { ProductListSection } from '@/widgets/product-list/ui/ProductListSection'
-
-const PAGE_SIZE = 12
 
 export function ProductListView() {
   const { filters, updateFilter, updatePage } = useProductFilters()
@@ -16,7 +15,7 @@ export function ProductListView() {
   const { data, isPending, isError, error } = useQuery(
     productEntity.getProductList({
       ...filters,
-      pageSize: PAGE_SIZE,
+      pageSize: DEFAULT_PAGE_SIZE,
     }),
   )
 
@@ -30,7 +29,7 @@ export function ProductListView() {
         <FilterBar
           filters={filters}
           totalCount={data?.totalCount ?? 0}
-          pageSize={PAGE_SIZE}
+          pageSize={DEFAULT_PAGE_SIZE}
           updateFilter={updateFilter}
           updatePage={updatePage}
         />
