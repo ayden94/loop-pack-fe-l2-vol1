@@ -172,6 +172,19 @@ pnpm build
 - **호출 지점** — Header(root layout에 있음)에서 cart·wishlist 두 store를 한 번씩 hydrate한다. ProductCard는 hydration 후 selector가 자동 리렌더하므로 별도 호출이 필요 없다.
 - **로그인·서버 동기화와의 관계** — 영속화는 어디까지나 비로그인 사용자의 로컬 익명 상태를 보존하기 위한 임시 수단이다. 서버가 위시리스트 원본을 소유하게 되면 persist를 걷어내고 TanStack Query로 대체한다. 이때 마이그레이션은 "로컬 익명 상태를 계정 데이터에 합칠지 버릴지"라는 정책 결정으로 바뀐다.
 
+### Advanced D — 테스트
+
+과제의 핵심 상태 계약 4가지를 자동화 테스트로 보호한다. `vitest` 환경은 `environment: 'node'`로 두고, DOM·React 렌더링·실제 URL hydration이 필요한 검증은 Playwright 영역으로 분리했다.
+
+- **Zustand action + selector** — `src/features/cart/model/CartStore.test.ts`, `src/features/wishlist/model/WishlistStore.test.ts`. addToCart·removeFromCart·clearCart·toggleWishlist 액션이 items 집합을 의도대로 변경하는지, cartSelectors.count·isInCart·wishlistSelectors.count·isInWishlist가 store state에서 올바르게 파생되는지 검증한다. 개수를 별도 상태로 저장하지 않고 파생한다는 과제 계약을 테스트가 보호한다.
+- **Header 개수 파생** — count selector가 items 길이를 반환하고 추가·제거에 따라 정확히 증감하는지 검증한다. Header가 별도 count 상태를 두지 않는다는 계약을 보호.
+- **nuqs URL 조건 ↔ query key 일치** — `src/features/product-filter/model/useProductFilters.test.ts`에서 `productFilterParsers`의 기본값(q='', category='all', sort='latest', page=1)과 enum을 검증하고, `src/entities/product/api/ProductService.test.ts`에서 `queryKeyFactory.product.list(query)`가 ProductListQuery 전체를 key에 반영하는지, q·category·sort·page·pageSize 각 변경이 key를 바꾸는지, 동일 쿼리는 동일 key를 반환하는지, scenario가 key에 들어가지 않는지 검증한다.
+- **홈·목록 store 동기화** — `src/features/store-sync.test.ts`에서 `useCartStore`/`useWishlistStore`가 모듈 싱글톤임을 검증하고, 한 곳에서 변경하면 같은 인스턴스를 읽는 다른 곳에서 즉시 반영됨을 확인한다. 두 view가 같은 store를 공유한다는 계약을 보호.
+
+**테스트 경계** — 단위 테스트는 순수 로직과 타입 계약만 검증한다. React 렌더링 결과, nuqs의 실제 URL 동기화, hydration 시점의 store 값 변화, 페이지 전환 중 카운트 유지는 Playwright로 검증한다(`검증 결과` 섹션). 이 경계를 둔 이유는 단위 테스트가 DOM·Next.js 라우터 없이 빠르게 돌고 상태 계약 자체를 명확히 검증하며, UI 흐름은 실제 브라우저에서 확인하는 쪽이 신뢰도가 높기 때문이다.
+
+`productFilterParsers`를 useProductFilters.ts에서 export하도록 리팩터링한 이유는, 훅이 아닌 parser 객체 자체를 단위 테스트에서 직접 검증하기 위해서다. 훅은 DOM/React가 필요하지만 parser 계약(기본값·enum)은 순수 객체 검증으로 충분하다.
+
 ### 검증 결과
 
 - **URL 공유**: `?category=fashion&q=stan&page=2` 링크를 새 탭에서 열면 같은 검색·카테고리·정렬·페이지 조건이 복원되고 동일한 상품 목록이 표시된다. ✅
