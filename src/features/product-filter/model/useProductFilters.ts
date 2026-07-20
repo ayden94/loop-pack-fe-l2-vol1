@@ -13,23 +13,25 @@ import {
   sortSchema,
 } from '@/entities/product/model/ProductQuerySchema'
 
-const parsers = {
+export const productFilterParsers = {
   q: parseAsString.withDefault(''),
   category: parseAsStringEnum(categorySchema.options).withDefault('all'),
   sort: parseAsStringEnum(sortSchema.options).withDefault('latest'),
   page: parseAsInteger.withDefault(1),
 } as const
 
-type ProductFilters = inferParserType<typeof parsers>
+export type ProductFilters = inferParserType<typeof productFilterParsers>
 
-export type { ProductFilters }
+export type ProductFilterPatch = Partial<
+  Pick<ProductFilters, 'q' | 'category' | 'sort'>
+>
 
 export function useProductFilters() {
-  const [filters, setFilters] = useQueryStates(parsers, { history: 'push' })
+  const [filters, setFilters] = useQueryStates(productFilterParsers, {
+    history: 'push',
+  })
 
-  const updateFilter = (
-    patch: Partial<Pick<ProductFilters, 'q' | 'category' | 'sort'>>,
-  ) => {
+  const updateFilter = (patch: ProductFilterPatch) => {
     void setFilters({
       ...patch,
       page: 1,
