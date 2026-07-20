@@ -1,10 +1,20 @@
 'use client'
 
-import { type ReactNode, useEffect, useState } from 'react'
+import { type ReactNode, useEffect, useRef, useState } from 'react'
 
 import { useDebouncedValue } from '@/shared/lib/useDebouncedValue'
 
 const DEFAULT_DEBOUNCE_MS = 300
+
+type DebouncedInputProps = {
+  initialValue: string
+  onDebouncedChange: (value: string) => void
+  debounceMs?: number
+  label: ReactNode
+  name: string
+  placeholder?: string
+  className?: string
+}
 
 export function DebouncedInput({
   initialValue,
@@ -14,21 +24,18 @@ export function DebouncedInput({
   name,
   placeholder,
   className,
-}: {
-  initialValue: string
-  onDebouncedChange: (value: string) => void
-  debounceMs?: number
-  label: ReactNode
-  name: string
-  placeholder?: string
-  className?: string
-}) {
+}: DebouncedInputProps) {
   const [draft, setDraft] = useState(initialValue)
   const debounced = useDebouncedValue(draft, debounceMs)
 
+  const onDebouncedChangeRef = useRef(onDebouncedChange)
   useEffect(() => {
-    onDebouncedChange(debounced)
-  }, [debounced, onDebouncedChange])
+    onDebouncedChangeRef.current = onDebouncedChange
+  }, [onDebouncedChange])
+
+  useEffect(() => {
+    onDebouncedChangeRef.current(debounced)
+  }, [debounced])
 
   return (
     <label className="flex flex-col gap-1">
