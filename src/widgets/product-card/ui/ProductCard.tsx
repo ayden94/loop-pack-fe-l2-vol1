@@ -3,11 +3,8 @@
 import Image from 'next/image'
 
 import type { Product } from '@/entities/product/model/types'
-import { cartSelectors, useCartStore } from '@/features/cart/model/CartStore'
-import {
-  useWishlistStore,
-  wishlistSelectors,
-} from '@/features/wishlist/model/WishlistStore'
+import { AddToCartButton } from '@/features/cart/ui/AddToCartButton'
+import { ToggleWishlistButton } from '@/features/wishlist/ui/ToggleWishlistButton'
 
 type ProductCardProps = {
   product: Product
@@ -17,13 +14,6 @@ type ProductCardProps = {
 const formatPrice = (price: number) => `${price.toLocaleString('ko-KR')}원`
 
 export function ProductCard({ product, priority = false }: ProductCardProps) {
-  const isInCart = useCartStore(cartSelectors.isInCart(product.id))
-  const isInWishlist = useWishlistStore(
-    wishlistSelectors.isInWishlist(product.id),
-  )
-  const { addToCart, removeFromCart } = useCartStore()
-  const { toggleWishlist } = useWishlistStore()
-
   const discountRate =
     product.originalPrice !== null
       ? Math.round((1 - product.price / product.originalPrice) * 100)
@@ -61,32 +51,11 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
         )}
       </div>
       <div className="flex gap-2">
-        <button
-          type="button"
-          aria-pressed={isInWishlist}
-          aria-label={`${product.name} 위시리스트`}
-          onClick={() => {
-            toggleWishlist(product.id)
-          }}
-          className="flex-1 rounded border border-(--color-border) px-3 py-2 text-xs text-(--color-text) hover:bg-(--color-surface-muted)"
-        >
-          {isInWishlist ? '찜 해제' : '찜'}
-        </button>
-        <button
-          type="button"
-          aria-pressed={isInCart}
-          aria-label={`${product.name} 장바구니`}
-          onClick={() => {
-            if (isInCart) {
-              removeFromCart(product.id)
-            } else {
-              addToCart(product.id)
-            }
-          }}
-          className="flex-1 rounded border border-(--color-border) px-3 py-2 text-xs text-(--color-text) hover:bg-(--color-surface-muted)"
-        >
-          {isInCart ? '빼기' : '담기'}
-        </button>
+        <ToggleWishlistButton
+          productId={product.id}
+          productName={product.name}
+        />
+        <AddToCartButton productId={product.id} productName={product.name} />
       </div>
     </article>
   )
