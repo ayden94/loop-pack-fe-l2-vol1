@@ -7,7 +7,7 @@ import { useDebouncedValue } from '@/shared/lib/useDebouncedValue'
 const DEFAULT_DEBOUNCE_MS = 300
 
 type DebouncedInputProps = {
-  initialValue: string
+  value: string
   onDebouncedChange: (value: string) => void
   debounceMs?: number
   label: ReactNode
@@ -17,7 +17,7 @@ type DebouncedInputProps = {
 }
 
 export function DebouncedInput({
-  initialValue,
+  value,
   onDebouncedChange,
   debounceMs = DEFAULT_DEBOUNCE_MS,
   label,
@@ -25,7 +25,17 @@ export function DebouncedInput({
   placeholder,
   className,
 }: DebouncedInputProps) {
-  const [draft, setDraft] = useState(initialValue)
+  const [prevValue, setPrevValue] = useState(value)
+  const [draft, setDraft] = useState(value)
+
+  // Sync draft to external value changes (browser nav, own emission
+  // returning). Adjusting during render avoids a stale frame between
+  // the value change and an effect firing.
+  if (value !== prevValue) {
+    setPrevValue(value)
+    setDraft(value)
+  }
+
   const debounced = useDebouncedValue(draft, debounceMs)
 
   const onDebouncedChangeRef = useRef(onDebouncedChange)
@@ -33,9 +43,16 @@ export function DebouncedInput({
     onDebouncedChangeRef.current = onDebouncedChange
   }, [onDebouncedChange])
 
+  // Emit only when the settled value matches current intent (debounced ===
+  // draft) and is not already the external source of truth (debounced !==
+  // value). This suppresses: stale debounce from before an external sync,
+  // own URL write returning as a duplicate, and external nav re-emissions.
   useEffect(() => {
+    if (debounced !== draft || debounced === value) {
+      return
+    }
     onDebouncedChangeRef.current(debounced)
-  }, [debounced])
+  }, [debounced, draft, value])
 
   return (
     <label className="flex flex-col gap-1">
