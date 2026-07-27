@@ -23,6 +23,9 @@ importers:
       '@tanstack/react-query':
         specifier: '5'
         version: 5.101.0(react@19.2.4)
+      ky:
+        specifier: ^2.0.2
+        version: 2.0.2
       next:
         specifier: 16.2.10
         version: 16.2.10(@babel/core@7.29.7)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
@@ -47,6 +50,9 @@ importers:
       zustand:
         specifier: ^5.0.14
         version: 5.0.14(@types/react@19.2.17)(react@19.2.4)
+      zustand-middleware-pipe:
+        specifier: ^1.0.0
+        version: 1.0.0(zustand@5.0.14(@types/react@19.2.17)(react@19.2.4))
     devDependencies:
       '@commitlint/cli':
         specifier: ^21.0.2
@@ -1980,6 +1986,10 @@ packages:
   keyv@4.5.4:
     resolution: {integrity: sha512-oxVHkHR/EJf2CNXnWxRLW6mg7JyCCUcG0DtEGmL2ctUo1PNTin1PUil+r/+4r5MpVgC/fn1kjsx7mjSujKqIpw==}
 
+  ky@2.0.2:
+    resolution: {integrity: sha512-/GmXpo9F9W+f8n4Ivr2iH+7h7wL7jLbLKWkMlpflcCRb6kGjBfTlASEXaZ9qUgNTn4VgS0P2pwxxzQ4EM6Ulgg==}
+    engines: {node: '>=22'}
+
   language-subtag-registry@0.3.23:
     resolution: {integrity: sha512-0K65Lea881pHotoGEa5gDlMxt3pctLi2RplBb7Ezh4rRdLEOtgi7n4EwK9lamnUCkKBqaeKRVebTq6BAxSkpXQ==}
 
@@ -2841,6 +2851,18 @@ packages:
 
   zod@4.4.3:
     resolution: {integrity: sha512-ytENFjIJFl2UwYglde2jchW2Hwm4GJFLDiSXWdTrJQBIN9Fcyp7n4DhxJEiWNAJMV1/BqWfW/kkg71UDcHJyTQ==}
+
+  zustand-middleware-pipe@1.0.0:
+    resolution: {integrity: sha512-+cFNzkiN76Vq/N9h5jGrS/sF3hY5LAOF6PupuolKsi6Lg6H+1XGQfe4z+6jbmHsxgQKAsQzwZ5l9gGh5Us8meQ==}
+    peerDependencies:
+      immer: '>=9.0.6'
+      zundo: ^2.3.0
+      zustand: ^5.0.0
+    peerDependenciesMeta:
+      immer:
+        optional: true
+      zundo:
+        optional: true
 
   zustand@5.0.14:
     resolution: {integrity: sha512-/8tAspM5LMPr28b3fwLYrtdj77ECpfZviaP75CMTnwO8ISyaE4GDIG/9rDDYq/cH9D2Xw2A2RXglLInmVBQB/g==}
@@ -4822,6 +4844,8 @@ snapshots:
     dependencies:
       json-buffer: 3.0.1
 
+  ky@2.0.2: {}
+
   language-subtag-registry@0.3.23: {}
 
   language-tags@1.0.9:
@@ -5755,6 +5779,10 @@ snapshots:
       zod: 4.4.3
 
   zod@4.4.3: {}
+
+  zustand-middleware-pipe@1.0.0(zustand@5.0.14(@types/react@19.2.17)(react@19.2.4)):
+    dependencies:
+      zustand: 5.0.14(@types/react@19.2.17)(react@19.2.4)
 
   zustand@5.0.14(@types/react@19.2.17)(react@19.2.4):
     optionalDependencies:

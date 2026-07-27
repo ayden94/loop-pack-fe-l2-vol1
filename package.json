@@ -36,29 +36,28 @@
     "@suspensive/react": "^3.21.2",
     "@suspensive/react-query": "npm:@suspensive/react-query-5@^3.21.2",
     "@tanstack/react-query": "5",
+    "ky": "^2.0.2",
     "next": "16.2.10",
     "nuqs": "^2.9.0",
     "react": "19.2.4",
     "react-dom": "19.2.4",
-    "zustand": "^5.0.14",
     "tailwind-merge": "^3.6.0",
     "tailwind-variants": "^3.2.2",
-    "zod": "^4.4.3"
+    "zod": "^4.4.3",
+    "zustand": "^5.0.14",
+    "zustand-middleware-pipe": "^1.0.0"
   },
   "devDependencies": {
-    "@types/node": "^24",
     "@commitlint/cli": "^21.0.2",
     "@commitlint/config-conventional": "^21.0.2",
     "@eslint/js": "^9.39.4",
     "@tailwindcss/postcss": "^4.3.1",
     "@types/eslint-plugin-jsx-a11y": "^6.10.1",
+    "@types/node": "^24",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.2.10",
-    "typescript": "^5",
-    "typescript-eslint": "^8.61.1",
-    "vitest": "^4.1.10",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-jsx-a11y": "^6.10.2",
     "eslint-plugin-react": "^7.37.5",
@@ -70,6 +69,9 @@
     "husky": "^9.1.7",
     "lint-staged": "^17.0.7",
     "prettier": "^3.8.4",
-    "tailwindcss": "^4.3.1"
+    "tailwindcss": "^4.3.1",
+    "typescript": "^5",
+    "typescript-eslint": "^8.61.1",
+    "vitest": "^4.1.10"
   }
 }
