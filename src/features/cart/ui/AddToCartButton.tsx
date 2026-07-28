@@ -12,7 +12,8 @@ export function AddToCartButton({
   productName,
 }: AddToCartButtonProps) {
   const isInCart = useCartStore(cartSelectors.isInCart(productId))
-  const { addToCart, removeFromCart } = useCartStore()
+  const addToCart = useCartStore((state) => state.addToCart)
+  const removeFromCart = useCartStore((state) => state.removeFromCart)
 
   return (
     <button
