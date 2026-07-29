@@ -3,7 +3,7 @@
 import Image from 'next/image'
 
 import type { Product } from '@/entities/product/model/types'
-import { AddToCartButton } from '@/features/cart/ui/AddToCartButton'
+import { AddToCartButton } from '@/features/add-to-cart/ui/AddToCartButton'
 import { ToggleWishlistButton } from '@/features/wishlist/ui/ToggleWishlistButton'
 
 type ProductCardProps = {
