@@ -218,6 +218,30 @@ import 경로만 새 action feature로 바꿨다. Header는 cart와 wishlist ent
 | 실행 자원 정리       | localStorage, browser, PID/port, `.next`, Playwright residue 정리   | `.omo/evidence/week06-fsd/todo-2/cleanup-receipt.md`                |
 | 전체 품질 게이트     | 95개 테스트, format, lint, typecheck, build, 최종 `pnpm check` 통과 | `.omo/evidence/week06-fsd/todo-2/quality-gates.md`                  |
 
+#### Todo 3 마이그레이션 결과
+
+2026-07-29에 상품 카드 표현을 `entities/product/ui/ProductCard.tsx`로 옮기고
+선택적 `actions?: ReactNode` slot을 추가했다. entity 카드는 기존 image, alt,
+priority/sizes, 한국 원화 가격, 할인율, `article` 의미 구조와 style을 그대로 유지한다.
+`widgets/product-list/ui/ProductGrid.tsx`가 `ToggleWishlistButton`과
+`AddToCartButton`을 product별로 조합해 같은 시각 위치에 전달한다. 기존
+`widgets/product-card` slice는 빈 디렉터리 없이 삭제했다.
+
+| 검증 항목          | 결과                                                                                      | 증거                                                                                                                                     |
+| ------------------ | ----------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| 이동 전 구조 red   | entity 목표 없음, 기존 widget 존재, sibling widget import 확인                            | `.omo/evidence/week06-fsd/todo-3/baseline/structural-red.md`                                                                             |
+| 이동 후 구조 green | entity 카드 존재, 기존 widget slice와 import 없음                                         | `.omo/evidence/week06-fsd/todo-3/current/structural-green.md`                                                                            |
+| LSP와 TypeScript   | 변경 파일 진단 0건, caller 유지, typecheck 통과                                           | `.omo/evidence/week06-fsd/todo-3/current/structural-green.md`                                                                            |
+| FSD import 감사    | entity 상향 import, product-list sibling widget import, same-layer cross-slice import 0건 | `.omo/evidence/week06-fsd/todo-3/current/structural-green.md`                                                                            |
+| 홈 카드 동작       | 인기/신상품 article, alt, 가격/할인, 두 action과 Header 동기화 유지                       | `.omo/evidence/week06-fsd/todo-3/current/manual-qa.md`                                                                                   |
+| 상품 목록 동작     | 기본/`메이커스` 필터 결과의 두 action, pressed, 반복 toggle, Header 동기화 유지           | `.omo/evidence/week06-fsd/todo-3/current/manual-qa.md`                                                                                   |
+| 접근성과 viewport  | desktop/mobile, accessible name, Enter/Space, focus-visible 통과                          | `.omo/evidence/week06-fsd/todo-3/current/manual-qa.md`                                                                                   |
+| 시각 비교          | 4쌍 0 pixel diff, products desktop은 image raster `0.0005`, layout/content 회귀 없음      | `.omo/evidence/week06-fsd/todo-3/current/visual-diff.md`                                                                                 |
+| 독립 시각 검토     | 기능/design-system과 visual/CJK 두 pass 모두 blocking 없이 통과                           | `.omo/evidence/week06-fsd/todo-3/current/visual-qa-report.md`                                                                            |
+| console/network    | 오류 0건, 기존 Image LCP warning만 유지, 관련 API 200                                     | `.omo/evidence/week06-fsd/todo-3/current/todo3-current-console.log`, `.omo/evidence/week06-fsd/todo-3/current/todo3-current-network.log` |
+| 전체 품질 게이트   | format, 95개 test, lint, typecheck, build, 최종 `pnpm check` 통과                         | `.omo/evidence/week06-fsd/todo-3/current/quality-gates.md`                                                                               |
+| 실행 자원 정리     | localStorage/cookie, browser, PID/port, `.next`, 임시 report 정리                         | `.omo/evidence/week06-fsd/todo-3/current/cleanup-receipt.md`                                                                             |
+
 ### 데이터 모델
 
 | 상태                          | 원본                | 이동 후 소유자                          | 소비자                      | 중복 저장 방지 규칙                                                      |
@@ -384,8 +408,11 @@ RFC 초안에 도움을 주었다. 개발자는 캡처한 selector, 상태 계�
 | RFC의 기존 유효하지 않은 scope 표기                        | 수용 | 실제 commitlint 유효 커밋인 `docs(week-06): add FSD RFC and behavior baseline`으로 고쳤다.              |
 | Todo 2 standards 검토의 hard violation 없음                | 수용 | 이동 파일, 실제 import, hydration 호출, LSP와 품질 게이트가 저장소 규칙을 만족한다.                     |
 | README/rules의 이전 경로도 Todo 2에서 지우라는 검토 지적   | 반려 | 삭제 대상은 `src/features/cart/**`와 `src/features/wishlist/**`이며 문서 변경은 이 RFC 증거로 제한한다. |
+| Todo 3 기능/design-system 독립 검토의 회귀 없음            | 수용 | 전체 capture, DOM, action, Header 동기화와 FSD 조합이 기준선과 같다고 판정했다.                         |
+| Todo 3 visual/CJK 독립 검토의 회귀 없음                    | 수용 | 네 쌍은 0 pixel diff이고 products desktop 차이는 상품 image raster에만 있다고 판정했다.                 |
 
 사전 두 축 검토에서는 Todo 1 명세 누락을 찾지 못했다. Todo 2 두 축 검토에서도 source
 구현과 저장소 규칙 위반은 없었다. README와 rules의 이전 경로 예시까지 바꾸라는 지적은
-명시된 source 삭제 범위와 RFC-only 문서 범위를 넘어 반려했다. Markdown 형식은 staged
-Prettier hook으로 확인한다.
+명시된 source 삭제 범위와 RFC-only 문서 범위를 넘어 반려했다. Todo 3의 두 독립 시각
+검토는 전체 최신 capture에서 기능, layout, CJK 회귀를 찾지 못했다. Markdown 형식은
+staged Prettier hook으로 확인한다.
