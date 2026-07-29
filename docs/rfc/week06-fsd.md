@@ -73,31 +73,47 @@ src/
   app/
     error.tsx
     {layout,page,providers}.tsx
+    providers.test.ts
     products/{error,loading,page}.tsx
     api/**                         # retained, outside migration scope
   entities/
-    product/{api,model,ui/ProductCard.tsx}
-    cart/model/CartStore.ts
-    wishlist/model/WishlistStore.ts
+    product/
+      api/
+        ProductRepository.ts
+        ProductRepository.test.ts
+        ProductService.ts
+      model/
+      ui/ProductCard.tsx
+    cart/model/{CartStore,CartStore.test}.ts
+    wishlist/model/{WishlistStore,WishlistStore.test}.ts
   features/
     add-to-cart/ui/AddToCartButton.tsx
     toggle-wishlist/ui/ToggleWishlistButton.tsx
     product-filter/{model,useProductFilters.ts;ui/FilterBar.tsx}
   shared/
-    api/{ApiClient,ApiErrorResponse,ApiErrorPolicy}.ts
+    api/
+      ApiClient.ts
+      ApiClient.test.ts
+      ApiErrorResponse.ts
+      ApiErrorPolicy.ts
+      ApiErrorPolicy.test.ts
     lib/useHydratePersistedStore.ts
-    ui/DebouncedInput.tsx
+    ui/
+      DebouncedInput.tsx
+      InlineQueryError.tsx
+      useInlineQueryRetry.ts
   views/{home,product-list}/ui/
   widgets/
     header/ui/Header.tsx
     product-list/ui/{ProductGrid,ProductListSection}.tsx
 ```
 
-마이그레이션은 명시한 목표 파일만 만든다. `src/app/api/**`는 이미 존재하며
-그대로 유지하는 하위 트리고, `src/views/{home,product-list}/ui/`는 기존 view
-위치를 요약한 표기다. 특히 `src/pages`, `src/_pages`, `processes`, 빈 segment,
-`index.ts` 배럴은 목표 트리에 포함하지 않는다. 과제의 `_pages` 표기 대신
-저장소가 승인한 `views` 레이어를 사용한다.
+Week 06에서 새로 추가하거나 이동한 최종 tracked 파일은 목표 트리에 이름을 명시한다.
+`src/app/api/**`는 이미 존재하며 그대로 유지하는 하위 트리고,
+`src/views/{home,product-list}/ui/`와 product model segment는 기존 파일을 유지하면서
+수정한 위치를 요약한 표기다. 특히 `src/pages`, `src/_pages`, `processes`, 빈 segment,
+`index.ts` 배럴은 목표 트리에 포함하지 않는다. 과제의 `_pages` 표기 대신 저장소가
+승인한 `views` 레이어를 사용한다.
 
 #### import 정책
 
@@ -136,33 +152,45 @@ import하면 하위 entity에서 상위 feature로 향하므로 금지한다. �
 
 #### 전체 파일 매핑
 
-| 현재 경로                                                                 | 목표 경로                                                  | 결정 및 근거                                                                            |
-| ------------------------------------------------------------------------- | ---------------------------------------------------------- | --------------------------------------------------------------------------------------- |
-| `src/app/page.tsx`                                                        | 유지                                                       | 얇은 Next 라우트 진입점이 `HomeView`를 렌더링한다.                                      |
-| `src/app/products/page.tsx`                                               | 유지                                                       | 얇은 Next 라우트 진입점이 `ProductListView`를 렌더링한다.                               |
-| `src/app/products/loading.tsx`                                            | 유지                                                       | 상품 route 전환 로딩은 route가 계속 소유한다.                                           |
-| 없음                                                                      | `src/app/error.tsx`                                        | Todo 6에서 root의 예상 밖 렌더링 오류 fallback으로 추가한다. layout 오류는 잡지 못한다. |
-| 없음                                                                      | `src/app/products/error.tsx`                               | Todo 6에서 products segment의 예상 밖 Query/렌더링 오류 fallback과 reset으로 추가한다.  |
-| `src/app/{layout,providers}.tsx`                                          | 유지                                                       | 앱 bootstrap, Header 조합, QueryClient, NuqsAdapter는 app에 둔다.                       |
-| `src/app/api/**`                                                          | 유지, 범위 제외                                            | mock Route Handler, fixture, 테스트는 이동하거나 계약을 바꾸지 않는다.                  |
-| `src/views/home/ui/HomeView.tsx`                                          | 유지                                                       | route-view 조합과 홈 query 소유를 맡는다.                                               |
-| `src/views/product-list/ui/ProductListView.tsx`                           | 유지                                                       | filter와 상품 목록 widget의 route-view 조합을 맡는다.                                   |
-| `src/widgets/header/ui/Header.tsx`                                        | 유지                                                       | 공통 shell widget이며 Todo 2 후 entity store를 import한다.                              |
-| `src/widgets/product-list/ui/ProductGrid.tsx`                             | 유지                                                       | 상품 목록 slice가 entity 카드와 action feature를 조합한다.                              |
-| `src/widgets/product-list/ui/ProductListSection.tsx`                      | 유지                                                       | 같은 상품 목록 slice가 목록의 로딩/오류/빈 영역을 맡는다.                               |
-| `src/widgets/product-card/ui/ProductCard.tsx`                             | `src/entities/product/ui/ProductCard.tsx`                  | 상품 전용 표현으로 이동하고 기존 widget slice를 삭제한다.                               |
-| `src/features/cart/model/{CartStore,CartStore.test}.ts`                   | `src/entities/cart/model/`                                 | 영속 cart 집합은 도메인 model이므로 테스트와 계약을 유지해 이동한다.                    |
-| `src/features/wishlist/model/{WishlistStore,WishlistStore.test}.ts`       | `src/entities/wishlist/model/`                             | 영속 wishlist 집합은 도메인 model이므로 테스트와 계약을 유지해 이동한다.                |
-| `src/features/cart/ui/AddToCartButton.tsx`                                | `src/features/add-to-cart/ui/AddToCartButton.tsx`          | 행동 UI는 독립 사용자 행동 slice로 둔다.                                                |
-| `src/features/wishlist/ui/ToggleWishlistButton.tsx`                       | `src/features/toggle-wishlist/ui/ToggleWishlistButton.tsx` | 행동 UI는 독립 사용자 행동 slice로 둔다.                                                |
-| `src/features/product-filter/{model,ui}/**`                               | 유지                                                       | 하나의 filter feature가 nuqs parser, URL 갱신, filter control을 소유한다.               |
-| `src/features/store-sync.test.ts`                                         | Todo 4에서 삭제 완료                                       | module identity 검증 대신 실제 entity test와 route 브라우저 동기화를 계약으로 삼는다.   |
-| `src/entities/product/api/{ProductRepository,ProductService}.ts`          | 유지                                                       | 상품 transport, schema, query key factory, stale time은 이미 함께 속한다.               |
-| `src/entities/product/model/{types,ResponseSchema,ProductQuerySchema}.ts` | 유지                                                       | 상품 DTO/schema/query 도메인 계약은 product에 둔다.                                     |
-| `src/shared/api/{ApiClient,ApiErrorResponse}.ts`                          | 유지, Todo 5에 `ApiErrorPolicy.ts` 추가                    | 일반 transport와 일반 오류 정책은 shared에 둔다.                                        |
-| `src/shared/lib/useHydratePersistedStore.ts`                              | 유지                                                       | idempotent persistence hydration은 범용 인프라다.                                       |
-| `src/shared/ui/DebouncedInput.tsx`                                        | 유지                                                       | 도메인 비종속 input primitive다.                                                        |
-| `src/shared/ui/{dialog,select}/**`, `src/examples/**`, `src/popover.d.ts` | 유지                                                       | 관련 없는 재사용 UI와 예제는 건드리지 않는다.                                           |
+| 현재 경로                                                                 | 목표 경로                                                  | 결정 및 근거                                                                                    |
+| ------------------------------------------------------------------------- | ---------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| `src/app/page.tsx`                                                        | 유지                                                       | 얇은 Next 라우트 진입점이 `HomeView`를 렌더링한다.                                              |
+| `src/app/products/page.tsx`                                               | 유지                                                       | 얇은 Next 라우트 진입점이 `ProductListView`를 렌더링한다.                                       |
+| `src/app/products/loading.tsx`                                            | 유지                                                       | 상품 route 전환 로딩은 route가 계속 소유한다.                                                   |
+| 없음                                                                      | `src/app/error.tsx`                                        | Todo 6에서 root의 예상 밖 렌더링 오류 fallback으로 추가한다. layout 오류는 잡지 못한다.         |
+| 없음                                                                      | `src/app/products/error.tsx`                               | Todo 6에서 products segment의 예상 밖 Query/렌더링 오류 fallback과 reset으로 추가한다.          |
+| `src/app/{layout,providers}.tsx`                                          | 유지                                                       | 앱 bootstrap, Header 조합, QueryClient, NuqsAdapter는 app에 둔다.                               |
+| 없음                                                                      | `src/app/providers.test.ts`                                | app provider의 Query 기본 retry/throw predicate 연결과 기존 default 계약을 검증한다.            |
+| `src/app/api/**`                                                          | 유지, 범위 제외                                            | mock Route Handler, fixture, 테스트는 이동하거나 계약을 바꾸지 않는다.                          |
+| `src/views/home/ui/HomeView.tsx`                                          | 유지                                                       | route-view 조합과 홈 query 소유를 맡는다.                                                       |
+| `src/views/product-list/ui/ProductListView.tsx`                           | 유지                                                       | filter와 상품 목록 widget의 route-view 조합을 맡는다.                                           |
+| `src/widgets/header/ui/Header.tsx`                                        | 유지                                                       | 공통 shell widget이며 Todo 2 후 entity store를 import한다.                                      |
+| `src/widgets/product-list/ui/ProductGrid.tsx`                             | 유지                                                       | 상품 목록 slice가 entity 카드와 action feature를 조합한다.                                      |
+| `src/widgets/product-list/ui/ProductListSection.tsx`                      | 유지                                                       | 같은 상품 목록 slice가 목록의 로딩/오류/빈 영역을 맡는다.                                       |
+| `src/widgets/product-card/ui/ProductCard.tsx`                             | `src/entities/product/ui/ProductCard.tsx`                  | 상품 전용 표현으로 이동하고 기존 widget slice를 삭제한다.                                       |
+| `src/features/cart/model/{CartStore,CartStore.test}.ts`                   | `src/entities/cart/model/`                                 | 영속 cart 집합은 도메인 model이므로 테스트와 계약을 유지해 이동한다.                            |
+| `src/features/wishlist/model/{WishlistStore,WishlistStore.test}.ts`       | `src/entities/wishlist/model/`                             | 영속 wishlist 집합은 도메인 model이므로 테스트와 계약을 유지해 이동한다.                        |
+| `src/features/cart/ui/AddToCartButton.tsx`                                | `src/features/add-to-cart/ui/AddToCartButton.tsx`          | 행동 UI는 독립 사용자 행동 slice로 둔다.                                                        |
+| `src/features/wishlist/ui/ToggleWishlistButton.tsx`                       | `src/features/toggle-wishlist/ui/ToggleWishlistButton.tsx` | 행동 UI는 독립 사용자 행동 slice로 둔다.                                                        |
+| `src/features/product-filter/{model,ui}/**`                               | 유지                                                       | 하나의 filter feature가 nuqs parser, URL 갱신, filter control을 소유한다.                       |
+| `src/features/store-sync.test.ts`                                         | Todo 4에서 삭제 완료                                       | module identity 검증 대신 실제 entity test와 route 브라우저 동기화를 계약으로 삼는다.           |
+| `src/entities/product/api/{ProductRepository,ProductService}.ts`          | 유지                                                       | 상품 transport, schema, query key factory, stale time은 이미 함께 속한다.                       |
+| 없음                                                                      | `src/entities/product/api/ProductRepository.test.ts`       | 성공한 2xx 상품 응답이 product schema 경계를 통과하거나 거부되는 계약을 검증한다.               |
+| `src/entities/product/model/{types,ResponseSchema,ProductQuerySchema}.ts` | 유지                                                       | 상품 DTO/schema/query 도메인 계약은 product에 둔다.                                             |
+| `src/shared/api/{ApiClient,ApiErrorResponse}.ts`                          | 유지                                                       | 외부 오류 payload 검증과 transport 정규화는 shared에 둔다.                                      |
+| 없음                                                                      | `src/shared/api/ApiErrorPolicy.ts`                         | 화면 문구 없이 오류 class/status의 retry·throw 판정만 제공하는 공통 Query 정책이다.             |
+| 없음                                                                      | `src/shared/api/ApiClient.test.ts`                         | HTTP 오류 payload 검증, status 보존, fallback과 Ky 무재시도 transport 정규화를 검증한다.        |
+| 없음                                                                      | `src/shared/api/ApiErrorPolicy.test.ts`                    | 4xx·5xx·network·timeout·schema·unknown의 retry/throw matrix를 검증한다.                         |
+| `src/shared/lib/useHydratePersistedStore.ts`                              | 유지                                                       | idempotent persistence hydration은 범용 인프라다.                                               |
+| `src/shared/ui/DebouncedInput.tsx`                                        | 유지                                                       | 도메인 비종속 input primitive다.                                                                |
+| 없음                                                                      | `src/shared/ui/InlineQueryError.tsx`                       | 화면별 오류 message를 props로 받고 공통 alert·retry·pending 상태와 일반 retry label만 표현한다. |
+| 없음                                                                      | `src/shared/ui/useInlineQueryRetry.ts`                     | refetch Promise 동안 오류 message 수명과 retry pending 상태를 유지하는 범용 hook이다.           |
+| `src/shared/ui/{dialog,select}/**`, `src/examples/**`, `src/popover.d.ts` | 유지                                                       | 관련 없는 재사용 UI와 예제는 건드리지 않는다.                                                   |
+
+`InlineQueryError`는 화면별 message를 전달받아 일반 alert와 retry 상태만 표현하고,
+`useInlineQueryRetry`는 refetch 동안 message 수명만 관리한다. 홈·상품의 오류 문구는 각
+view가, route fallback 문구는 app 오류 경계가 소유한다. `shared/api/ApiErrorPolicy.ts`에는
+사용자 문구나 화면 정책을 넣지 않는다.
 
 #### 배치가 애매한 항목의 결정
 
@@ -651,42 +679,43 @@ selector, 상태 계약, source ownership, 임시 handler diff, cleanup receipt�
 교차 확인했다. 독립 검토 에이전트는 기록과 최종 소스를 다시 대조했다. 최종 사람 검토와
 승인은 아직 대기 중이다.
 
-| 검토 항목                                                       | 처리 | 근거                                                                                                     |
-| --------------------------------------------------------------- | ---- | -------------------------------------------------------------------------------------------------------- |
-| 과제의 `_pages` 대신 `views` 사용                               | 수용 | 저장소 FSD 규칙이 route 조합에 `views`를 명시한다.                                                       |
-| 실제 파일 경로 import 사용                                      | 수용 | 저장소 규칙이 습관적 `index.ts` 배럴을 금지한다.                                                         |
-| ProductCard를 entity에 두고 widget에서 action slot 조합         | 수용 | 보이는 control을 유지하면서 entity-to-feature 압력을 제거한다.                                           |
-| slice-root public barrel을 추가하라는 일반 FSD 조언             | 반려 | 저장소의 직접 import 결정과 충돌한다.                                                                    |
-| `src/app/api/**`를 프런트엔드 파일과 함께 이동                  | 반려 | 명시적으로 마이그레이션 범위 밖이며 임시 seam은 제거했다.                                                |
-| test cookie 또는 scenario query key를 영구 추가                 | 반려 | 사용자 URL/상태 계약과 mock 동작을 바꾼다.                                                               |
-| products 로딩 증거가 loaded 상태를 보인다는 독립 검토 지적      | 수용 | 실제 pending navigation에서 로딩 텍스트와 loaded count의 상호 배타성을 캡처해 교체했다.                  |
-| 두 route boundary 파일이 file map에 없다는 독립 검토 지적       | 수용 | `src/app/error.tsx`, `src/app/products/error.tsx`의 계획된 소유와 근거를 표에 추가했다.                  |
-| RFC의 기존 유효하지 않은 scope 표기                             | 수용 | 실제 commitlint 유효 커밋인 `docs(week-06): add FSD RFC and behavior baseline`으로 고쳤다.               |
-| Todo 2 standards 검토의 hard violation 없음                     | 수용 | 이동 파일, 실제 import, hydration 호출, LSP와 품질 게이트가 저장소 규칙을 만족한다.                      |
-| README/rules의 이전 경로도 Todo 2에서 지우라는 검토 지적        | 반려 | 삭제 대상은 `src/features/cart/**`와 `src/features/wishlist/**`이며 문서 변경은 이 RFC 증거로 제한한다.  |
-| Todo 3 기능/design-system 독립 검토의 회귀 없음                 | 수용 | 전체 capture, DOM, action, Header 동기화와 FSD 조합이 기준선과 같다고 판정했다.                          |
-| Todo 3 visual/CJK 독립 검토의 회귀 없음                         | 수용 | 네 쌍은 0 pixel diff이고 products desktop 차이는 상품 image raster에만 있다고 판정했다.                  |
-| Todo 4에서 import 수정이 필요하다는 가정                        | 반려 | CodeGraph와 전체 import 감사에서 현재 consumer가 이미 실제 파일 경로와 하향 방향을 만족했다.             |
-| module identity test를 다른 경로 test로 대체하라는 제안         | 반려 | 실제 entity 동작 test와 localhost route 동기화가 사용자 관찰 계약을 직접 증명한다.                       |
-| Todo 4 standards 독립 검토의 위반 없음                          | 수용 | test 삭제와 RFC 변경에서 FSD, lint/format, 접근성, 검증 규칙 위반이나 유의미한 code smell을 찾지 못했다. |
-| Todo 4 spec 독립 검토의 누락과 범위 초과 없음                   | 수용 | Todo 4 삭제, 소유권, import, URL/store 증거가 충족되고 Todo 5 source 변경이 없다고 판정했다.             |
-| Todo 5 standards 독립 검토의 위반 없음                          | 수용 | transport, policy, provider, test가 저장소 규칙과 FSD 방향을 만족하고 유의미한 code smell이 없다.        |
-| Todo 5 spec 검토의 source 누락과 범위 초과 없음                 | 수용 | Todo 5 계약을 충족하고 Todo 6 UI/route boundary 변경이 없다고 판정했다.                                  |
-| ignore된 Todo 5 evidence를 Git에서 볼 수 없다는 지적            | 보정 | AI 실행 에이전트가 artifact 7개를 확인하고 독립 검토 영수증에 가시성 한계와 해소 결과를 기록했다.        |
-| Todo 6 시각 기능 검토의 blocker 없음                            | 수용 | 12개 전체 화면에서 인라인/route 분리, FilterBar, focus style과 token 사용을 확인했다.                    |
-| Todo 6 시각/CJK 검토의 blocker 없음                             | 수용 | mobile 어절 수정 뒤 12개 전체 캡처가 clipping, overflow, 개발 chrome 없이 통과했다.                      |
-| Todo 6 WCAG 검토의 `AA-ready`                                   | 수용 | contrast, Tab 왕복, focus 비가림 manual gap을 실제 browser 측정으로 추가 확인했다.                       |
-| Todo 6 standards 검토의 중복 retry 지적                         | 수용 | 두 owner의 state machine을 `useInlineQueryRetry` 한곳으로 모았다.                                        |
-| Todo 6 standards 검토의 RFC table pipe 지적                     | 수용 | cell의 literal pipe를 제거하고 네 열 table로 다시 작성했다.                                              |
-| Todo 6 spec 검토의 native disabled focus 지적                   | 수용 | guarded `aria-disabled`로 중복 실행을 막고 pending focus와 outline 유지까지 browser에서 재검증했다.      |
-| Todo 6 spec 검토의 DESIGN 문서 범위 초과 지적                   | 수용 | 새 token이 없는 focused UI이므로 선택적 Query recovery 문단을 제거했다.                                  |
-| Todo 7 시각 이중 검토의 42개 화면 회귀 없음                     | 수용 | 최종 source 복원 뒤 만든 42개 PNG를 두 검토가 모두 PASS로 판정했다.                                      |
-| Todo 7 WCAG 검토의 범위 한정 `AA-ready`                         | 수용 | keyboard, accessibility tree, reflow, contrast, target 근거가 있는 범위에만 한정했다.                    |
-| Todo 7 검토의 명령 순서 누락 지적                               | 반려 | 직접 요구한 명령 순서대로 이미 실행했으며 reviewer가 plan 순서를 우선해 생긴 오판이었다.                 |
-| Todo 7 검토의 remote parity 누락 지적                           | 반려 | 갱신된 cleanup receipt에서 local/upstream/remote `c2cfa06` 일치를 확인한 뒤 stale 지적으로 판정했다.     |
-| Todo 8 wishlist 삭제 반경과 응집도 판정                         | 수용 | CodeGraph의 최종 import 흐름을 대조해 삭제 3개와 조합 수정 2개로 확정했다.                               |
-| Todo 8 badge 한 파일 예측이 schema·clock 계약을 누락했다는 지적 | 수용 | mock prototype과 신뢰 가능한 범위를 분리하고 ISO schema, 순수 규칙·테스트, 고정 기준시각을 추가했다.     |
-| Todo 8의 실행·검증 주체 표기가 부정확하다는 지적                | 수용 | 실행·교차 확인 주체를 AI 에이전트로 바로잡고 최종 사람 검토·승인을 대기 상태로 명시했다.                 |
+| 검토 항목                                                        | 처리 | 근거                                                                                                     |
+| ---------------------------------------------------------------- | ---- | -------------------------------------------------------------------------------------------------------- |
+| 과제의 `_pages` 대신 `views` 사용                                | 수용 | 저장소 FSD 규칙이 route 조합에 `views`를 명시한다.                                                       |
+| 실제 파일 경로 import 사용                                       | 수용 | 저장소 규칙이 습관적 `index.ts` 배럴을 금지한다.                                                         |
+| ProductCard를 entity에 두고 widget에서 action slot 조합          | 수용 | 보이는 control을 유지하면서 entity-to-feature 압력을 제거한다.                                           |
+| slice-root public barrel을 추가하라는 일반 FSD 조언              | 반려 | 저장소의 직접 import 결정과 충돌한다.                                                                    |
+| `src/app/api/**`를 프런트엔드 파일과 함께 이동                   | 반려 | 명시적으로 마이그레이션 범위 밖이며 임시 seam은 제거했다.                                                |
+| test cookie 또는 scenario query key를 영구 추가                  | 반려 | 사용자 URL/상태 계약과 mock 동작을 바꾼다.                                                               |
+| products 로딩 증거가 loaded 상태를 보인다는 독립 검토 지적       | 수용 | 실제 pending navigation에서 로딩 텍스트와 loaded count의 상호 배타성을 캡처해 교체했다.                  |
+| 두 route boundary 파일이 file map에 없다는 독립 검토 지적        | 수용 | `src/app/error.tsx`, `src/app/products/error.tsx`의 계획된 소유와 근거를 표에 추가했다.                  |
+| RFC의 기존 유효하지 않은 scope 표기                              | 수용 | 실제 commitlint 유효 커밋인 `docs(week-06): add FSD RFC and behavior baseline`으로 고쳤다.               |
+| Todo 2 standards 검토의 hard violation 없음                      | 수용 | 이동 파일, 실제 import, hydration 호출, LSP와 품질 게이트가 저장소 규칙을 만족한다.                      |
+| README/rules의 이전 경로도 Todo 2에서 지우라는 검토 지적         | 반려 | 삭제 대상은 `src/features/cart/**`와 `src/features/wishlist/**`이며 문서 변경은 이 RFC 증거로 제한한다.  |
+| Todo 3 기능/design-system 독립 검토의 회귀 없음                  | 수용 | 전체 capture, DOM, action, Header 동기화와 FSD 조합이 기준선과 같다고 판정했다.                          |
+| Todo 3 visual/CJK 독립 검토의 회귀 없음                          | 수용 | 네 쌍은 0 pixel diff이고 products desktop 차이는 상품 image raster에만 있다고 판정했다.                  |
+| Todo 4에서 import 수정이 필요하다는 가정                         | 반려 | CodeGraph와 전체 import 감사에서 현재 consumer가 이미 실제 파일 경로와 하향 방향을 만족했다.             |
+| module identity test를 다른 경로 test로 대체하라는 제안          | 반려 | 실제 entity 동작 test와 localhost route 동기화가 사용자 관찰 계약을 직접 증명한다.                       |
+| Todo 4 standards 독립 검토의 위반 없음                           | 수용 | test 삭제와 RFC 변경에서 FSD, lint/format, 접근성, 검증 규칙 위반이나 유의미한 code smell을 찾지 못했다. |
+| Todo 4 spec 독립 검토의 누락과 범위 초과 없음                    | 수용 | Todo 4 삭제, 소유권, import, URL/store 증거가 충족되고 Todo 5 source 변경이 없다고 판정했다.             |
+| Todo 5 standards 독립 검토의 위반 없음                           | 수용 | transport, policy, provider, test가 저장소 규칙과 FSD 방향을 만족하고 유의미한 code smell이 없다.        |
+| Todo 5 spec 검토의 source 누락과 범위 초과 없음                  | 수용 | Todo 5 계약을 충족하고 Todo 6 UI/route boundary 변경이 없다고 판정했다.                                  |
+| ignore된 Todo 5 evidence를 Git에서 볼 수 없다는 지적             | 보정 | AI 실행 에이전트가 artifact 7개를 확인하고 독립 검토 영수증에 가시성 한계와 해소 결과를 기록했다.        |
+| Todo 6 시각 기능 검토의 blocker 없음                             | 수용 | 12개 전체 화면에서 인라인/route 분리, FilterBar, focus style과 token 사용을 확인했다.                    |
+| Todo 6 시각/CJK 검토의 blocker 없음                              | 수용 | mobile 어절 수정 뒤 12개 전체 캡처가 clipping, overflow, 개발 chrome 없이 통과했다.                      |
+| Todo 6 WCAG 검토의 `AA-ready`                                    | 수용 | contrast, Tab 왕복, focus 비가림 manual gap을 실제 browser 측정으로 추가 확인했다.                       |
+| Todo 6 standards 검토의 중복 retry 지적                          | 수용 | 두 owner의 state machine을 `useInlineQueryRetry` 한곳으로 모았다.                                        |
+| Todo 6 standards 검토의 RFC table pipe 지적                      | 수용 | cell의 literal pipe를 제거하고 네 열 table로 다시 작성했다.                                              |
+| Todo 6 spec 검토의 native disabled focus 지적                    | 수용 | guarded `aria-disabled`로 중복 실행을 막고 pending focus와 outline 유지까지 browser에서 재검증했다.      |
+| Todo 6 spec 검토의 DESIGN 문서 범위 초과 지적                    | 수용 | 새 token이 없는 focused UI이므로 선택적 Query recovery 문단을 제거했다.                                  |
+| Todo 7 시각 이중 검토의 42개 화면 회귀 없음                      | 수용 | 최종 source 복원 뒤 만든 42개 PNG를 두 검토가 모두 PASS로 판정했다.                                      |
+| Todo 7 WCAG 검토의 범위 한정 `AA-ready`                          | 수용 | keyboard, accessibility tree, reflow, contrast, target 근거가 있는 범위에만 한정했다.                    |
+| Todo 7 검토의 명령 순서 누락 지적                                | 반려 | 직접 요구한 명령 순서대로 이미 실행했으며 reviewer가 plan 순서를 우선해 생긴 오판이었다.                 |
+| Todo 7 검토의 remote parity 누락 지적                            | 반려 | 갱신된 cleanup receipt에서 local/upstream/remote `c2cfa06` 일치를 확인한 뒤 stale 지적으로 판정했다.     |
+| Todo 8 wishlist 삭제 반경과 응집도 판정                          | 수용 | CodeGraph의 최종 import 흐름을 대조해 삭제 3개와 조합 수정 2개로 확정했다.                               |
+| Todo 8 badge 한 파일 예측이 schema·clock 계약을 누락했다는 지적  | 수용 | mock prototype과 신뢰 가능한 범위를 분리하고 ISO schema, 순수 규칙·테스트, 고정 기준시각을 추가했다.     |
+| Todo 8의 실행·검증 주체 표기가 부정확하다는 지적                 | 수용 | 실행·교차 확인 주체를 AI 에이전트로 바로잡고 최종 사람 검토·승인을 대기 상태로 명시했다.                 |
+| F1 목표 트리와 전체 파일 map에서 최종 파일 6개가 누락됐다는 지적 | 수용 | runtime 2개와 test 4개를 목표 트리와 exact map 행에 추가하고 전체 source name-status를 다시 대조했다.    |
 
 사전 두 축 검토에서는 Todo 1 명세 누락을 찾지 못했다. Todo 2 두 축 검토에서도 source
 구현과 저장소 규칙 위반은 없었다. README와 rules의 이전 경로 예시까지 바꾸라는 지적은
