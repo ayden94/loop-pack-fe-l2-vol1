@@ -156,7 +156,7 @@ import하면 하위 entity에서 상위 feature로 향하므로 금지한다. �
 | `src/features/cart/ui/AddToCartButton.tsx`                                | `src/features/add-to-cart/ui/AddToCartButton.tsx`          | 행동 UI는 독립 사용자 행동 slice로 둔다.                                                |
 | `src/features/wishlist/ui/ToggleWishlistButton.tsx`                       | `src/features/toggle-wishlist/ui/ToggleWishlistButton.tsx` | 행동 UI는 독립 사용자 행동 slice로 둔다.                                                |
 | `src/features/product-filter/{model,ui}/**`                               | 유지                                                       | 하나의 filter feature가 nuqs parser, URL 갱신, filter control을 소유한다.               |
-| `src/features/store-sync.test.ts`                                         | Todo 4에서 삭제                                            | module identity 검증은 실제 cross-route 동작 검증이 아니다.                             |
+| `src/features/store-sync.test.ts`                                         | Todo 4에서 삭제 완료                                       | module identity 검증 대신 실제 entity test와 route 브라우저 동기화를 계약으로 삼는다.   |
 | `src/entities/product/api/{ProductRepository,ProductService}.ts`          | 유지                                                       | 상품 transport, schema, query key factory, stale time은 이미 함께 속한다.               |
 | `src/entities/product/model/{types,ResponseSchema,ProductQuerySchema}.ts` | 유지                                                       | 상품 DTO/schema/query 도메인 계약은 product에 둔다.                                     |
 | `src/shared/api/{ApiClient,ApiErrorResponse}.ts`                          | 유지, Todo 5에 `ApiErrorPolicy.ts` 추가                    | 일반 transport와 일반 오류 정책은 shared에 둔다.                                        |
@@ -241,6 +241,33 @@ priority/sizes, 한국 원화 가격, 할인율, `article` 의미 구조와 styl
 | console/network    | 오류 0건, 기존 Image LCP warning만 유지, 관련 API 200                                     | `.omo/evidence/week06-fsd/todo-3/current/todo3-current-console.log`, `.omo/evidence/week06-fsd/todo-3/current/todo3-current-network.log` |
 | 전체 품질 게이트   | format, 95개 test, lint, typecheck, build, 최종 `pnpm check` 통과                         | `.omo/evidence/week06-fsd/todo-3/current/quality-gates.md`                                                                               |
 | 실행 자원 정리     | localStorage/cookie, browser, PID/port, `.next`, 임시 report 정리                         | `.omo/evidence/week06-fsd/todo-3/current/cleanup-receipt.md`                                                                             |
+
+#### Todo 4 import와 상태 원본 검증 결과
+
+2026-07-29에 route부터 shared까지 이동 consumer와 상태 원본을 다시 감사했다. 모든
+production import가 이미 실제 파일 경로와 하향 방향을 만족해 import 코드는 수정하지
+않았다. `src/features/store-sync.test.ts`는 삭제 전에 4개 test가 통과했지만, 자기
+자신과 같은 module instance를 다시 읽는 검증이라 route 동기화 계약으로는 약했다.
+이를 대체하는 path/identity test는 만들지 않고 cart/wishlist entity의 action,
+selector, persistence test와 실제 브라우저 route 동기화를 계약으로 유지했다.
+
+| 검증 항목            | 결과                                                                           | 증거                                                                                                         |
+| -------------------- | ------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------ |
+| 삭제 전 구조 red     | obsolete test가 남아 있어 의도한 실패 발생                                     | `.omo/evidence/week06-fsd/todo-4/baseline-and-structure.md`                                                  |
+| 삭제 전 특성화       | 1개 파일, 4개 test 통과; module identity와 같은 instance 재조회임을 확인       | `.omo/evidence/week06-fsd/todo-4/baseline-and-structure.md`                                                  |
+| 삭제 후 실제 계약    | entity store, query key, parser의 4개 파일, 55개 test 통과                     | `.omo/evidence/week06-fsd/todo-4/baseline-and-structure.md`                                                  |
+| import 방향          | upward, same-layer cross-slice, escaping relative import 모두 0건              | `.omo/evidence/week06-fsd/todo-4/import-audit.md`                                                            |
+| route/provider 소유  | 두 page는 view만 렌더링하고 QueryClient/NuqsAdapter는 providers에 유지         | `.omo/evidence/week06-fsd/todo-4/import-audit.md`                                                            |
+| query/cache 계약     | query key, repository 입력, 홈 60초, 목록 30초 그대로 유지                     | `.omo/evidence/week06-fsd/todo-4/import-audit.md`                                                            |
+| scenario 격리        | production query type, parser/hook, query key에서 0건; test의 부재 검증만 유지 | `.omo/evidence/week06-fsd/todo-4/import-audit.md`                                                            |
+| URL 직접 열기/reload | q/category/sort/page와 4개 결과가 정확히 복원                                  | `.omo/evidence/week06-fsd/todo-4/manual-qa.md`                                                               |
+| history/공유         | Back/Forward 2회와 복사한 새 tab에서 control/결과가 정확히 복원                | `.omo/evidence/week06-fsd/todo-4/manual-qa.md`                                                               |
+| 잘못된 query         | URL 원문을 보존하면서 page 1, category all, sort latest로 안전하게 해석        | `.omo/evidence/week06-fsd/todo-4/manual-qa.md`                                                               |
+| route store 동기화   | 홈 추가 뒤 products와 reload에서 Header 1/1, 두 action pressed 유지            | `.omo/evidence/week06-fsd/todo-4/manual-qa.md`                                                               |
+| console/network      | 오류 0건, 기존 Image LCP warning 1건, 관련 API 요청 성공                       | `.omo/evidence/week06-fsd/todo-4/browser-console.log`, `.omo/evidence/week06-fsd/todo-4/browser-network.log` |
+
+Todo 5의 retry, throw, 오류 문구, route boundary 정책은 이번 변경에서 시작하지
+않았다.
 
 ### 데이터 모델
 
@@ -395,24 +422,29 @@ AI는 코드베이스 inventory, 기준선 브라우저 절차, 임시 미커밋
 RFC 초안에 도움을 주었다. 개발자는 캡처한 selector, 상태 계약, source ownership,
 임시 handler diff, cleanup receipt를 직접 검토했다.
 
-| 검토 항목                                                  | 처리 | 근거                                                                                                    |
-| ---------------------------------------------------------- | ---- | ------------------------------------------------------------------------------------------------------- |
-| 과제의 `_pages` 대신 `views` 사용                          | 수용 | 저장소 FSD 규칙이 route 조합에 `views`를 명시한다.                                                      |
-| 실제 파일 경로 import 사용                                 | 수용 | 저장소 규칙이 습관적 `index.ts` 배럴을 금지한다.                                                        |
-| ProductCard를 entity에 두고 widget에서 action slot 조합    | 수용 | 보이는 control을 유지하면서 entity-to-feature 압력을 제거한다.                                          |
-| slice-root public barrel을 추가하라는 일반 FSD 조언        | 반려 | 저장소의 직접 import 결정과 충돌한다.                                                                   |
-| `src/app/api/**`를 프런트엔드 파일과 함께 이동             | 반려 | 명시적으로 마이그레이션 범위 밖이며 임시 seam은 제거했다.                                               |
-| test cookie 또는 scenario query key를 영구 추가            | 반려 | 사용자 URL/상태 계약과 mock 동작을 바꾼다.                                                              |
-| products 로딩 증거가 loaded 상태를 보인다는 독립 검토 지적 | 수용 | 실제 pending navigation에서 로딩 텍스트와 loaded count의 상호 배타성을 캡처해 교체했다.                 |
-| 두 route boundary 파일이 file map에 없다는 독립 검토 지적  | 수용 | `src/app/error.tsx`, `src/app/products/error.tsx`의 계획된 소유와 근거를 표에 추가했다.                 |
-| RFC의 기존 유효하지 않은 scope 표기                        | 수용 | 실제 commitlint 유효 커밋인 `docs(week-06): add FSD RFC and behavior baseline`으로 고쳤다.              |
-| Todo 2 standards 검토의 hard violation 없음                | 수용 | 이동 파일, 실제 import, hydration 호출, LSP와 품질 게이트가 저장소 규칙을 만족한다.                     |
-| README/rules의 이전 경로도 Todo 2에서 지우라는 검토 지적   | 반려 | 삭제 대상은 `src/features/cart/**`와 `src/features/wishlist/**`이며 문서 변경은 이 RFC 증거로 제한한다. |
-| Todo 3 기능/design-system 독립 검토의 회귀 없음            | 수용 | 전체 capture, DOM, action, Header 동기화와 FSD 조합이 기준선과 같다고 판정했다.                         |
-| Todo 3 visual/CJK 독립 검토의 회귀 없음                    | 수용 | 네 쌍은 0 pixel diff이고 products desktop 차이는 상품 image raster에만 있다고 판정했다.                 |
+| 검토 항목                                                  | 처리 | 근거                                                                                                     |
+| ---------------------------------------------------------- | ---- | -------------------------------------------------------------------------------------------------------- |
+| 과제의 `_pages` 대신 `views` 사용                          | 수용 | 저장소 FSD 규칙이 route 조합에 `views`를 명시한다.                                                       |
+| 실제 파일 경로 import 사용                                 | 수용 | 저장소 규칙이 습관적 `index.ts` 배럴을 금지한다.                                                         |
+| ProductCard를 entity에 두고 widget에서 action slot 조합    | 수용 | 보이는 control을 유지하면서 entity-to-feature 압력을 제거한다.                                           |
+| slice-root public barrel을 추가하라는 일반 FSD 조언        | 반려 | 저장소의 직접 import 결정과 충돌한다.                                                                    |
+| `src/app/api/**`를 프런트엔드 파일과 함께 이동             | 반려 | 명시적으로 마이그레이션 범위 밖이며 임시 seam은 제거했다.                                                |
+| test cookie 또는 scenario query key를 영구 추가            | 반려 | 사용자 URL/상태 계약과 mock 동작을 바꾼다.                                                               |
+| products 로딩 증거가 loaded 상태를 보인다는 독립 검토 지적 | 수용 | 실제 pending navigation에서 로딩 텍스트와 loaded count의 상호 배타성을 캡처해 교체했다.                  |
+| 두 route boundary 파일이 file map에 없다는 독립 검토 지적  | 수용 | `src/app/error.tsx`, `src/app/products/error.tsx`의 계획된 소유와 근거를 표에 추가했다.                  |
+| RFC의 기존 유효하지 않은 scope 표기                        | 수용 | 실제 commitlint 유효 커밋인 `docs(week-06): add FSD RFC and behavior baseline`으로 고쳤다.               |
+| Todo 2 standards 검토의 hard violation 없음                | 수용 | 이동 파일, 실제 import, hydration 호출, LSP와 품질 게이트가 저장소 규칙을 만족한다.                      |
+| README/rules의 이전 경로도 Todo 2에서 지우라는 검토 지적   | 반려 | 삭제 대상은 `src/features/cart/**`와 `src/features/wishlist/**`이며 문서 변경은 이 RFC 증거로 제한한다.  |
+| Todo 3 기능/design-system 독립 검토의 회귀 없음            | 수용 | 전체 capture, DOM, action, Header 동기화와 FSD 조합이 기준선과 같다고 판정했다.                          |
+| Todo 3 visual/CJK 독립 검토의 회귀 없음                    | 수용 | 네 쌍은 0 pixel diff이고 products desktop 차이는 상품 image raster에만 있다고 판정했다.                  |
+| Todo 4에서 import 수정이 필요하다는 가정                   | 반려 | CodeGraph와 전체 import 감사에서 현재 consumer가 이미 실제 파일 경로와 하향 방향을 만족했다.             |
+| module identity test를 다른 경로 test로 대체하라는 제안    | 반려 | 실제 entity 동작 test와 localhost route 동기화가 사용자 관찰 계약을 직접 증명한다.                       |
+| Todo 4 standards 독립 검토의 위반 없음                     | 수용 | test 삭제와 RFC 변경에서 FSD, lint/format, 접근성, 검증 규칙 위반이나 유의미한 code smell을 찾지 못했다. |
+| Todo 4 spec 독립 검토의 누락과 범위 초과 없음              | 수용 | Todo 4 삭제, 소유권, import, URL/store 증거가 충족되고 Todo 5 source 변경이 없다고 판정했다.             |
 
 사전 두 축 검토에서는 Todo 1 명세 누락을 찾지 못했다. Todo 2 두 축 검토에서도 source
 구현과 저장소 규칙 위반은 없었다. README와 rules의 이전 경로 예시까지 바꾸라는 지적은
 명시된 source 삭제 범위와 RFC-only 문서 범위를 넘어 반려했다. Todo 3의 두 독립 시각
 검토는 전체 최신 capture에서 기능, layout, CJK 회귀를 찾지 못했다. Markdown 형식은
-staged Prettier hook으로 확인한다.
+staged Prettier hook으로 확인한다. Todo 4의 standards/spec 두 축 독립 검토도 tracked
+diff와 evidence를 확인하고 blocking finding 없이 통과했다.
