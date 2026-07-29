@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { cartSelectors, useCartStore } from '@/features/cart/model/CartStore'
+import { cartSelectors, useCartStore } from '@/entities/cart/model/CartStore'
 import {
   useWishlistStore,
   wishlistSelectors,
