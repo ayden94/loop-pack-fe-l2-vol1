@@ -12,7 +12,7 @@ import { ProductListSection } from '@/widgets/product-list/ui/ProductListSection
 export function ProductListView() {
   const { filters, updateFilter, updatePage } = useProductFilters()
 
-  const { data, isPending, isError, error } = useQuery(
+  const productListQuery = useQuery(
     productEntity.getProductList({
       ...filters,
       pageSize: DEFAULT_PAGE_SIZE,
@@ -28,19 +28,14 @@ export function ProductListView() {
       <section className="mb-6">
         <FilterBar
           filters={filters}
-          totalCount={data?.totalCount ?? 0}
+          totalCount={productListQuery.data?.totalCount ?? 0}
           pageSize={DEFAULT_PAGE_SIZE}
           updateFilter={updateFilter}
           updatePage={updatePage}
         />
       </section>
 
-      <ProductListSection
-        data={data}
-        isPending={isPending}
-        isError={isError}
-        error={error}
-      />
+      <ProductListSection query={productListQuery} />
 
       <div className="mt-8">
         <Link
