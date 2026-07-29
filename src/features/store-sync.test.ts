@@ -4,7 +4,7 @@ import { cartSelectors, useCartStore } from '@/entities/cart/model/CartStore'
 import {
   useWishlistStore,
   wishlistSelectors,
-} from '@/features/wishlist/model/WishlistStore'
+} from '@/entities/wishlist/model/WishlistStore'
 
 describe('store instance sharing', () => {
   it('useCartStore is a module singleton', () => {
