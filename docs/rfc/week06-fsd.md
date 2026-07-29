@@ -269,6 +269,36 @@ selector, persistence test와 실제 브라우저 route 동기화를 계약으�
 Todo 5의 retry, throw, 오류 문구, route boundary 정책은 이번 변경에서 시작하지
 않았다.
 
+#### Todo 5 transport와 Query 오류 분류 결과
+
+2026-07-29에 Ky transport와 TanStack Query의 자동 재시도 소유권을 분리했다.
+`ApiErrorResponseSchema`를 먼저 정의하고 `ApiErrorResponse`는
+`z.infer<typeof ApiErrorResponseSchema>`로 파생했다. Ky 2가 `beforeError` 전에
+준비한 `HTTPError.data`만 schema로 parse하며, 이미 소비된 `response.json()`을
+다시 호출하지 않는다. 유효한 payload는 서버 message를 보존하고 malformed shape,
+malformed JSON, non-JSON payload는 status를 보존한 `ApiClientError`와 일반 fallback
+message로 바뀐다. Ky의 `retry: 0` 때문에 한 Query 시도마다 underlying request는
+한 번만 발생한다.
+
+`ApiErrorPolicy`는 화면 문구나 렌더링 결정을 포함하지 않고 두 predicate만 제공한다.
+Query retry callback의 `failureCount`가 첫 retry 판단에서 `0`이라는 TanStack Query
+계약을 사용해 인식된 5xx, `NetworkError`, `TimeoutError`만 한 번 재시도한다.
+`throwOnError`는 인식된 4xx `ApiClientError`에만 false이며 나머지는 모두 true다.
+provider의 QueryClient default가 두 predicate를 소유하고 홈/목록 query options에는
+중복하지 않았다. 기존 Query key, 홈 60초/목록 30초 `staleTime`, refetch 설정은
+변경하지 않았다.
+
+| 검증 항목                  | 결과                                                                                 | 증거                                                       |
+| -------------------------- | ------------------------------------------------------------------------------------ | ---------------------------------------------------------- |
+| 변경 전 기준선             | 7개 test file, 91개 test와 typecheck 통과; Ky 기본 retry와 provider `retry: 1` 확인  | `.omo/evidence/week06-fsd/todo-5/baseline.md`              |
+| transport red/green        | 서버 message 유실·500 3회 시도를 red로 확인하고 최종 7개 test 통과                   | `.omo/evidence/week06-fsd/todo-5/red-green.md`             |
+| 오류 policy red/green      | 18개 중 의도한 6개 실패 뒤 18개 전체 통과                                            | `.omo/evidence/week06-fsd/todo-5/red-green.md`             |
+| provider default red/green | 기존 숫자 retry로 1개 실패 뒤 공유 retry/throw predicate wiring 2개 통과             | `.omo/evidence/week06-fsd/todo-5/red-green.md`             |
+| malformed 2xx              | ProductRepository가 1회 요청 뒤 `ZodError`를 전파하고 Query policy가 재시도하지 않음 | `.omo/evidence/week06-fsd/todo-5/red-green.md`             |
+| route handler 계약         | products/home error는 500, 잘못된 products query는 400과 기존 body를 반환            | `.omo/evidence/week06-fsd/todo-5/curl-handler-contract.md` |
+| 전체 품질 게이트           | test, format, lint, typecheck, build, 최종 check 통과                                | `.omo/evidence/week06-fsd/todo-5/quality-gates.md`         |
+| 실행 자원 정리             | dev PID/port, `.next`, 임시 fixture/report를 정리                                    | `.omo/evidence/week06-fsd/todo-5/cleanup-receipt.md`       |
+
 ### 데이터 모델
 
 | 상태                          | 원본                | 이동 후 소유자                          | 소비자                      | 중복 저장 방지 규칙                                                      |
@@ -321,6 +351,22 @@ private으로 둔다.
 Todo 5는 일반 `ApiErrorPolicy`만 추가한다. Todo 6에서 사용자 문구, 인라인 retry
 상태, route `error.tsx`를 제공한다. 임시 cookie instrumentation으로 기존 UI를
 관찰하더라도 `src/app/api/**`는 마이그레이션 범위 밖이다.
+
+### Todo 5 오류 분류표
+
+| 오류 class/status                   | `retry(0)` | `retry(1)` | `throwOnError` | Todo 5 이후 처리                                                 |
+| ----------------------------------- | ---------- | ---------- | -------------- | ---------------------------------------------------------------- |
+| 인식된 `ApiClientError` 4xx         | false      | false      | false          | Query 오류 상태에 남긴다. 화면 표현과 재시도 UI는 Todo 6 소유다. |
+| 인식된 `ApiClientError` 5xx         | true       | false      | true           | 한 번 재시도한 뒤 route boundary로 전파할 계약이다.              |
+| Ky `NetworkError`                   | true       | false      | true           | 한 번 재시도한 뒤 route boundary로 전파할 계약이다.              |
+| Ky `TimeoutError`                   | true       | false      | true           | 한 번 재시도한 뒤 route boundary로 전파할 계약이다.              |
+| 성공 2xx 뒤 product `ZodError`      | false      | false      | true           | 예상 밖 응답 schema 오류로 전파한다.                             |
+| JSON decoding `SyntaxError`         | false      | false      | true           | 응답 decoding 오류로 전파한다.                                   |
+| 그 밖의 programming/unknown `Error` | false      | false      | true           | 분류하지 않고 예상 밖 오류로 전파한다.                           |
+
+이 표는 shared의 기계적인 class/status 판정만 기록한다. 사용자에게 보일 문구,
+인라인 retry control, `QueryErrorResetBoundary`, route `error.tsx`는 Todo 6 전까지
+추가하지 않는다.
 
 ## 기준선 특성화
 
@@ -441,10 +487,15 @@ RFC 초안에 도움을 주었다. 개발자는 캡처한 selector, 상태 계�
 | module identity test를 다른 경로 test로 대체하라는 제안    | 반려 | 실제 entity 동작 test와 localhost route 동기화가 사용자 관찰 계약을 직접 증명한다.                       |
 | Todo 4 standards 독립 검토의 위반 없음                     | 수용 | test 삭제와 RFC 변경에서 FSD, lint/format, 접근성, 검증 규칙 위반이나 유의미한 code smell을 찾지 못했다. |
 | Todo 4 spec 독립 검토의 누락과 범위 초과 없음              | 수용 | Todo 4 삭제, 소유권, import, URL/store 증거가 충족되고 Todo 5 source 변경이 없다고 판정했다.             |
+| Todo 5 standards 독립 검토의 위반 없음                     | 수용 | transport, policy, provider, test가 저장소 규칙과 FSD 방향을 만족하고 유의미한 code smell이 없다.        |
+| Todo 5 spec 검토의 source 누락과 범위 초과 없음            | 수용 | Todo 5 계약을 충족하고 Todo 6 UI/route boundary 변경이 없다고 판정했다.                                  |
+| ignore된 Todo 5 evidence를 Git에서 볼 수 없다는 지적       | 보정 | 실제 artifact 7개를 직접 확인하고 독립 검토 영수증에 가시성 한계와 해소 결과를 기록했다.                 |
 
 사전 두 축 검토에서는 Todo 1 명세 누락을 찾지 못했다. Todo 2 두 축 검토에서도 source
 구현과 저장소 규칙 위반은 없었다. README와 rules의 이전 경로 예시까지 바꾸라는 지적은
 명시된 source 삭제 범위와 RFC-only 문서 범위를 넘어 반려했다. Todo 3의 두 독립 시각
 검토는 전체 최신 capture에서 기능, layout, CJK 회귀를 찾지 못했다. Markdown 형식은
 staged Prettier hook으로 확인한다. Todo 4의 standards/spec 두 축 독립 검토도 tracked
-diff와 evidence를 확인하고 blocking finding 없이 통과했다.
+diff와 evidence를 확인하고 blocking finding 없이 통과했다. Todo 5 standards/spec 두
+축 검토도 source finding 없이 통과했고 ignore된 evidence 가시성 지적은 실제 artifact
+확인으로 해소했다.
