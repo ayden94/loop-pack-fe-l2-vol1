@@ -4,7 +4,7 @@ import Image from 'next/image'
 
 import type { Product } from '@/entities/product/model/types'
 import { AddToCartButton } from '@/features/add-to-cart/ui/AddToCartButton'
-import { ToggleWishlistButton } from '@/features/wishlist/ui/ToggleWishlistButton'
+import { ToggleWishlistButton } from '@/features/toggle-wishlist/ui/ToggleWishlistButton'
 
 type ProductCardProps = {
   product: Product
