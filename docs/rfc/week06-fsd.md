@@ -113,7 +113,7 @@ import { ProductGrid } from '@/widgets/product-list/ui/ProductGrid'
 
 ```ts
 import { AddToCartButton } from '@/features/add-to-cart'
-// Forbidden when imported by an entity: it crosses from lower entity to upper feature.
+// 도메인 계층에서 가져오면 하위 레이어가 상위 레이어를 향하므로 금지한다.
 import { ToggleWishlistButton } from '@/features/toggle-wishlist/ui/ToggleWishlistButton'
 import { ProductCard } from '@/widgets/product-card/ui/ProductCard'
 ```
