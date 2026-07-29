@@ -299,6 +299,67 @@ provider의 QueryClient default가 두 predicate를 소유하고 홈/목록 quer
 | 전체 품질 게이트           | test, format, lint, typecheck, build, 최종 check 통과                                | `.omo/evidence/week06-fsd/todo-5/quality-gates.md`         |
 | 실행 자원 정리             | dev PID/port, `.next`, 임시 fixture/report를 정리                                    | `.omo/evidence/week06-fsd/todo-5/cleanup-receipt.md`       |
 
+#### Todo 6 인라인 복구와 route 오류 경계 결과
+
+2026-07-29에 기존 `QueryClientProvider` 아래에 `QueryErrorResetBoundary`를 추가했다.
+QueryClient는 `useState(createQueryClient)`로 한 번만 만들며 Todo 5의 공통 retry와
+`throwOnError` predicate를 그대로 상속한다. 홈과 상품 query key, 홈 60초/목록 30초
+`staleTime`은 바꾸지 않았다.
+
+인식된 4xx는 `InlineQueryError`가 각 콘텐츠 소유 영역에서 `role="alert"` 메시지와
+`type="button"` retry를 제공한다. retry는 `refetch`를 호출하고 fetch 중에는 버튼을
+`aria-disabled`로 비활성화해 focus를 유지하며 보이는 이름을 `다시 불러오는 중…`으로
+바꾼다. data 없는 오류를
+refetch하면 Query가 다시 pending이 되므로, 소유 컴포넌트가 오류 문구를 refetch
+Promise 수명 동안 보존해 같은 인라인 영역이 사라지지 않게 했다. 상품 화면에서는
+`FilterBar`가 결과 영역 바깥에 계속 mount되어 4xx 중에도 보인다.
+
+예상 밖 오류는 root와 products의 `error.tsx`로 전파한다. 두 client boundary는
+`Error & { digest?: string }`과 `reset: () => void` 계약을 사용하며 handler에서
+`useQueryErrorResetBoundary().reset()`을 먼저 호출하고 Next `reset()`을 나중에
+호출한다. root `error.tsx`는 같은 segment의 `page.tsx`와 하위 segment만 감싸므로
+`layout.tsx`나 그 안의 Header 오류를 잡지 못한다. 그런 오류는 필요할 때 별도의
+`global-error.tsx` 범위를 설계해야 한다. React Error Boundary는 event handler나
+비동기 callback에서 나중에 throw된 오류도 잡지 않는다. 현재 cart/wishlist의 로컬
+handler에는 원격 실패가 없고, 향후 생기면 handler 내부에서 예상 실패를 로컬 상태로
+처리하고 예상 밖 오류는 호출 경계의 명시적 보고 경로로 전달한다.
+
+로딩 소유권은 그대로다. 홈 Query 초기 로딩은 `HomeView`의 `isPending`이 맡는다.
+상품 route 전환은 `src/app/products/loading.tsx`가 맡고, 상품 Query pending은
+FilterBar를 유지한 결과 영역만 바꾼다. root에는 server-suspending 작업이 없으므로
+`src/app/loading.tsx`를 추가하지 않았다.
+
+| 실패/검증                | 직접 URL, cookie 또는 차단 방법                                                     | 기대 UI와 실제 UI                                                                                 | 복구와 요청 수                                                                                                     |
+| ------------------------ | ----------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| handler home empty/error | `/api/home?scenario=empty`, `/api/home?scenario=error`                              | 200 빈 배열, 500 한국어 오류 payload를 반환했다. UI 검증으로 해석하지 않았다.                     | handler-only 증거이며 reset 없음.                                                                                  |
+| handler products         | `/api/products?scenario=empty`, `/api/products?scenario=error`, 잘못된 sort         | 각각 200 빈 목록, 500 오류, 400 요청 조건 payload를 반환했다.                                     | handler-only 증거이며 reset 없음.                                                                                  |
+| 홈 400                   | `week06-todo6-scenario=400` 뒤 `/`, 화면 reload 없이 cookie 삭제                    | 홈 main 안 alert와 retry가 보였다.                                                                | 자동 retry 0회, 최초 1회. pointer/Enter retry 1회 뒤 성공했고 document marker와 navigation entry 1개가 유지됐다.   |
+| 상품 400                 | 같은 cookie 뒤 `/products?q=todo6400`, 화면 reload 없이 cookie 삭제                 | FilterBar 전체가 남고 결과 영역만 alert와 retry로 교체됐다.                                       | 자동 retry 0회, 최초 1회. Space/pointer retry 1회 뒤 성공했고 문서 reload가 없었다.                                |
+| 홈/상품 500              | `week06-todo6-scenario=500`, fallback에서 cookie 삭제                               | route별 `표시하지 못했습니다.` 제목과 retry가 보였다.                                             | 각 initial+Query retry 정확히 2회 뒤 fallback, Query reset→Next reset 뒤 1회 성공했다.                             |
+| 홈/상품 schema-invalid   | `week06-todo6-scenario=schema-invalid`인 유효하지 않은 2xx body                     | 각 route fallback으로 전파됐다.                                                                   | 각 최초 1회로 retry 없음. cookie 삭제 뒤 reset 1회로 성공했다.                                                     |
+| 홈/상품 transport        | Playwright로 정확한 `/api/home` 또는 `/api/products` initial+retry 요청을 abort     | `navigator.onLine === true`인 상태에서 각 route fallback으로 전파됐다.                            | 각 2회 실패 뒤 차단을 해제하고 reset 1회로 성공했다.                                                               |
+| 홈/상품 render           | 임시 render cookie의 home/products 값과 view `TypeError`                            | root와 products fallback이 각각 나타났다.                                                         | cookie와 throw 제거 뒤 pointer/Enter reset으로 성공했고 fixture 문자열은 source에서 0건이었다.                     |
+| retry pending            | 실패 cookie만 삭제하고 별도 임시 slow cookie를 유지한 뒤 retry                      | 같은 alert 안 버튼이 비활성 상태이며 `다시 불러오는 중…`으로 바뀌었다.                            | 1.5초 구간에서 홈 Enter와 상품 pointer로 직접 관찰했다.                                                            |
+| focus/반응형             | 375x812, 768x900, 1280x900에서 400/500 12개 캡처, Tab/Shift+Tab/Enter/Space/pointer | 가로 overflow 0, alert 1개, 상품 400 FilterBar 유지, mobile 한국어 줄바꿈 수정 뒤 전체 시각 통과. | focus outline `2px`, offset `2px`; button/message/outline contrast `15.92:1`/`5.44:1`/`18.76:1`; target `85.9x40`. |
+| 잘못된 cookie            | `week06-todo6-scenario=malformed-cookie-value`                                      | override를 선택하지 않고 정상 빈 검색 결과와 retry 0개를 보였다.                                  | 정상 요청 1회로 끝났다.                                                                                            |
+
+Todo 6 변경 전 수동 red는 retry control과 두 route `error.tsx`가 없음을 확인했다.
+Todo 1 원래 기준선에서는 400/500/schema가 모두 인라인이었지만 Todo 5의
+`throwOnError` 연결 뒤 Todo 6 직전 재확인에서는 400만 인라인에 남고 500/schema는
+Next 기본 `This page couldn’t load`로 전파됐다. 이 차이를 숨기지 않고
+`.omo/evidence/week06-fsd/todo-6/baseline/observation.md`에 두 단계로 기록했다.
+
+독립 시각 검토 두 번은 12개 전체 최신 캡처를 읽고 각각 `PASS`, blocker 0건을
+반환했다. WCAG 2.2 AA 범위 검토도 `AA-ready`였고 남은 manual-needed 두 항목은
+실제 Tab 왕복과 contrast 계산으로 닫았다. forced error의 Next 개발 overlay와 console
+오류는 개발 오류 표시라는 한계가 있어 캡처에서는 product가 아닌 dev portal만
+제거했고, 성공 뒤 새 정상 session에서 console/network를 별도로 확인한다.
+
+임시 cookie handler, slow delay, render throw, Playwright abort route는 모두 제거했다.
+`git diff -- src/app/api`와 fixture 문자열 scan은 출력이 없으며, 최종 commit range와
+API history도 다시 검사한다. 상세 요청 수, marker, capture와 cleanup은
+`.omo/evidence/week06-fsd/todo-6/` 아래에 있다.
+
 ### 데이터 모델
 
 | 상태                          | 원본                | 이동 후 소유자                          | 소비자                      | 중복 저장 방지 규칙                                                      |
@@ -490,6 +551,13 @@ RFC 초안에 도움을 주었다. 개발자는 캡처한 selector, 상태 계�
 | Todo 5 standards 독립 검토의 위반 없음                     | 수용 | transport, policy, provider, test가 저장소 규칙과 FSD 방향을 만족하고 유의미한 code smell이 없다.        |
 | Todo 5 spec 검토의 source 누락과 범위 초과 없음            | 수용 | Todo 5 계약을 충족하고 Todo 6 UI/route boundary 변경이 없다고 판정했다.                                  |
 | ignore된 Todo 5 evidence를 Git에서 볼 수 없다는 지적       | 보정 | 실제 artifact 7개를 직접 확인하고 독립 검토 영수증에 가시성 한계와 해소 결과를 기록했다.                 |
+| Todo 6 시각 기능 검토의 blocker 없음                       | 수용 | 12개 전체 화면에서 인라인/route 분리, FilterBar, focus style과 token 사용을 확인했다.                    |
+| Todo 6 시각/CJK 검토의 blocker 없음                        | 수용 | mobile 어절 수정 뒤 12개 전체 캡처가 clipping, overflow, 개발 chrome 없이 통과했다.                      |
+| Todo 6 WCAG 검토의 `AA-ready`                              | 수용 | contrast, Tab 왕복, focus 비가림 manual gap을 실제 browser 측정으로 추가 확인했다.                       |
+| Todo 6 standards 검토의 중복 retry 지적                    | 수용 | 두 owner의 state machine을 `useInlineQueryRetry` 한곳으로 모았다.                                        |
+| Todo 6 standards 검토의 RFC table pipe 지적                | 수용 | cell의 literal pipe를 제거하고 네 열 table로 다시 작성했다.                                              |
+| Todo 6 spec 검토의 native disabled focus 지적              | 수용 | guarded `aria-disabled`로 중복 실행을 막고 pending focus와 outline 유지까지 browser에서 재검증했다.      |
+| Todo 6 spec 검토의 DESIGN 문서 범위 초과 지적              | 수용 | 새 token이 없는 focused UI이므로 선택적 Query recovery 문단을 제거했다.                                  |
 
 사전 두 축 검토에서는 Todo 1 명세 누락을 찾지 못했다. Todo 2 두 축 검토에서도 source
 구현과 저장소 규칙 위반은 없었다. README와 rules의 이전 경로 예시까지 바꾸라는 지적은
@@ -498,4 +566,6 @@ RFC 초안에 도움을 주었다. 개발자는 캡처한 selector, 상태 계�
 staged Prettier hook으로 확인한다. Todo 4의 standards/spec 두 축 독립 검토도 tracked
 diff와 evidence를 확인하고 blocking finding 없이 통과했다. Todo 5 standards/spec 두
 축 검토도 source finding 없이 통과했고 ignore된 evidence 가시성 지적은 실제 artifact
-확인으로 해소했다.
+확인으로 해소했다. Todo 6의 두 시각 검토와 WCAG 검토는 blocker 없이 통과했다. standards와
+spec 검토가 찾은 중복 hook, table, focus, 문서 범위 지적은 모두 반영한 뒤 같은 품질
+게이트와 browser 복구를 다시 실행했다.
