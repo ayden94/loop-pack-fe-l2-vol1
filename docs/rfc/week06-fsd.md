@@ -581,19 +581,47 @@ import하거나 상태를 소비하지 않아 수정하지 않는다. 기존 브
 
 ### 신상품 badge 추가
 
-최소 변경 예측은 `src/entities/product/ui/ProductCard.tsx` 한 파일이다.
-`src/entities/product/model/ResponseSchema.ts`의 `productSchema`가 이미
-`createdAt: z.string()`을 검증하고, `Product` 타입은 이 schema에서 파생된다. 홈의
-`popularProducts`·`newProducts`와 상품 목록의 `products`가 모두 같은 `Product`를
-`ProductGrid`에서 카드로 전달한다. 현재 home/products handler도 같은 ISO 시각 문자열을
-`Date.parse`로 정렬하므로 추가 API/model 변환이 필요하지 않다.
+현재 mock만 대상으로 한 prototype과 신뢰 가능한 제품 계약의 변경 반경은 다르다.
 
-카드가 `createdAt`과 현재 시각으로 신상품 기준을 계산하고 이미지 영역에 badge를
-표현하면 홈과 목록에 같은 규칙이 적용된다. 따라서 `ProductGrid`, `HomeView`,
-`ProductListView`, `ProductRepository`, `ProductService`, route handler는 수정하지 않는다.
-신상품 판정 기준을 여러 표현이 공유하게 되는 요구가 생길 때만 product entity 내부
-model로 승격한다. 현재 데이터와 단일 소비 범위에서는 entity UI 한 파일이 가장 작은
-확정 변경 반경이다.
+#### 현재 mock prototype
+
+현재 `src/app/api/_data/commerce.ts`의 30개 `createdAt` 값은 모두 `Date.parse`가 해석하는
+ISO 시각 문자열이다. home/products handler도 같은 값을 정렬에 사용한다. 이 고정된 mock
+데이터만 대상으로 badge를 시연한다면
+`src/entities/product/ui/ProductCard.tsx` 한 파일에서 표시할 수 있다.
+
+다만 `src/entities/product/model/ResponseSchema.ts`의 현재 계약은
+`createdAt: z.string()`뿐이다. 임의 문자열도 schema를 통과하므로 현재 fixture의 형태를
+외부 상품 응답의 ISO datetime 보장으로 해석할 수 없다. 따라서 한 파일 범위는 현재
+mock을 이용한 prototype에만 유효하다.
+
+#### 신뢰 가능한 제품 계약
+
+신뢰 가능한 범위는 product entity 안의 다음 다섯 파일이다.
+
+- `src/entities/product/model/ResponseSchema.ts`: `createdAt`을 ISO datetime으로
+  검증해 잘못된 외부 날짜 문자열을 repository 경계에서 거부한다.
+- `src/entities/product/model/ResponseSchema.test.ts`: 유효한 ISO datetime의 통과와
+  임의 문자열·잘못된 날짜의 거부를 회귀 테스트로 고정한다.
+- `src/entities/product/model/ProductNewness.ts`: 제품 정책으로 확정한 고정 N일과
+  주입된 `referenceNow`를 받아 신상품 여부를 반환하는 순수 규칙을 둔다. 이 규칙은
+  system clock을 내부에서 읽지 않는다.
+- `src/entities/product/model/ProductNewness.test.ts`: 고정한 `referenceNow`로 N일 경계
+  직전·경계·직후와 미래 시각을 검증해 실행 시각과 무관한 결과를 보장한다.
+- `src/entities/product/ui/ProductCard.tsx`: client mount effect에서 `referenceNow`를 한
+  번 상태로 고정하고 순수 규칙에 전달한다. 기준시각이 생기기 전에는 badge를 렌더링하지
+  않으며 render마다 `Date.now()`를 호출하지 않는다.
+
+badge를 홈과 상품 목록에 공통 적용하므로 현재 구조에서는 `ProductGrid`, `HomeView`,
+`ProductListView`, `ProductRepository`, `ProductService`, API route handler를 바꿀 필요가
+없다. schema가 검증한 `Product.createdAt`과 product entity의 순수 판정 규칙을 카드가
+소비하면 현재 두 화면에 같은 기준이 적용된다.
+
+현재 상품 데이터는 client Query가 완료된 뒤 렌더된다. mount 전후의 첫 markup에는
+badge가 없고 effect 뒤에만 판정하므로 render 시각에 따른 초기 hydration 차이를 만들지
+않는다. 나중에 server-rendered initial data에서 첫 HTML부터 badge를 보여주려면 각 카드가
+서로 다른 clock을 읽게 두지 않는다. request마다 한 번 고정한 `referenceNow`를 모든 카드에
+전달해야 하며, 이때는 `ProductGrid`나 view까지 전달 경로가 확장될 수 있다.
 
 ## FSD 이해 확인 답변
 
@@ -618,43 +646,47 @@ model로 승격한다. 현재 데이터와 단일 소비 범위에서는 entity 
 ## AI 지원과 검토 기록
 
 AI는 코드베이스 inventory, 기준선 브라우저 절차, 임시 미커밋 instrumentation,
-RFC 초안에 도움을 주었다. 개발자는 캡처한 selector, 상태 계약, source ownership,
-임시 handler diff, cleanup receipt를 직접 검토했다.
+RFC 초안에 도움을 주었다. AI 실행 에이전트가 명령과 브라우저 흐름을 실행하고 캡처한
+selector, 상태 계약, source ownership, 임시 handler diff, cleanup receipt를
+교차 확인했다. 독립 검토 에이전트는 기록과 최종 소스를 다시 대조했다. 최종 사람 검토와
+승인은 아직 대기 중이다.
 
-| 검토 항목                                                  | 처리 | 근거                                                                                                       |
-| ---------------------------------------------------------- | ---- | ---------------------------------------------------------------------------------------------------------- |
-| 과제의 `_pages` 대신 `views` 사용                          | 수용 | 저장소 FSD 규칙이 route 조합에 `views`를 명시한다.                                                         |
-| 실제 파일 경로 import 사용                                 | 수용 | 저장소 규칙이 습관적 `index.ts` 배럴을 금지한다.                                                           |
-| ProductCard를 entity에 두고 widget에서 action slot 조합    | 수용 | 보이는 control을 유지하면서 entity-to-feature 압력을 제거한다.                                             |
-| slice-root public barrel을 추가하라는 일반 FSD 조언        | 반려 | 저장소의 직접 import 결정과 충돌한다.                                                                      |
-| `src/app/api/**`를 프런트엔드 파일과 함께 이동             | 반려 | 명시적으로 마이그레이션 범위 밖이며 임시 seam은 제거했다.                                                  |
-| test cookie 또는 scenario query key를 영구 추가            | 반려 | 사용자 URL/상태 계약과 mock 동작을 바꾼다.                                                                 |
-| products 로딩 증거가 loaded 상태를 보인다는 독립 검토 지적 | 수용 | 실제 pending navigation에서 로딩 텍스트와 loaded count의 상호 배타성을 캡처해 교체했다.                    |
-| 두 route boundary 파일이 file map에 없다는 독립 검토 지적  | 수용 | `src/app/error.tsx`, `src/app/products/error.tsx`의 계획된 소유와 근거를 표에 추가했다.                    |
-| RFC의 기존 유효하지 않은 scope 표기                        | 수용 | 실제 commitlint 유효 커밋인 `docs(week-06): add FSD RFC and behavior baseline`으로 고쳤다.                 |
-| Todo 2 standards 검토의 hard violation 없음                | 수용 | 이동 파일, 실제 import, hydration 호출, LSP와 품질 게이트가 저장소 규칙을 만족한다.                        |
-| README/rules의 이전 경로도 Todo 2에서 지우라는 검토 지적   | 반려 | 삭제 대상은 `src/features/cart/**`와 `src/features/wishlist/**`이며 문서 변경은 이 RFC 증거로 제한한다.    |
-| Todo 3 기능/design-system 독립 검토의 회귀 없음            | 수용 | 전체 capture, DOM, action, Header 동기화와 FSD 조합이 기준선과 같다고 판정했다.                            |
-| Todo 3 visual/CJK 독립 검토의 회귀 없음                    | 수용 | 네 쌍은 0 pixel diff이고 products desktop 차이는 상품 image raster에만 있다고 판정했다.                    |
-| Todo 4에서 import 수정이 필요하다는 가정                   | 반려 | CodeGraph와 전체 import 감사에서 현재 consumer가 이미 실제 파일 경로와 하향 방향을 만족했다.               |
-| module identity test를 다른 경로 test로 대체하라는 제안    | 반려 | 실제 entity 동작 test와 localhost route 동기화가 사용자 관찰 계약을 직접 증명한다.                         |
-| Todo 4 standards 독립 검토의 위반 없음                     | 수용 | test 삭제와 RFC 변경에서 FSD, lint/format, 접근성, 검증 규칙 위반이나 유의미한 code smell을 찾지 못했다.   |
-| Todo 4 spec 독립 검토의 누락과 범위 초과 없음              | 수용 | Todo 4 삭제, 소유권, import, URL/store 증거가 충족되고 Todo 5 source 변경이 없다고 판정했다.               |
-| Todo 5 standards 독립 검토의 위반 없음                     | 수용 | transport, policy, provider, test가 저장소 규칙과 FSD 방향을 만족하고 유의미한 code smell이 없다.          |
-| Todo 5 spec 검토의 source 누락과 범위 초과 없음            | 수용 | Todo 5 계약을 충족하고 Todo 6 UI/route boundary 변경이 없다고 판정했다.                                    |
-| ignore된 Todo 5 evidence를 Git에서 볼 수 없다는 지적       | 보정 | 실제 artifact 7개를 직접 확인하고 독립 검토 영수증에 가시성 한계와 해소 결과를 기록했다.                   |
-| Todo 6 시각 기능 검토의 blocker 없음                       | 수용 | 12개 전체 화면에서 인라인/route 분리, FilterBar, focus style과 token 사용을 확인했다.                      |
-| Todo 6 시각/CJK 검토의 blocker 없음                        | 수용 | mobile 어절 수정 뒤 12개 전체 캡처가 clipping, overflow, 개발 chrome 없이 통과했다.                        |
-| Todo 6 WCAG 검토의 `AA-ready`                              | 수용 | contrast, Tab 왕복, focus 비가림 manual gap을 실제 browser 측정으로 추가 확인했다.                         |
-| Todo 6 standards 검토의 중복 retry 지적                    | 수용 | 두 owner의 state machine을 `useInlineQueryRetry` 한곳으로 모았다.                                          |
-| Todo 6 standards 검토의 RFC table pipe 지적                | 수용 | cell의 literal pipe를 제거하고 네 열 table로 다시 작성했다.                                                |
-| Todo 6 spec 검토의 native disabled focus 지적              | 수용 | guarded `aria-disabled`로 중복 실행을 막고 pending focus와 outline 유지까지 browser에서 재검증했다.        |
-| Todo 6 spec 검토의 DESIGN 문서 범위 초과 지적              | 수용 | 새 token이 없는 focused UI이므로 선택적 Query recovery 문단을 제거했다.                                    |
-| Todo 7 시각 이중 검토의 42개 화면 회귀 없음                | 수용 | 최종 source 복원 뒤 만든 42개 PNG를 두 검토가 모두 PASS로 판정했다.                                        |
-| Todo 7 WCAG 검토의 범위 한정 `AA-ready`                    | 수용 | keyboard, accessibility tree, reflow, contrast, target 근거가 있는 범위에만 한정했다.                      |
-| Todo 7 검토의 명령 순서 누락 지적                          | 반려 | 직접 요구한 명령 순서대로 이미 실행했으며 reviewer가 plan 순서를 우선해 생긴 오판이었다.                   |
-| Todo 7 검토의 remote parity 누락 지적                      | 반려 | 갱신된 cleanup receipt에서 local/upstream/remote `c2cfa06` 일치를 확인한 뒤 stale 지적으로 판정했다.       |
-| Todo 8 wishlist와 badge 변경 반경 예측                     | 수용 | CodeGraph의 최종 import·data 흐름을 실제 파일과 대조해 삭제 3개, 조합 수정 2개, badge 수정 1개로 확정했다. |
+| 검토 항목                                                       | 처리 | 근거                                                                                                     |
+| --------------------------------------------------------------- | ---- | -------------------------------------------------------------------------------------------------------- |
+| 과제의 `_pages` 대신 `views` 사용                               | 수용 | 저장소 FSD 규칙이 route 조합에 `views`를 명시한다.                                                       |
+| 실제 파일 경로 import 사용                                      | 수용 | 저장소 규칙이 습관적 `index.ts` 배럴을 금지한다.                                                         |
+| ProductCard를 entity에 두고 widget에서 action slot 조합         | 수용 | 보이는 control을 유지하면서 entity-to-feature 압력을 제거한다.                                           |
+| slice-root public barrel을 추가하라는 일반 FSD 조언             | 반려 | 저장소의 직접 import 결정과 충돌한다.                                                                    |
+| `src/app/api/**`를 프런트엔드 파일과 함께 이동                  | 반려 | 명시적으로 마이그레이션 범위 밖이며 임시 seam은 제거했다.                                                |
+| test cookie 또는 scenario query key를 영구 추가                 | 반려 | 사용자 URL/상태 계약과 mock 동작을 바꾼다.                                                               |
+| products 로딩 증거가 loaded 상태를 보인다는 독립 검토 지적      | 수용 | 실제 pending navigation에서 로딩 텍스트와 loaded count의 상호 배타성을 캡처해 교체했다.                  |
+| 두 route boundary 파일이 file map에 없다는 독립 검토 지적       | 수용 | `src/app/error.tsx`, `src/app/products/error.tsx`의 계획된 소유와 근거를 표에 추가했다.                  |
+| RFC의 기존 유효하지 않은 scope 표기                             | 수용 | 실제 commitlint 유효 커밋인 `docs(week-06): add FSD RFC and behavior baseline`으로 고쳤다.               |
+| Todo 2 standards 검토의 hard violation 없음                     | 수용 | 이동 파일, 실제 import, hydration 호출, LSP와 품질 게이트가 저장소 규칙을 만족한다.                      |
+| README/rules의 이전 경로도 Todo 2에서 지우라는 검토 지적        | 반려 | 삭제 대상은 `src/features/cart/**`와 `src/features/wishlist/**`이며 문서 변경은 이 RFC 증거로 제한한다.  |
+| Todo 3 기능/design-system 독립 검토의 회귀 없음                 | 수용 | 전체 capture, DOM, action, Header 동기화와 FSD 조합이 기준선과 같다고 판정했다.                          |
+| Todo 3 visual/CJK 독립 검토의 회귀 없음                         | 수용 | 네 쌍은 0 pixel diff이고 products desktop 차이는 상품 image raster에만 있다고 판정했다.                  |
+| Todo 4에서 import 수정이 필요하다는 가정                        | 반려 | CodeGraph와 전체 import 감사에서 현재 consumer가 이미 실제 파일 경로와 하향 방향을 만족했다.             |
+| module identity test를 다른 경로 test로 대체하라는 제안         | 반려 | 실제 entity 동작 test와 localhost route 동기화가 사용자 관찰 계약을 직접 증명한다.                       |
+| Todo 4 standards 독립 검토의 위반 없음                          | 수용 | test 삭제와 RFC 변경에서 FSD, lint/format, 접근성, 검증 규칙 위반이나 유의미한 code smell을 찾지 못했다. |
+| Todo 4 spec 독립 검토의 누락과 범위 초과 없음                   | 수용 | Todo 4 삭제, 소유권, import, URL/store 증거가 충족되고 Todo 5 source 변경이 없다고 판정했다.             |
+| Todo 5 standards 독립 검토의 위반 없음                          | 수용 | transport, policy, provider, test가 저장소 규칙과 FSD 방향을 만족하고 유의미한 code smell이 없다.        |
+| Todo 5 spec 검토의 source 누락과 범위 초과 없음                 | 수용 | Todo 5 계약을 충족하고 Todo 6 UI/route boundary 변경이 없다고 판정했다.                                  |
+| ignore된 Todo 5 evidence를 Git에서 볼 수 없다는 지적            | 보정 | AI 실행 에이전트가 artifact 7개를 확인하고 독립 검토 영수증에 가시성 한계와 해소 결과를 기록했다.        |
+| Todo 6 시각 기능 검토의 blocker 없음                            | 수용 | 12개 전체 화면에서 인라인/route 분리, FilterBar, focus style과 token 사용을 확인했다.                    |
+| Todo 6 시각/CJK 검토의 blocker 없음                             | 수용 | mobile 어절 수정 뒤 12개 전체 캡처가 clipping, overflow, 개발 chrome 없이 통과했다.                      |
+| Todo 6 WCAG 검토의 `AA-ready`                                   | 수용 | contrast, Tab 왕복, focus 비가림 manual gap을 실제 browser 측정으로 추가 확인했다.                       |
+| Todo 6 standards 검토의 중복 retry 지적                         | 수용 | 두 owner의 state machine을 `useInlineQueryRetry` 한곳으로 모았다.                                        |
+| Todo 6 standards 검토의 RFC table pipe 지적                     | 수용 | cell의 literal pipe를 제거하고 네 열 table로 다시 작성했다.                                              |
+| Todo 6 spec 검토의 native disabled focus 지적                   | 수용 | guarded `aria-disabled`로 중복 실행을 막고 pending focus와 outline 유지까지 browser에서 재검증했다.      |
+| Todo 6 spec 검토의 DESIGN 문서 범위 초과 지적                   | 수용 | 새 token이 없는 focused UI이므로 선택적 Query recovery 문단을 제거했다.                                  |
+| Todo 7 시각 이중 검토의 42개 화면 회귀 없음                     | 수용 | 최종 source 복원 뒤 만든 42개 PNG를 두 검토가 모두 PASS로 판정했다.                                      |
+| Todo 7 WCAG 검토의 범위 한정 `AA-ready`                         | 수용 | keyboard, accessibility tree, reflow, contrast, target 근거가 있는 범위에만 한정했다.                    |
+| Todo 7 검토의 명령 순서 누락 지적                               | 반려 | 직접 요구한 명령 순서대로 이미 실행했으며 reviewer가 plan 순서를 우선해 생긴 오판이었다.                 |
+| Todo 7 검토의 remote parity 누락 지적                           | 반려 | 갱신된 cleanup receipt에서 local/upstream/remote `c2cfa06` 일치를 확인한 뒤 stale 지적으로 판정했다.     |
+| Todo 8 wishlist 삭제 반경과 응집도 판정                         | 수용 | CodeGraph의 최종 import 흐름을 대조해 삭제 3개와 조합 수정 2개로 확정했다.                               |
+| Todo 8 badge 한 파일 예측이 schema·clock 계약을 누락했다는 지적 | 수용 | mock prototype과 신뢰 가능한 범위를 분리하고 ISO schema, 순수 규칙·테스트, 고정 기준시각을 추가했다.     |
+| Todo 8의 실행·검증 주체 표기가 부정확하다는 지적                | 수용 | 실행·교차 확인 주체를 AI 에이전트로 바로잡고 최종 사람 검토·승인을 대기 상태로 명시했다.                 |
 
 사전 두 축 검토에서는 Todo 1 명세 누락을 찾지 못했다. Todo 2 두 축 검토에서도 source
 구현과 저장소 규칙 위반은 없었다. README와 rules의 이전 경로 예시까지 바꾸라는 지적은

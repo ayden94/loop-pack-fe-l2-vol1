@@ -105,10 +105,11 @@ widgets/product-list/ui/ProductGrid.tsx
 ### AI 활용과 검토
 
 - AI 지원 영역: 코드베이스 inventory, FSD 파일 배치 후보, 오류 정책 검토, 브라우저 검증 절차, RFC와 PR 초안
-- 개발자 확인: 모든 import와 경로를 최종 소스에서 대조하고, 테스트·빌드·브라우저 흐름·cleanup·Git parity를 직접 확인했습니다.
+- AI 실행 및 교차 확인: 실행 에이전트와 독립 검토 에이전트가 import, 경로, 테스트·빌드 결과, 브라우저 evidence, cleanup, Git parity를 최종 소스와 대조했습니다.
 - 수용한 의견: `views` 사용, 실제 파일 경로 import, entity `ProductCard`와 widget action 조합, route boundary 파일 매핑, 공통 retry hook, `aria-disabled` focus 유지, 범위 한정 AA-ready 판정
 - 반려한 의견: 저장소 규칙과 충돌하는 slice-root barrel, 범위 밖 `src/app/api/**` 이동, 영구 test cookie/query key, 약한 module identity 대체 테스트, 직접 요구와 다른 명령 순서 지적, 갱신 전 증거를 읽은 parity 지적
-- 한계: 실제 screen reader 음성, 원격 CI, reviewer 승인 결과는 확인하지 않았습니다.
+- 최종 사람 검토: 아직 수행하지 않았으며 승인도 대기 중입니다.
+- 한계: 실제 screen reader 음성과 원격 CI 결과는 확인하지 않았습니다.
 
 ## 🤔 고민한 점 / 막혔던 부분
 
@@ -116,7 +117,12 @@ widgets/product-list/ui/ProductGrid.tsx
 
 - wishlist 제거는 entity model/test와 toggle feature를 삭제하고 Header와 ProductGrid 조합만 수정하면 됩니다. shared, product-filter, product API, route 변경이 없어 최종 응집도는 충분하다고 판단했습니다.
 - Header 집계와 ProductGrid action에 cart/wishlist가 함께 나타나는 파편화는 상위 widget의 조합 책임이며, 두 기능의 대칭을 유지하기 위해 받아들였습니다.
-- 신상품 badge는 `Product.createdAt`이 이미 schema와 응답에 있고 home/products 정렬에도 쓰이므로 `entities/product/ui/ProductCard.tsx` 한 파일에서 구현할 수 있다고 예측했습니다. API, model, widget, view 변경은 필요하지 않습니다.
+- 신상품 badge 변경 반경:
+  - 현재 30개 mock fixture는 ISO 시각이므로 prototype은 `ProductCard.tsx` 한 파일에서 표시할 수 있습니다.
+  - 신뢰 가능한 기능은 `ResponseSchema.ts`와 `ResponseSchema.test.ts`에서 ISO datetime 계약을 보장해야 합니다.
+  - `ProductNewness.ts`와 `ProductNewness.test.ts`는 고정 N일과 주입된 `referenceNow`를 사용하는 순수 규칙과 경계값을 검증합니다. `ProductCard.tsx`는 client mount effect에서 기준시각을 한 번 고정하고, 그전에는 badge를 숨겨 초기 hydration 차이를 만들지 않으며 render마다 clock을 다시 읽지 않습니다.
+  - badge를 홈과 상품 목록에 공통 적용하므로 현재는 API handler, repository/service, widget, view 변경이 필요하지 않습니다.
+  - 나중에 server-rendered initial data를 도입하면 request 단위 기준시각을 상위 조합에서 전달해야 하므로 변경 반경이 넓어질 수 있습니다.
 - root `error.tsx`가 layout/Header 오류를 잡지 못하는 점과 실제 screen reader 음성을 검증하지 않은 점은 남은 한계입니다.
 - 375 px의 긴 상품명과 가격 단위 줄바꿈은 기존 기준선과 같고 overflow나 clipping이 늘지 않아 이번 구조 리팩터링에서 수정하지 않았습니다.
 
@@ -127,5 +133,5 @@ widgets/product-list/ui/ProductGrid.tsx
 - `ProductCard`의 작은 인터페이스와 `ProductGrid`의 action 조합이 entity/feature/widget 책임을 충분히 분리했는지 확인해주세요.
 - cart/wishlist 상태를 entity model에 두고 action UI만 feature로 둔 기준이 적절한지 확인해주세요.
 - 4xx 인라인 복구와 5xx/transport/schema route boundary 분류, Query reset 뒤 Next reset 순서가 자연스러운지 확인해주세요.
-- wishlist 삭제와 신상품 badge 예측이 실제 변경 반경을 충분히 드러내는지 확인해주세요.
+- wishlist 삭제 반경과 신상품 badge의 `ResponseSchema`, `ProductNewness` 규칙·테스트, `ProductCard` 표현 범위가 충분한지 확인해주세요.
 - 실제 screen reader 음성 없이 accessibility tree와 keyboard 근거로 범위를 한정한 `AA-ready` 표현이 과장되지 않았는지 확인해주세요.
