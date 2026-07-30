@@ -9,10 +9,12 @@ import { ProductGrid } from '@/widgets/product-list/ui/ProductGrid'
 
 type ProductListSectionProps = {
   readonly query: UseQueryResult<ProductListResponse>
+  readonly scope: string
 }
 
-export function ProductListSection({ query }: ProductListSectionProps) {
+export function ProductListSection({ query, scope }: ProductListSectionProps) {
   const inlineQueryRetry = useInlineQueryRetry({
+    scope,
     isFetching: query.isFetching,
     refetch: query.refetch,
   })

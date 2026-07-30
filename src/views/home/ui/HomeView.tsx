@@ -29,7 +29,11 @@ export function HomeView() {
   const { data, isPending, isError, error, isFetching, refetch } = useQuery(
     productEntity.getHome(),
   )
-  const inlineQueryRetry = useInlineQueryRetry({ isFetching, refetch })
+  const inlineQueryRetry = useInlineQueryRetry({
+    scope: 'home',
+    isFetching,
+    refetch,
+  })
   const retryErrorMessage = inlineQueryRetry.message
 
   if (retryErrorMessage !== null) {

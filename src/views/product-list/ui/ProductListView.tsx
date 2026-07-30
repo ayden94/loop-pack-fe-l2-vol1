@@ -11,12 +11,14 @@ import { ProductListSection } from '@/widgets/product-list/ui/ProductListSection
 
 export function ProductListView() {
   const { filters, updateFilter, updatePage } = useProductFilters()
+  const productListQueryInput = {
+    ...filters,
+    pageSize: DEFAULT_PAGE_SIZE,
+  }
+  const productListScope = JSON.stringify(productListQueryInput)
 
   const productListQuery = useQuery(
-    productEntity.getProductList({
-      ...filters,
-      pageSize: DEFAULT_PAGE_SIZE,
-    }),
+    productEntity.getProductList(productListQueryInput),
   )
 
   return (
@@ -35,7 +37,7 @@ export function ProductListView() {
         />
       </section>
 
-      <ProductListSection query={productListQuery} />
+      <ProductListSection query={productListQuery} scope={productListScope} />
 
       <div className="mt-8">
         <Link
