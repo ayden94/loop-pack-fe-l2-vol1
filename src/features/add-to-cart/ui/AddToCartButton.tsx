@@ -1,6 +1,6 @@
 'use client'
 
-import { cartSelectors, useCartStore } from '@/features/cart/model/CartStore'
+import { cartSelectors, useCartStore } from '@/entities/cart/model/CartStore'
 
 type AddToCartButtonProps = {
   productId: string

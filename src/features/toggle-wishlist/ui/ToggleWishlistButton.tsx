@@ -3,7 +3,7 @@
 import {
   useWishlistStore,
   wishlistSelectors,
-} from '@/features/wishlist/model/WishlistStore'
+} from '@/entities/wishlist/model/WishlistStore'
 
 type ToggleWishlistButtonProps = {
   productId: string
