@@ -232,13 +232,51 @@ LCP candidate가 run마다 바뀐 것은 무효 사유가 아니다. 유효 run�
 - 먼저 시도할 가장 작은 변경: Todo 6에서 인과를 확정한 뒤 mandatory semantic shell
   boundary만 먼저 실험한다. 이미지 변경은 displayed-candidate audit 전에는 하지 않는다.
 
+### LCP causal attribution
+
+| 근거                 | 관찰한 사실                                                                                                                        | 인과 해석                                                                                                                    |
+| -------------------- | ---------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| baseline source      | pending 동안 `HomeView`는 loading text만 반환하고 `h1`, 설명, Hero는 success branch에만 있다.                                      | slow query가 semantic shell과 Hero DOM insertion을 직접 막는다.                                                              |
+| Lighthouse 5회       | 5/5 LCP candidate는 original Hero이고 simulated LCP median은 6981.484ms, range는 269.803ms다.                                      | 동일 Lighthouse 조건의 end-to-end 비교에서 Hero가 일관되게 LCP를 결정한다.                                                   |
+| Lighthouse insight   | observed breakdown median에서 resource load delay 1738.374ms가 TTFB 64.792ms, transfer 196.617ms, render delay 135.646ms보다 길다. | observed breakdown 내부에서는 discovery/load delay가 지배적이며 TTFB나 render delay만으로 변경을 처방할 수 없다.             |
+| supporting trace     | API start 3097.182ms, Hero request start 4656.848ms로 1559.666ms 차이가 나며 Home Layout Shift는 0건이다.                          | API 응답 뒤 Hero가 삽입되는 현재 query boundary가 late discovery를 설명한다. API 시작 전 시간은 아직 attribution하지 않는다. |
+| separate Slow 4G HAR | API는 1527.653ms, Hero는 7545525 bytes이며 receive에 42859.522ms를 사용한다.                                                       | oversized transfer는 late discovery 이후의 독립 병목이지만 Todo 8 candidate audit 전에는 변경하지 않는다.                    |
+
+Lighthouse의 simulated LCP와 insight의 observed phase는 같은 값이 아니다. 예를 들어
+B-LH3의 top-level simulated LCP는 `6967.505ms`이지만 같은 export의
+`observedLargestContentfulPaint`는 약 `2138ms`이며 insight phase 합계와 대응한다.
+따라서 simulated LCP는 동일 config의 Before/After end-to-end 비교에, observed phase는
+원인 분류에, Slow 4G trace/HAR는 요청 순서와 전송 관찰에 각각 사용한다. 서로 다른
+측정값을 합치거나 하나가 다른 값을 재현한다고 주장하지 않는다.
+
+### Todo 7 predeclared semantic-shell decision
+
+- 가설: `/?scenario=slow`에서 `h1`과 페이지 설명을 data-dependent subtree 밖으로 옮기고,
+  local Suspense 안에 고정 geometry Hero fallback을 두면 home API 완료와 final Hero 삽입
+  전에 semantic shell과 reserved Hero frame이 표시된다. LCP 감소는 예측하지 않는다.
+- keep threshold: 같은 run의 trace와 filmstrip에서 `h1`, 설명, reserved Hero frame이 API
+  완료 및 final Hero insertion 전에 보이고, `1365 × 768`과 `375 × 812`에서 fallback과
+  final Hero bounds가 일치하며, 정확히 하나의 `h1`, Hero replacement 기인 Layout Shift
+  0건, hydration·접근성·시각적 역할·error/retry·build 회귀 0건이면 유지한다.
+- timing classification: 같은 config의 isolated 5회 측정을 수행한 경우 LCP median이
+  `6711.6814ms` 미만이면 directional improvement, `7251.28685ms` 초과이면 regression,
+  그 사이면 inconclusive다. mandatory shell contract를 만족하면 inconclusive LCP는
+  revert 사유가 아니다.
+- falsification/revert: shell이 API 전에 나타나지 않거나, duplicate `h1`, fallback/final
+  bounds mismatch, Hero-attributed shift, hydration·접근성·기능 회귀가 있으면 가설은 현재
+  구현으로 반증된 것이다. 먼저 수정하고 재측정하며, candidate에 귀속되는 range 초과
+  timing regression을 수정할 수 없으면 별도 revert commit 후 중단한다.
+- stop rule: Todo 7 final SHA, trace, candidate distribution, keep/fix/revert 결정을 기록하기
+  전에는 Todo 8을 시작하지 않는다. 이 실험에는 `next/image`, priority, preload, candidate,
+  format, quality 변경을 섞지 않는다.
+
 ## Hero 실험과 결정
 
-| 순서 | 실험                            | 사전 가설 | 판정 threshold | 반증 조건 | candidate SHA | 측정 결과 | 결정·이유 | evidence ID |
-| ---- | ------------------------------- | --------- | -------------- | --------- | ------------- | --------- | --------- | ----------- |
-| 1    | semantic shell/loading boundary | Pending   | Pending        | Pending   | Pending       | Pending   | Pending   | Pending     |
-| 2    | displayed size/candidate audit  | Pending   | Pending        | Pending   | Pending       | Pending   | Pending   | Pending     |
-| 3    | optional discovery/priority     | Pending   | Pending        | Pending   | Pending       | Pending   | Pending   | Pending     |
+| 순서 | 실험                            | 사전 가설                                       | 판정 threshold                                                                    | 반증 조건                                                                        | candidate SHA | 측정 결과 | 결정·이유                     | evidence ID       |
+| ---- | ------------------------------- | ----------------------------------------------- | --------------------------------------------------------------------------------- | -------------------------------------------------------------------------------- | ------------- | --------- | ----------------------------- | ----------------- |
+| 1    | semantic shell/loading boundary | API 전 shell+reserved frame, LCP 개선 예측 없음 | semantic contract 전부 통과; timing은 <6711.6814 improved, >7251.28685 regression | API 전 shell 실패, duplicate h1, bounds/shift/hydration/a11y/function regression | Pending       | Pending   | predeclared; source change 전 | B-LH1-B-LH5/B-HTR |
+| 2    | displayed size/candidate audit  | Pending                                         | Pending                                                                           | Pending                                                                          | Pending       | Pending   | Pending                       | Pending           |
+| 3    | optional discovery/priority     | Pending                                         | Pending                                                                           | Pending                                                                          | Pending       | Pending   | Pending                       | Pending           |
 
 ### 이미지 candidate audit
 
@@ -368,9 +406,9 @@ Basic 완료 후 아래 네 조건을 모두 충족할 때만 진입한다.
 
 ## 결정 로그
 
-| 시각    | source SHA | 관찰한 사실 | 가설    | 반증 방법 | 가장 작은 실험 | 사전 threshold | 결과    | keep/revert/reject와 이유 |
-| ------- | ---------- | ----------- | ------- | --------- | -------------- | -------------- | ------- | ------------------------- |
-| Pending | Pending    | Pending     | Pending | Pending   | Pending        | Pending        | Pending | Pending                   |
+| 시각                 | source SHA | 관찰한 사실                                                                                  | 가설                                                          | 반증 방법                                                                    | 가장 작은 실험                                        | 사전 threshold                                                    | 결과    | keep/revert/reject와 이유 |
+| -------------------- | ---------- | -------------------------------------------------------------------------------------------- | ------------------------------------------------------------- | ---------------------------------------------------------------------------- | ----------------------------------------------------- | ----------------------------------------------------------------- | ------- | ------------------------- |
+| 2026-08-04T15:11:59Z | `e2e608b`  | slow query가 shell/Hero insertion을 막고, late discovery 뒤 7.55MB transfer가 별도 병목이다. | shell boundary 분리로 API 전 semantic shell을 노출할 수 있다. | same-run filmstrip/trace에서 API 전 shell, bounds, shifts와 회귀를 확인한다. | semantic shell + fixed-geometry local fallback만 변경 | semantic contract 전부 통과; timing 분류는 6711.6814/7251.28685ms | Pending | source change 전 locked   |
 
 ## AI 활용
 
@@ -389,10 +427,10 @@ Basic 완료 후 아래 네 조건을 모두 충족할 때만 진입한다.
 - 측정 및 판단을 기록할 RFC 틀을 만들었다.
 - 원본 Hero와 home/products diagnostic scenario baseline을 구현하고 자동 검증했다.
 - clean BeforeSHA에서 Lighthouse 5회와 Home/products supporting evidence를 수집했다.
+- LCP 인과와 Todo 7 semantic-shell 가설·threshold·반증·stop rule을 source 변경 전에 고정했다.
 
 ### Pending
 
-- LCP 원인 분류와 실험별 사전 가설·threshold·반증
 - 상품 목록 여섯 시나리오
 - metadata 문서·응답 시점·서버 호출 계수
 - clean BasicAfterSHA와 After Lighthouse 5회
