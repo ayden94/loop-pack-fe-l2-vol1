@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import * as z from 'zod'
 
+import type { DiagnosticScenario } from '@/entities/product/model/DiagnosticScenario'
 import { apiClient } from '@/shared/api/ApiClient'
 
 import { ProductRepository } from './ProductRepository'
@@ -22,7 +23,88 @@ describe('ProductRepository successful response boundary', () => {
     })
     const repository = new ProductRepository(api)
 
-    await expect(repository.getHome()).rejects.toBeInstanceOf(z.ZodError)
+    await expect(repository.getHome({})).rejects.toBeInstanceOf(z.ZodError)
     expect(attemptCount).toBe(1)
   })
+})
+
+const scenarioCases = [
+  [{}, null],
+  [{ scenario: 'slow' }, 'slow'],
+  [{ scenario: 'empty' }, 'empty'],
+  [{ scenario: 'error' }, 'error'],
+] as const satisfies ReadonlyArray<readonly [DiagnosticScenario, string | null]>
+
+describe('ProductRepository diagnostic scenario requests', () => {
+  it.each(scenarioCases)(
+    'keeps the home GET scenario aligned with the descriptor',
+    async (diagnosticScenario, expectedScenario) => {
+      let requestedUrl = ''
+      const api = apiClient.extend({
+        baseUrl: 'https://example.test/',
+        fetch: (request) => {
+          requestedUrl = new Request(request).url
+          return Promise.resolve(
+            Response.json({
+              banner: {
+                title: 'title',
+                description: 'description',
+                image: '/hero.jpg',
+              },
+              categories: [],
+              popularProducts: [],
+              newProducts: [],
+            }),
+          )
+        },
+      })
+
+      await new ProductRepository(api).getHome(diagnosticScenario)
+
+      expect(new URL(requestedUrl).searchParams.get('scenario')).toBe(
+        expectedScenario,
+      )
+    },
+  )
+
+  it.each(scenarioCases)(
+    'keeps product filters and GET scenario aligned with the descriptor',
+    async (diagnosticScenario, expectedScenario) => {
+      let requestedUrl = ''
+      const api = apiClient.extend({
+        baseUrl: 'https://example.test/',
+        fetch: (request) => {
+          requestedUrl = new Request(request).url
+          return Promise.resolve(
+            Response.json({
+              products: [],
+              categories: [],
+              totalCount: 0,
+              page: 2,
+              pageSize: 12,
+            }),
+          )
+        },
+      })
+
+      await new ProductRepository(api).getProductList(
+        {
+          q: 'stanley',
+          category: 'home',
+          sort: 'price-asc',
+          page: 2,
+          pageSize: 12,
+        },
+        diagnosticScenario,
+      )
+
+      const searchParams = new URL(requestedUrl).searchParams
+      expect(searchParams.get('q')).toBe('stanley')
+      expect(searchParams.get('category')).toBe('home')
+      expect(searchParams.get('sort')).toBe('price-asc')
+      expect(searchParams.get('page')).toBe('2')
+      expect(searchParams.get('pageSize')).toBe('12')
+      expect(searchParams.get('scenario')).toBe(expectedScenario)
+    },
+  )
 })

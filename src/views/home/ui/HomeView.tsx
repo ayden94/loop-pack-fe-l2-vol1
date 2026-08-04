@@ -4,7 +4,9 @@ import { useQuery } from '@tanstack/react-query'
 import Link from 'next/link'
 
 import { productEntity } from '@/entities/product/api/ProductService'
+import type { DiagnosticScenario } from '@/entities/product/model/DiagnosticScenario'
 import type { Category } from '@/entities/product/model/types'
+import { HeroSection } from '@/examples/week-07-performance/HeroSection'
 import { InlineQueryError } from '@/shared/ui/InlineQueryError'
 import { useInlineQueryRetry } from '@/shared/ui/useInlineQueryRetry'
 import { ProductGrid } from '@/widgets/product-list/ui/ProductGrid'
@@ -25,12 +27,16 @@ function CategoryLinks({ categories }: { categories: Array<Category> }) {
   )
 }
 
-export function HomeView() {
+type HomeViewProps = {
+  readonly diagnosticScenario: DiagnosticScenario
+}
+
+export function HomeView({ diagnosticScenario }: HomeViewProps) {
   const { data, isPending, isError, error, isFetching, refetch } = useQuery(
-    productEntity.getHome(),
+    productEntity.getHome(diagnosticScenario),
   )
   const inlineQueryRetry = useInlineQueryRetry({
-    scope: 'home',
+    scope: `home:${diagnosticScenario.scenario ?? 'normal'}`,
     isFetching,
     refetch,
   })
@@ -76,14 +82,19 @@ export function HomeView() {
 
   return (
     <main className="mx-auto max-w-6xl px-6 py-8">
-      <section className="flex min-h-56 flex-col justify-end gap-2 rounded-lg bg-(--color-surface-soft) p-8">
-        <p className="text-sm text-(--color-muted)">
-          {data.banner.description}
-        </p>
+      <header className="mb-8">
         <h1 className="text-2xl font-extrabold text-(--color-ink)">
-          {data.banner.title}
+          Loopers Commerce
         </h1>
-      </section>
+        <p className="mt-2 text-sm text-(--color-muted)">
+          취향에 맞는 상품을 발견해보세요.
+        </p>
+      </header>
+
+      <HeroSection
+        title={data.banner.title}
+        description={data.banner.description}
+      />
 
       <section className="mt-10">
         <h2 className="mb-4 text-lg font-bold text-(--color-ink)">카테고리</h2>

@@ -7,13 +7,13 @@ import type {
   productSchema,
 } from './ResponseSchema'
 
+export type { MockApiScenario } from './DiagnosticScenario'
+
 export type CategoryId = 'casual' | 'fashion' | 'goods' | 'home' | 'digital'
 
 export type Category = z.infer<typeof categoryResponseSchema>
 
 export type ProductSort = 'latest' | 'popular' | 'price-asc' | 'price-desc'
-
-export type MockApiScenario = 'empty' | 'error' | 'slow'
 
 export type ProductListQuery = {
   q?: string

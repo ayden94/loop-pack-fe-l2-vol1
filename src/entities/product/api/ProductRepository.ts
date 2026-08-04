@@ -1,3 +1,4 @@
+import type { DiagnosticScenario } from '@/entities/product/model/DiagnosticScenario'
 import {
   homeResponseSchema,
   productListResponseSchema,
@@ -17,12 +18,19 @@ export class ProductRepository {
     products: 'api/products',
   } as const
 
-  async getHome(): Promise<HomeResponse> {
-    const json = await this.api.get(this.endpoints.home).json<unknown>()
+  async getHome(diagnosticScenario: DiagnosticScenario): Promise<HomeResponse> {
+    const json = await this.api
+      .get(this.endpoints.home, {
+        searchParams: { scenario: diagnosticScenario.scenario },
+      })
+      .json<unknown>()
     return homeResponseSchema.parse(json)
   }
 
-  async getProductList(query: ProductListQuery): Promise<ProductListResponse> {
+  async getProductList(
+    query: ProductListQuery,
+    diagnosticScenario: DiagnosticScenario,
+  ): Promise<ProductListResponse> {
     const json = await this.api
       .get(this.endpoints.products, {
         searchParams: {
@@ -31,6 +39,7 @@ export class ProductRepository {
           sort: query.sort,
           page: query.page,
           pageSize: query.pageSize,
+          scenario: diagnosticScenario.scenario,
         },
       })
       .json<unknown>()

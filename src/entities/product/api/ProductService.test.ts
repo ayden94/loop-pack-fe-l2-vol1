@@ -1,136 +1,143 @@
-import { describe, expect, it } from 'vitest'
+import { QueryClient } from '@tanstack/react-query'
+import { describe, expect, it, vi } from 'vitest'
 
+import type { DiagnosticScenario } from '@/entities/product/model/DiagnosticScenario'
 import type { ProductListQuery } from '@/entities/product/model/types'
 
+import { ProductRepository } from './ProductRepository'
 import { ProductService } from './ProductService'
 
+const scenarioCases = [
+  {},
+  { scenario: 'slow' },
+  { scenario: 'empty' },
+  { scenario: 'error' },
+] as const satisfies ReadonlyArray<DiagnosticScenario>
+const normalScenario = scenarioCases[0]
+const slowScenario = scenarioCases[1]
+
+const baseQuery: ProductListQuery = {
+  q: '',
+  category: 'all',
+  sort: 'latest',
+  page: 1,
+  pageSize: 12,
+}
+
 describe('ProductService.queryKeyFactory.home', () => {
-  it('returns a stable home key', () => {
-    expect(ProductService.queryKeyFactory.home.all()).toEqual(['home'])
+  it.each(scenarioCases)(
+    'contains the diagnostic scenario descriptor',
+    (diagnosticScenario) => {
+      expect(
+        ProductService.queryKeyFactory.home.all(diagnosticScenario),
+      ).toEqual(['home', diagnosticScenario])
+    },
+  )
+
+  it('produces equal normal keys for equal descriptors', () => {
+    expect(ProductService.queryKeyFactory.home.all(normalScenario)).toEqual(
+      ProductService.queryKeyFactory.home.all({}),
+    )
   })
 })
 
 describe('ProductService.queryKeyFactory.product.list', () => {
-  it('returns a key containing the full ProductListQuery', () => {
-    const query: ProductListQuery = {
-      q: 'stanley',
-      category: 'fashion',
-      sort: 'price-asc',
-      page: 2,
-      pageSize: 12,
-    }
-    expect(ProductService.queryKeyFactory.product.list(query)).toEqual([
-      'products',
-      'list',
-      query,
-    ])
+  it('contains the full query and diagnostic scenario descriptor', () => {
+    expect(
+      ProductService.queryKeyFactory.product.list(baseQuery, slowScenario),
+    ).toEqual(['products', 'list', baseQuery, slowScenario])
   })
 
-  it('reflects q changes in the key', () => {
-    const base: ProductListQuery = {
-      q: '',
-      category: 'all',
-      sort: 'latest',
-      page: 1,
-      pageSize: 12,
-    }
-    const a = ProductService.queryKeyFactory.product.list(base)
-    const b = ProductService.queryKeyFactory.product.list({
-      ...base,
-      q: 'stanley',
-    })
-    expect(a).not.toEqual(b)
+  it.each([
+    ['q', { q: 'stanley' }],
+    ['category', { category: 'fashion' as const }],
+    ['sort', { sort: 'popular' as const }],
+    ['page', { page: 2 }],
+    ['pageSize', { pageSize: 24 }],
+  ])('reflects %s changes in the key', (_field, patch) => {
+    const current = ProductService.queryKeyFactory.product.list(
+      baseQuery,
+      normalScenario,
+    )
+    const changed = ProductService.queryKeyFactory.product.list(
+      { ...baseQuery, ...patch },
+      normalScenario,
+    )
+
+    expect(current).not.toEqual(changed)
   })
 
-  it('reflects category changes in the key', () => {
-    const base: ProductListQuery = {
-      q: '',
-      category: 'all',
-      sort: 'latest',
-      page: 1,
-      pageSize: 12,
-    }
-    const a = ProductService.queryKeyFactory.product.list(base)
-    const b = ProductService.queryKeyFactory.product.list({
-      ...base,
-      category: 'fashion',
-    })
-    expect(a).not.toEqual(b)
-  })
+  it.each(scenarioCases.slice(1))(
+    'reflects diagnostic scenario changes in the key',
+    (diagnosticScenario) => {
+      expect(
+        ProductService.queryKeyFactory.product.list(baseQuery, normalScenario),
+      ).not.toEqual(
+        ProductService.queryKeyFactory.product.list(
+          baseQuery,
+          diagnosticScenario,
+        ),
+      )
+    },
+  )
 
-  it('reflects sort changes in the key', () => {
-    const base: ProductListQuery = {
-      q: '',
-      category: 'all',
-      sort: 'latest',
-      page: 1,
-      pageSize: 12,
-    }
-    const a = ProductService.queryKeyFactory.product.list(base)
-    const b = ProductService.queryKeyFactory.product.list({
-      ...base,
-      sort: 'popular',
-    })
-    expect(a).not.toEqual(b)
-  })
-
-  it('reflects page changes in the key', () => {
-    const base: ProductListQuery = {
-      q: '',
-      category: 'all',
-      sort: 'latest',
-      page: 1,
-      pageSize: 12,
-    }
-    const a = ProductService.queryKeyFactory.product.list(base)
-    const b = ProductService.queryKeyFactory.product.list({
-      ...base,
-      page: 2,
-    })
-    expect(a).not.toEqual(b)
-  })
-
-  it('reflects pageSize changes in the key', () => {
-    const base: ProductListQuery = {
-      q: '',
-      category: 'all',
-      sort: 'latest',
-      page: 1,
-      pageSize: 12,
-    }
-    const a = ProductService.queryKeyFactory.product.list(base)
-    const b = ProductService.queryKeyFactory.product.list({
-      ...base,
-      pageSize: 24,
-    })
-    expect(a).not.toEqual(b)
-  })
-
-  it('produces equal keys for equal queries (cache hit)', () => {
-    const query: ProductListQuery = {
-      q: 'stanley',
-      category: 'fashion',
-      sort: 'price-asc',
-      page: 2,
-      pageSize: 12,
-    }
-    expect(ProductService.queryKeyFactory.product.list(query)).toEqual(
-      ProductService.queryKeyFactory.product.list({ ...query }),
+  it('produces equal keys for equal queries and descriptors', () => {
+    expect(
+      ProductService.queryKeyFactory.product.list(baseQuery, slowScenario),
+    ).toEqual(
+      ProductService.queryKeyFactory.product.list(
+        { ...baseQuery },
+        { ...slowScenario },
+      ),
     )
   })
+})
 
-  it('does not include scenario in the query key contract', () => {
-    const query: ProductListQuery = {
-      q: '',
-      category: 'all',
-      sort: 'latest',
-      page: 1,
-      pageSize: 12,
-    }
-    const key = ProductService.queryKeyFactory.product.list(
-      query,
-    ) as ReadonlyArray<unknown>
-    expect(key).not.toContain('scenario')
-    expect(JSON.stringify(key)).not.toContain('scenario')
-  })
+describe('ProductService query functions', () => {
+  it.each(scenarioCases)(
+    'forwards the home diagnostic descriptor to the repository',
+    async (diagnosticScenario) => {
+      const repository = new ProductRepository()
+      const getHome = vi.spyOn(repository, 'getHome').mockResolvedValue({
+        banner: {
+          title: 'title',
+          description: 'description',
+          image: '/hero.jpg',
+        },
+        categories: [],
+        popularProducts: [],
+        newProducts: [],
+      })
+      const service = new ProductService(repository)
+      const queryClient = new QueryClient()
+
+      await queryClient.fetchQuery(service.getHome(diagnosticScenario))
+
+      expect(getHome).toHaveBeenCalledWith(diagnosticScenario)
+    },
+  )
+
+  it.each(scenarioCases)(
+    'forwards product filters and descriptor to the repository',
+    async (diagnosticScenario) => {
+      const repository = new ProductRepository()
+      const getProductList = vi
+        .spyOn(repository, 'getProductList')
+        .mockResolvedValue({
+          products: [],
+          categories: [],
+          totalCount: 0,
+          page: 1,
+          pageSize: 12,
+        })
+      const service = new ProductService(repository)
+      const queryClient = new QueryClient()
+
+      await queryClient.fetchQuery(
+        service.getProductList(baseQuery, diagnosticScenario),
+      )
+
+      expect(getProductList).toHaveBeenCalledWith(baseQuery, diagnosticScenario)
+    },
+  )
 })

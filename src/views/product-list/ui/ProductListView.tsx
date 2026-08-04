@@ -4,21 +4,29 @@ import { useQuery } from '@tanstack/react-query'
 import Link from 'next/link'
 
 import { productEntity } from '@/entities/product/api/ProductService'
+import type { DiagnosticScenario } from '@/entities/product/model/DiagnosticScenario'
 import { DEFAULT_PAGE_SIZE } from '@/entities/product/model/ProductQuerySchema'
 import { useProductFilters } from '@/features/product-filter/model/useProductFilters'
 import { FilterBar } from '@/features/product-filter/ui/FilterBar'
 import { ProductListSection } from '@/widgets/product-list/ui/ProductListSection'
 
-export function ProductListView() {
+type ProductListViewProps = {
+  readonly diagnosticScenario: DiagnosticScenario
+}
+
+export function ProductListView({ diagnosticScenario }: ProductListViewProps) {
   const { filters, updateFilter, updatePage } = useProductFilters()
   const productListQueryInput = {
     ...filters,
     pageSize: DEFAULT_PAGE_SIZE,
   }
-  const productListScope = JSON.stringify(productListQueryInput)
+  const productListScope = JSON.stringify({
+    query: productListQueryInput,
+    diagnosticScenario,
+  })
 
   const productListQuery = useQuery(
-    productEntity.getProductList(productListQueryInput),
+    productEntity.getProductList(productListQueryInput, diagnosticScenario),
   )
 
   return (
