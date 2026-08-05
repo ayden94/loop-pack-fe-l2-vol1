@@ -66,6 +66,7 @@ export function ProductListView({ diagnosticScenario }: ProductListViewProps) {
       <ProductListSection
         query={productListQuery}
         displayedData={productListState.displayedData}
+        displayedDataKey={productListState.displayedDataKey}
         scope={productListScope}
       />
 

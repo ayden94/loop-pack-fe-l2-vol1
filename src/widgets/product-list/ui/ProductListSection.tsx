@@ -1,6 +1,6 @@
 'use client'
 
-import type { UseQueryResult } from '@tanstack/react-query'
+import type { QueryKey, UseQueryResult } from '@tanstack/react-query'
 
 import type { ProductListResponse } from '@/entities/product/model/types'
 import { InlineQueryError } from '@/shared/ui/InlineQueryError'
@@ -11,12 +11,14 @@ import { ProductListSkeleton } from '@/widgets/product-list/ui/ProductListSkelet
 type ProductListSectionProps = {
   readonly query: UseQueryResult<ProductListResponse>
   readonly displayedData: ProductListResponse | undefined
+  readonly displayedDataKey: QueryKey | null
   readonly scope: string
 }
 
 export function ProductListSection({
   query,
   displayedData,
+  displayedDataKey,
   scope,
 }: ProductListSectionProps) {
   const inlineQueryRetry = useInlineQueryRetry({
@@ -65,6 +67,7 @@ export function ProductListSection({
           <ProductListSkeleton />
         ) : (
           <ProductGrid
+            key={JSON.stringify(displayedDataKey)}
             products={displayedData?.products ?? []}
             reserveTwelveSlots
           />

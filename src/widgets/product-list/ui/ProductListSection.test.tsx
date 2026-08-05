@@ -28,6 +28,7 @@ function renderSection(
       <ProductListSection
         query={query}
         displayedData={displayedData}
+        displayedDataKey={displayedData === undefined ? null : ['displayed']}
         scope="current-product-key"
       />
     </QueryClientProvider>,
