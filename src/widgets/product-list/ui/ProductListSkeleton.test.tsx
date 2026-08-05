@@ -16,6 +16,8 @@ describe('ProductListSkeleton', () => {
     expect(markup).toContain('sm:grid-cols-3')
     expect(markup).toContain('lg:grid-cols-5')
     expect(markup).toContain('aspect-square')
+    expect(markup).toContain('h-9.5')
+    expect(markup).toContain('h-8.5')
     expect(markup).not.toContain('role=')
     expect(markup).not.toContain('<button')
     expect(markup).not.toMatch(/<a(?:\s|>)/)

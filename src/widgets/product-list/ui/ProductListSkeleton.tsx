@@ -25,9 +25,9 @@ function ProductListSlot({
     >
       <div className="aspect-square rounded-lg bg-(--color-surface-soft)" />
       <div className="h-4 w-2/5 rounded bg-(--color-surface-soft)" />
-      <div className="h-10 rounded bg-(--color-surface-soft)" />
+      <div className="h-9.5 rounded bg-(--color-surface-soft)" />
       <div className="h-6 w-3/5 rounded bg-(--color-surface-soft)" />
-      <div className="h-10 rounded bg-(--color-surface-soft)" />
+      <div className="h-8.5 rounded bg-(--color-surface-soft)" />
     </article>
   )
 }
