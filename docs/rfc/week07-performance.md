@@ -342,10 +342,13 @@ source SHA는 `ca2b6a7a461f7a0edbe28585d6a3640c6e2780fd`다.
 수정하지 않았다. supporting protocol의 DPR 1은 고정 조건이지만 T7 trace 자체에 직렬화된
 값은 아니다.
 
-| 시점   | CSS 표시 크기                                             | DPR                                                  | intrinsic/request candidate         | format  | resource/transfer bytes   | quality·crop                                                   | CLS     | evidence ID                                       |
-| ------ | --------------------------------------------------------- | ---------------------------------------------------- | ----------------------------------- | ------- | ------------------------- | -------------------------------------------------------------- | ------- | ------------------------------------------------- |
-| Before | desktop `1104×621`; tablet `720×405`; mobile `327×408.75` | supporting protocol `1`; trace에는 독립 직렬화 안 됨 | raw original `3840×2160`, no srcset | JPEG    | `7,545,239` / `7,545,525` | numeric quality unavailable; object-cover; mobile `56% center` | `0`     | B-HHAR/T7-LH1-T7-LH5/T7-TR/T7-IMG2/T7-IMG4/T8-AUD |
-| After  | Pending                                                   | Pending                                              | Pending                             | Pending | Pending                   | Pending                                                        | Pending | Pending                                           |
+| 시점   | CSS 표시 크기                                             | DPR                                                  | intrinsic/request candidate         | format  | compression                     | resource/transfer bytes   | quality·crop                                                   | CLS     | evidence ID                                       |
+| ------ | --------------------------------------------------------- | ---------------------------------------------------- | ----------------------------------- | ------- | ------------------------------- | ------------------------- | -------------------------------------------------------------- | ------- | ------------------------------------------------- |
+| Before | desktop `1104×621`; tablet `720×405`; mobile `327×408.75` | supporting protocol `1`; trace에는 독립 직렬화 안 됨 | raw original `3840×2160`, no srcset | JPEG    | HAR content `0` (B-HHAR/T8-AUD) | `7,545,239` / `7,545,525` | numeric quality unavailable; object-cover; mobile `56% center` | `0`     | B-HHAR/T7-LH1-T7-LH5/T7-TR/T7-IMG2/T7-IMG4/T8-AUD |
+| After  | Pending                                                   | Pending                                              | Pending                             | Pending | Pending                         | Pending                   | Pending                                                        | Pending | Pending                                           |
+
+Before의 HAR content `compression = 0`은 transport/body-size accounting 값이며 numeric
+JPEG encoder quality 값이 아니다. JPEG encoder quality는 계속 unavailable이다 (B-HHAR/T8-AUD).
 
 desktop DPR 1의 pixel-area oversize는
 `(3840 × 2160) / (1104 × 621) = 12.098299×`다. 따라서 Todo 8의 conditional source-change
