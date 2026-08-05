@@ -114,6 +114,7 @@ describe('ProductListSection presentation', () => {
     expect(markup).toContain('>30</span>개')
     expect(markup).toContain('role="alert"')
     expect(markup).toContain('max-w-sm')
+    expect(markup).toContain('min-w-40')
     expect(markup).toContain('상품 목록 요청 실패')
     expect(markup).toContain('<button')
     expect(markup.match(/data-product-geometry-slot="true"/g)).toHaveLength(12)

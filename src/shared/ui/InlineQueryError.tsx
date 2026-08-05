@@ -31,7 +31,7 @@ export function InlineQueryError({
         type="button"
         aria-disabled={isRetrying}
         onClick={handleRetry}
-        className="min-h-10 rounded border border-(--color-border) bg-(--color-surface) px-4 py-2 text-sm font-bold text-(--color-text) hover:bg-(--color-surface-soft) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--color-ink) aria-disabled:cursor-not-allowed aria-disabled:opacity-50"
+        className="min-h-10 min-w-40 rounded border border-(--color-border) bg-(--color-surface) px-4 py-2 text-sm font-bold text-(--color-text) hover:bg-(--color-surface-soft) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--color-ink) aria-disabled:cursor-not-allowed aria-disabled:opacity-50"
       >
         {retryLabel}
       </button>
