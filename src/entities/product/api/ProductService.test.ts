@@ -137,7 +137,78 @@ describe('ProductService query functions', () => {
         service.getProductList(baseQuery, diagnosticScenario),
       )
 
+      expect(getProductList).toHaveBeenCalledWith(
+        baseQuery,
+        diagnosticScenario,
+        expect.any(AbortSignal),
+      )
+    },
+  )
+
+  it('forwards the browser query signal to the repository', async () => {
+    const repository = new ProductRepository()
+    const getProductList = vi
+      .spyOn(repository, 'getProductList')
+      .mockResolvedValue({
+        products: [],
+        categories: [],
+        totalCount: 0,
+        page: 1,
+        pageSize: 12,
+      })
+    const service = new ProductService(repository)
+    const queryClient = new QueryClient()
+
+    await queryClient.fetchQuery(
+      service.getProductList(baseQuery, slowScenario),
+    )
+
+    expect(getProductList).toHaveBeenCalledWith(
+      baseQuery,
+      slowScenario,
+      expect.any(AbortSignal),
+    )
+  })
+
+  it.each(scenarioCases)(
+    'keeps the server product query signal-free for each descriptor',
+    async (diagnosticScenario) => {
+      const repository = new ProductRepository()
+      const getProductList = vi
+        .spyOn(repository, 'getProductList')
+        .mockResolvedValue({
+          products: [],
+          categories: [],
+          totalCount: 0,
+          page: 1,
+          pageSize: 12,
+        })
+      const service = new ProductService(repository)
+      const queryClient = new QueryClient()
+
+      await queryClient.fetchQuery(
+        service.getServerProductList(baseQuery, diagnosticScenario),
+      )
+
       expect(getProductList).toHaveBeenCalledWith(baseQuery, diagnosticScenario)
+    },
+  )
+
+  it.each(scenarioCases)(
+    'keeps browser and server product cache semantics equal',
+    (diagnosticScenario) => {
+      const service = new ProductService()
+      const browserOptions = service.getProductList(
+        baseQuery,
+        diagnosticScenario,
+      )
+      const serverOptions = service.getServerProductList(
+        baseQuery,
+        diagnosticScenario,
+      )
+
+      expect(browserOptions.queryKey).toEqual(serverOptions.queryKey)
+      expect(browserOptions.staleTime).toBe(serverOptions.staleTime)
     },
   )
 })

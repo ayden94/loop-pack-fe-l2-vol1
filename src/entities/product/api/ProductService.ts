@@ -48,6 +48,21 @@ export class ProductService {
         query,
         diagnosticScenario,
       ),
+      queryFn: ({ signal }) =>
+        this.repository.getProductList(query, diagnosticScenario, signal),
+      staleTime: 30_000,
+    })
+  }
+
+  getServerProductList(
+    query: ProductListQuery,
+    diagnosticScenario: DiagnosticScenario,
+  ) {
+    return queryOptions({
+      queryKey: ProductService.queryKeyFactory.product.list(
+        query,
+        diagnosticScenario,
+      ),
       queryFn: () => this.repository.getProductList(query, diagnosticScenario),
       staleTime: 30_000,
     })

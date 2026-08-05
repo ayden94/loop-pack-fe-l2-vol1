@@ -30,18 +30,23 @@ export class ProductRepository {
   async getProductList(
     query: ProductListQuery,
     diagnosticScenario: DiagnosticScenario,
+    signal?: AbortSignal,
   ): Promise<ProductListResponse> {
+    const requestOptions = {
+      searchParams: {
+        q: query.q || undefined,
+        category: query.category === 'all' ? undefined : query.category,
+        sort: query.sort,
+        page: query.page,
+        pageSize: query.pageSize,
+        scenario: diagnosticScenario.scenario,
+      },
+    }
     const json = await this.api
-      .get(this.endpoints.products, {
-        searchParams: {
-          q: query.q || undefined,
-          category: query.category === 'all' ? undefined : query.category,
-          sort: query.sort,
-          page: query.page,
-          pageSize: query.pageSize,
-          scenario: diagnosticScenario.scenario,
-        },
-      })
+      .get(
+        this.endpoints.products,
+        signal === undefined ? requestOptions : { ...requestOptions, signal },
+      )
       .json<unknown>()
     return productListResponseSchema.parse(json)
   }
