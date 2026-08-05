@@ -157,6 +157,7 @@ describe('ProductListStatePolicy with QueryObserver', () => {
     expect(result.isFetching).toBe(true)
     expect(result.dataUpdatedAt).toBe(0)
     expect(state.displayedData).toBe(firstPage)
+    expect(state.displayedDataKey).toBe(firstKey)
     expect(state.lastSuccessfulKey).toBe(firstKey)
     unsubscribe()
   })
@@ -191,6 +192,7 @@ describe('ProductListStatePolicy with QueryObserver', () => {
     })
 
     expect(state.displayedData).toBe(emptyPage)
+    expect(state.displayedDataKey).toBe(currentKey)
     expect(state.lastSuccessfulKey).toBe(currentKey)
   })
 })

@@ -15,6 +15,7 @@ type ProductListStateContext = {
 
 type ProductListState = {
   readonly displayedData: ProductListResponse | undefined
+  readonly displayedDataKey: QueryKey | null
   readonly lastSuccessfulKey: QueryKey | null
 }
 
@@ -28,6 +29,7 @@ export class ProductListStatePolicy {
     if (query.isSuccess && !query.isPlaceholderData) {
       return {
         displayedData: query.data,
+        displayedDataKey: currentKey,
         lastSuccessfulKey: currentKey,
       }
     }
@@ -39,6 +41,7 @@ export class ProductListStatePolicy {
 
     return {
       displayedData: query.data ?? retainedData,
+      displayedDataKey: lastSuccessfulKey,
       lastSuccessfulKey,
     }
   }
