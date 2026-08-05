@@ -50,7 +50,9 @@ export class ProductService {
       ),
       queryFn: ({ signal }) =>
         this.repository.getProductList(query, diagnosticScenario, signal),
+      placeholderData: (previousData) => previousData,
       staleTime: 30_000,
+      throwOnError: false,
     })
   }
 

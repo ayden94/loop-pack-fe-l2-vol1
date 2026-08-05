@@ -211,4 +211,38 @@ describe('ProductService query functions', () => {
       expect(browserOptions.staleTime).toBe(serverOptions.staleTime)
     },
   )
+
+  it('keeps previous data and handles browser product errors inline', () => {
+    const service = new ProductService()
+    const previousData = {
+      products: [],
+      categories: [],
+      totalCount: 0,
+      page: 1,
+      pageSize: 12,
+    }
+
+    const browserOptions = service.getProductList(baseQuery, normalScenario)
+    const placeholderData = browserOptions.placeholderData
+
+    expect(typeof placeholderData).toBe('function')
+    if (typeof placeholderData === 'function') {
+      expect(placeholderData(previousData, undefined)).toBe(previousData)
+    }
+    expect(browserOptions.throwOnError).toBe(false)
+  })
+
+  it('does not apply browser presentation policy to server or home queries', () => {
+    const service = new ProductService()
+    const serverOptions = service.getServerProductList(
+      baseQuery,
+      normalScenario,
+    )
+    const homeOptions = service.getHome(normalScenario)
+
+    expect(serverOptions.placeholderData).toBeUndefined()
+    expect(serverOptions.throwOnError).toBeUndefined()
+    expect(homeOptions.placeholderData).toBeUndefined()
+    expect(homeOptions.throwOnError).toBeUndefined()
+  })
 })
