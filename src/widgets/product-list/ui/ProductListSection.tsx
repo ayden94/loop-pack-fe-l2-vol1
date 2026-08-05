@@ -36,11 +36,14 @@ export function ProductListSection({
     <section aria-label="상품 검색 결과" aria-busy={query.isFetching}>
       <div className="mb-4 min-h-5 text-sm text-(--color-muted)">
         {displayedData === undefined ? (
-          query.isPending && (
-            <p role="status" aria-live="polite">
-              상품을 불러오는 중…
-            </p>
-          )
+          <p
+            role="status"
+            aria-live="polite"
+            aria-hidden={!query.isPending}
+            className={query.isPending ? undefined : 'invisible'}
+          >
+            상품을 불러오는 중…
+          </p>
         ) : (
           <p>
             총{' '}

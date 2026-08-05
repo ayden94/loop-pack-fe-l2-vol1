@@ -101,11 +101,15 @@ describe('ProductListSection presentation', () => {
       })
     })
 
-    const markup = renderSection(queryClient, await errorResultPromise, {
+    const errorResult = await errorResultPromise
+    const coldMarkup = renderSection(queryClient, errorResult, undefined)
+    const markup = renderSection(queryClient, errorResult, {
       ...emptyResponse,
       totalCount: 30,
     })
 
+    expect(coldMarkup).toContain('aria-hidden="true"')
+    expect(coldMarkup).toContain('invisible')
     expect(markup).toContain('aria-busy="false"')
     expect(markup).toContain('>30</span>개')
     expect(markup).toContain('role="alert"')
