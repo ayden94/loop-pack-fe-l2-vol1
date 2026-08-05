@@ -551,6 +551,93 @@ prefetch/hydration은 Hero availability와 insertion/discovery/priority를 바�
 변경 후 fresh current-SHA trace에서 attachment, request start, bytes, priority, LCP phases, CLS를 다시
 검증해야 한다. 현재 no-hint 결정은 그 fresh evidence를 선점하지 않는다.
 
+## Todo 10 pre-source browser cancellation decision
+
+### Baseline과 가설
+
+- current source `83f189f`의 warm rapid-filter Before에서는 `/api/products` 요청 11개가 모두
+  약 1.50-1.60초 뒤 HTTP 200으로 완료됐고 transport cancellation은 없었다
+  (B-PRTR/B-PRHAR). 이는 Todo 10 결과가 아니라 source 변경 전 baseline fact다.
+- `ProductService.getProductList()`의 browser query function은 현재 TanStack
+  `QueryFunctionContext.signal`을 받거나 전달하지 않아 signal을 버리고,
+  `ProductRepository.getProductList()`의 Ky GET에도 signal이 없다. 따라서 superseded query의
+  상태 격리와 실제 browser transport 중단을 같은 것으로 주장할 수 없다.
+- `scenario`는 진단용 `DiagnosticScenario`로 product query key와 실제 GET search params에는
+  남아 있지만, 사용자 `ProductListQuery`와 `useProductFilters()` 상태에는 포함되지 않는다. 이
+  경계와 key/GET 대응은 실험 전후에 유지한다.
+- 가설: products `useQuery`가 사용하는 browser product query에서만 context signal을 Ky의 native
+  signal로 소비하면 superseded slow browser transport가 abort된다. 별도 server/metadata product
+  query path는 context signal을 무시해 같은 key, URL, GET options를 유지하고 options 객체에 자체
+  `signal` property를 만들지 않으므로 이후 동일 server fetch memoization 입력 검증 자격을 보존한다.
+- 공식 TanStack Query v5 계약상 query function이 signal을 소비하면 abort 시 query state가 이전
+  상태로 되돌아가고, 소비하지 않으면 요청은 완료되어 cache에 남을 수 있다. Suspense query
+  cancellation은 지원 대상이 아니므로 `SuspenseQuery`를 쓰는 Home은 이 실험에서 제외하고,
+  products `useQuery`만 Todo 10 대상으로 삼는다.
+
+### 가장 작은 실험과 고정 계약
+
+- `ProductService`에 동일한 `queryKeyFactory.product.list()`를 쓰는 browser/server product
+  `queryOptions` path를 분리한다. browser `queryFn`만 `{ signal }`을 repository에 전달하고,
+  server/metadata `queryFn`은 context signal을 전달하지 않는다.
+- `ProductRepository.getProductList()`에는 optional transport signal overlay만 허용한다. signal이
+  있을 때만 기존 Ky GET options에 추가하고, 없을 때는 `signal: undefined`조차 생성하지 않는다.
+- browser/server path의 query key, products endpoint, method `GET`, q/category/sort/page/pageSize와
+  진단 `scenario` search params 및 signal overlay 전 base GET options는 동일해야 한다.
+  server/metadata path끼리는 final URL/options도 byte-for-byte 동일하고 own `signal` property가 없어야
+  한다. Todo 10은 key나 URL을 cancellation 여부로 분기하지 않는다.
+- focused `ProductService`/`ProductRepository` tests로 browser signal identity 전달, server signal
+  부재, 양쪽 key와 URL/search params 및 GET options 동일성을 고정한다.
+- source candidate 범위는 위 ProductService browser/server queryOptions path,
+  ProductRepository optional signal overlay, focused tests, README의 진단 wording 정정뿐이다. 이
+  문서 체크포인트에서는 그 source, tests, README를 아직 변경하지 않는다.
+
+### Keep, fix/revert, falsification
+
+- **KEEP**: focused tests가 browser signal propagation, server call의 own `signal` property 부재,
+  동일 key와 URL/search params/GET options를 증명해야 한다. clean committed production candidate의
+  rapid sequence에서는 superseded browser requests가 Network에서 `(canceled)`/aborted로 관찰되고,
+  latest request만 완료되어야 한다. canceled query가 error UI나 unhandled error로 나타나지 않고,
+  늦은 stale response가 화면을 덮지 않으며, 최종 URL, active key, GET, visible IDs가 모두
+  `q=stanley&category=home&sort=price-asc&page=1&pageSize=12&scenario=slow`과
+  `p17,p20,p19`에 맞아야 한다.
+- **FIX 후 재측정**: signal이 server/metadata path로 새거나, key/GET/`scenario`가 drift하거나,
+  latest request가 취소되거나, canceled request가 error로 노출되거나, stale overwrite 또는
+  build/function regression이 생기면 candidate를 유지하지 않고 최소 범위에서 고친다.
+- **REVERT**: focused contracts 또는 production rapid sequence를 수정 후에도 만족하지 못하면
+  Todo 10 source candidate를 별도 revert하고 baseline path로 돌아간다.
+- **가설 반증**: browser signal identity가 transport까지 전달됐는데도 superseded request가 모두
+  정상 완료되거나, cancel이 latest result/error/state 계약을 깨면 현재 구현 가설은 반증된다.
+  browser cancellation은 Route Handler 실행 중단이나 server execution/call-count 감소의 증거로
+  해석하지 않는다.
+
+### Production Network evidence recipe
+
+1. Todo 10 candidate를 commit한 뒤 tracked tree가 clean인지 확인하고 normal production build를
+   `APP_ORIGIN=http://127.0.0.1:3000`으로 실행한다. 같은 값을 runtime에도 사용한다.
+2. Chrome Guest profile, Responsive `1365 × 768`, DPR `1`, zoom `100%`, Network `Slow 4G`,
+   Disable cache on, Preserve log on으로 `/products`를 열어 warm success를 확인한다.
+3. Network를 비우고 `/products?q=stanley&scenario=slow` →
+   `/products?q=stanley&category=home&scenario=slow` →
+   `/products?q=stanley&category=home&sort=price-asc&scenario=slow` 순서로 앞 요청의 완료를
+   기다리지 않고 빠르게 적용한다.
+4. 각 `/api/products` 행의 시작·종료·status, canceled/aborted 표시, Initiator와 full request URL을
+   기록한다. 동시에 각 단계의 browser URL, active query key, 실제 GET, query error 여부와 visible
+   product IDs를 기록한다.
+5. superseded requests는 canceled/aborted, latest request는 HTTP 200 완료인지 확인하고 최종
+   URL/key/GET/IDs가 KEEP 계약과 일치하는지 확인한다. canceled transport가 Route Handler 중단이나
+   server call-count 감소를 뜻한다고 기록하지 않는다.
+
+### Scope exclusions와 상태
+
+- Todo 11의 placeholder data, 12-card skeleton, loading/empty/error/refresh-error state redesign을
+  시작하지 않는다.
+- Todo 12의 canonical `APP_ORIGIN`, canonical request builder, `getQueryClient()`를 추가하지 않는다.
+- Todo 13의 prefetch, metadata composition, hydration을 추가하지 않는다.
+- Route Handler abort propagation, server execution 중단, server call-count 감소를 구현하거나
+  주장하지 않는다. 해당 수치는 Browser Network가 아니라 후속 server-side 계측으로만 판정한다.
+- global Stage 0/After와 Todo 10 구현·측정 결과는 모두 **Pending**이다. 이 checkpoint는
+  source mutation 전 decision lock이며 cancellation을 관찰했다는 결과 기록이 아니다.
+
 ## 상품 목록 여섯 시나리오
 
 각 행에는 시작 cache, 수행 행동, 최종 URL, active query key, 실제 GET, 화면의 product ID,
@@ -729,9 +816,13 @@ Basic 완료 후 아래 네 조건을 모두 충족할 때만 진입한다.
   dominant지만, pending 중 Hero가 absent이고 already-attached late discovery는 증명되지 않았다.
 - Todo 9 literal gate를 닫아 preload/priority/`fetchPriority`/eager source 실험과 candidate commit을
   만들지 않았으며 `T9-AUD-CEE8`을 manifest했다.
+- Todo 10의 browser-only signal, signal-free server path, keep/fix/revert/falsification, production
+  Network recipe와 scope exclusions를 source 변경 전에 locked 상태로 기록했다. 결과는 Pending이다.
 
 ### Pending
 
+- Todo 10 browser cancellation source candidate, focused tests, production Network 측정과
+  keep/fix/revert 판정
 - 상품 목록 여섯 시나리오
 - metadata 문서·응답 시점·서버 호출 계수
 - Todo 13 server prefetch/hydration 후 fresh current-SHA trace로 Hero
