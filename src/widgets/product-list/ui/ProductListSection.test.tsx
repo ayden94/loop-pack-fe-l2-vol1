@@ -75,6 +75,7 @@ describe('ProductListSection presentation', () => {
     expect(markup).toContain('aria-busy="false"')
     expect(markup).toContain('>0</span>개')
     expect(markup).toContain('min-w-8')
+    expect(markup).toContain('text-left')
     expect(markup).toContain('tabular-nums')
     expect(markup).toContain('검색 결과가 없습니다.')
     expect(markup.match(/data-product-geometry-slot="true"/g)).toHaveLength(12)

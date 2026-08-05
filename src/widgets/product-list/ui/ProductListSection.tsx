@@ -44,7 +44,7 @@ export function ProductListSection({
         ) : (
           <p>
             총{' '}
-            <span className="inline-block min-w-8 text-right tabular-nums">
+            <span className="inline-block min-w-8 text-left tabular-nums">
               {String(displayedData.totalCount)}
             </span>
             개
