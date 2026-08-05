@@ -42,7 +42,13 @@ export function ProductListSection({
             </p>
           )
         ) : (
-          <p>총 {String(displayedData.totalCount)}개</p>
+          <p>
+            총{' '}
+            <span className="inline-block min-w-8 text-right tabular-nums">
+              {String(displayedData.totalCount)}
+            </span>
+            개
+          </p>
         )}
         {query.isFetching && displayedData !== undefined && (
           <p role="status" aria-live="polite" className="sr-only">
