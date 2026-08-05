@@ -81,13 +81,15 @@ export function ProductListSection({
 
         {errorMessage !== null && (
           <div className="absolute inset-0 flex items-center justify-center p-6">
-            <InlineQueryError
-              message={errorMessage}
-              isRetrying={inlineQueryRetry.isRetrying}
-              onRetry={() => {
-                inlineQueryRetry.retry(errorMessage)
-              }}
-            />
+            <div className="w-full max-w-sm">
+              <InlineQueryError
+                message={errorMessage}
+                isRetrying={inlineQueryRetry.isRetrying}
+                onRetry={() => {
+                  inlineQueryRetry.retry(errorMessage)
+                }}
+              />
+            </div>
           </div>
         )}
       </div>
