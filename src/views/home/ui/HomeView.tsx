@@ -1,14 +1,22 @@
 'use client'
 
-import { useQuery } from '@tanstack/react-query'
+import {
+  ErrorBoundary,
+  type ErrorBoundaryFallbackProps,
+} from '@suspensive/react'
+import { SuspenseQuery } from '@suspensive/react-query'
+import { useQueryErrorResetBoundary } from '@tanstack/react-query'
 import Link from 'next/link'
+import { use } from 'react'
 
 import { productEntity } from '@/entities/product/api/ProductService'
-import type { DiagnosticScenario } from '@/entities/product/model/DiagnosticScenario'
+import {
+  type DiagnosticScenario,
+  parseDiagnosticScenario,
+} from '@/entities/product/model/DiagnosticScenario'
 import type { Category } from '@/entities/product/model/types'
 import { HeroSection } from '@/examples/week-07-performance/HeroSection'
 import { InlineQueryError } from '@/shared/ui/InlineQueryError'
-import { useInlineQueryRetry } from '@/shared/ui/useInlineQueryRetry'
 import { ProductGrid } from '@/widgets/product-list/ui/ProductGrid'
 
 function CategoryLinks({ categories }: { categories: Array<Category> }) {
@@ -31,91 +39,87 @@ type HomeViewProps = {
   readonly diagnosticScenario: DiagnosticScenario
 }
 
-export function HomeView({ diagnosticScenario }: HomeViewProps) {
-  const { data, isPending, isError, error, isFetching, refetch } = useQuery(
-    productEntity.getHome(diagnosticScenario),
+type HomeSearchParamsProps = {
+  readonly searchParams: Promise<{
+    readonly scenario?: string | Array<string>
+  }>
+}
+
+function HomeQueryErrorFallback({ error, reset }: ErrorBoundaryFallbackProps) {
+  return (
+    <InlineQueryError
+      message={error.message}
+      isRetrying={false}
+      onRetry={reset}
+    />
   )
-  const inlineQueryRetry = useInlineQueryRetry({
-    scope: `home:${diagnosticScenario.scenario ?? 'normal'}`,
-    isFetching,
-    refetch,
-  })
-  const retryErrorMessage = inlineQueryRetry.message
+}
 
-  if (retryErrorMessage !== null) {
-    return (
-      <main className="mx-auto max-w-6xl px-6 py-8">
-        <InlineQueryError
-          message={retryErrorMessage}
-          isRetrying={inlineQueryRetry.isRetrying}
-          onRetry={() => {
-            inlineQueryRetry.retry(retryErrorMessage)
-          }}
-        />
-      </main>
-    )
-  }
+export function HomeHeroFallback() {
+  return (
+    <div
+      role="status"
+      aria-live="polite"
+      aria-busy="true"
+      className="relative flex [aspect-ratio:16/9] w-full items-center justify-center overflow-hidden bg-(--color-surface-muted) text-sm text-(--color-muted) [@media(max-width:640px)]:[aspect-ratio:4/5]"
+    >
+      홈 데이터를 불러오는 중…
+    </div>
+  )
+}
 
-  if (isPending) {
-    return (
-      <main className="mx-auto max-w-6xl px-6 py-8">
-        <div className="py-20 text-center text-(--color-muted)">
-          홈 데이터를 불러오는 중…
-        </div>
-      </main>
-    )
-  }
+export function HomeSearchParams({ searchParams }: HomeSearchParamsProps) {
+  const { scenario } = use(searchParams)
 
-  if (isError) {
-    return (
-      <main className="mx-auto max-w-6xl px-6 py-8">
-        <InlineQueryError
-          message={error.message}
-          isRetrying={isFetching}
-          onRetry={() => {
-            inlineQueryRetry.retry(error.message)
-          }}
-        />
-      </main>
-    )
-  }
+  return <HomeView diagnosticScenario={parseDiagnosticScenario(scenario)} />
+}
+
+export function HomeView({ diagnosticScenario }: HomeViewProps) {
+  const queryErrorResetBoundary = useQueryErrorResetBoundary()
 
   return (
-    <main className="mx-auto max-w-6xl px-6 py-8">
-      <header className="mb-8">
-        <h1 className="text-2xl font-extrabold text-(--color-ink)">
-          Loopers Commerce
-        </h1>
-        <p className="mt-2 text-sm text-(--color-muted)">
-          취향에 맞는 상품을 발견해보세요.
-        </p>
-      </header>
+    <ErrorBoundary
+      fallback={HomeQueryErrorFallback}
+      onReset={queryErrorResetBoundary.reset}
+      resetKeys={[diagnosticScenario.scenario]}
+    >
+      <SuspenseQuery {...productEntity.getHome(diagnosticScenario)}>
+        {({ data }) => (
+          <>
+            <HeroSection
+              title={data.banner.title}
+              description={data.banner.description}
+            />
 
-      <HeroSection
-        title={data.banner.title}
-        description={data.banner.description}
-      />
+            <section className="mt-10">
+              <h2 className="mb-4 text-lg font-bold text-(--color-ink)">
+                카테고리
+              </h2>
+              <CategoryLinks categories={data.categories} />
+            </section>
 
-      <section className="mt-10">
-        <h2 className="mb-4 text-lg font-bold text-(--color-ink)">카테고리</h2>
-        <CategoryLinks categories={data.categories} />
-      </section>
+            <section className="mt-10">
+              <h2 className="mb-4 text-lg font-bold text-(--color-ink)">
+                인기 상품
+              </h2>
+              <ProductGrid
+                products={data.popularProducts}
+                emptyMessage="표시할 상품이 없습니다."
+              />
+            </section>
 
-      <section className="mt-10">
-        <h2 className="mb-4 text-lg font-bold text-(--color-ink)">인기 상품</h2>
-        <ProductGrid
-          products={data.popularProducts}
-          emptyMessage="표시할 상품이 없습니다."
-        />
-      </section>
-
-      <section className="mt-10">
-        <h2 className="mb-4 text-lg font-bold text-(--color-ink)">신상품</h2>
-        <ProductGrid
-          products={data.newProducts}
-          emptyMessage="표시할 상품이 없습니다."
-        />
-      </section>
-    </main>
+            <section className="mt-10">
+              <h2 className="mb-4 text-lg font-bold text-(--color-ink)">
+                신상품
+              </h2>
+              <ProductGrid
+                products={data.newProducts}
+                emptyMessage="표시할 상품이 없습니다."
+              />
+            </section>
+          </>
+        )}
+      </SuspenseQuery>
+    </ErrorBoundary>
   )
 }

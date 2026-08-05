@@ -8,8 +8,8 @@ import type { HomeResponse } from '@/entities/product/model/types'
 
 import { HomeView } from './HomeView'
 
-describe('HomeView successful baseline', () => {
-  it('renders one page h1 and the unoptimized Hero contract', () => {
+describe('HomeView successful data content', () => {
+  it('renders the data sections without duplicating the page shell', () => {
     const diagnosticScenario: DiagnosticScenario = { scenario: 'slow' }
     const homeResponse: HomeResponse = {
       banner: {
@@ -33,7 +33,8 @@ describe('HomeView successful baseline', () => {
       </QueryClientProvider>,
     )
 
-    expect(markup.match(/<h1\b/g)).toHaveLength(1)
+    expect(markup).not.toContain('<main')
+    expect(markup).not.toContain('<h1')
     expect(markup).toContain('<h2 id="week07-hero-title"')
     expect(markup).toContain('매일 새롭게 발견하는 취향')
     expect(markup).toContain('지금 가장 사랑받는 상품을 만나보세요.')
@@ -41,5 +42,8 @@ describe('HomeView successful baseline', () => {
     expect(markup).toContain('alt=""')
     expect(markup).toContain('width="3840"')
     expect(markup).toContain('height="2160"')
+    expect(markup).toContain('카테고리')
+    expect(markup).toContain('인기 상품')
+    expect(markup).toContain('신상품')
   })
 })
