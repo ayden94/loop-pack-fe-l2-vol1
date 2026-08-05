@@ -5,10 +5,9 @@
 - StartSHA: `4e53e545863f5ad184137f58569cc0942d405a64`
 - StartSHA 확인 명령: `git rev-parse HEAD`
 - 작업 시작 전 `git status --porcelain`: 출력 없음
-- 현재: 기존 Before 근거를 재사용한 Todo 8 displayed-candidate audit에서 oversized gate 충족을
-  확인하고, source 변경 전 `next/image` 최소 실험과 판정 기준을 고정했다.
-- 대기: Todo 8 구현·candidate 측정·After 판정, 상품 여섯 상태, metadata, Basic After와
-  최종 회귀 검증이다.
+- 현재: Todo 8 responsive candidate는 `f4167e9`의 mobile 품질 실패를 FIX 근거로 보존하고,
+  `cee8cf7`의 공식 5회 측정과 viewport별 검증을 locked threshold로 판정해 최종 KEEP했다.
+- 대기: Todo 9 priority 판단, 상품 여섯 상태, metadata, Basic After와 최종 회귀 검증이다.
 
 ## 범위와 불변 조건
 
@@ -38,33 +37,37 @@
 
 ## SHA와 체크포인트
 
-| 역할                        | SHA                                        | 작업 트리 | 기록 시점                   | 상태    |
-| --------------------------- | ------------------------------------------ | --------- | --------------------------- | ------- |
-| StartSHA                    | `4e53e545863f5ad184137f58569cc0942d405a64` | clean     | Week 07 작업 시작 전        | current |
-| 프로토콜 문서 체크포인트    | `d3da682`                                  | clean     | RFC 프로토콜 커밋 후        | current |
-| BeforeSHA                   | `e2e608b3c46e1003b44c1919b10906f78f1dc64b` | clean     | baseline Hero 통합 커밋 후  | current |
-| Todo 7 final source SHA     | `ca2b6a7a461f7a0edbe28585d6a3640c6e2780fd` | clean     | semantic shell candidate 후 | current |
-| BasicAfterSHA               | Pending                                    | Pending   | 최종 source 검증·커밋 후    | pending |
-| Advanced Before/After SHA   | Pending                                    | Pending   | Advanced A 진입 시          | pending |
-| 최종 evidence 문서 커밋 SHA | Pending                                    | Pending   | RFC와 근거 확정 후          | pending |
+| 역할                        | SHA                                        | 작업 트리 | 기록 시점                    | 상태          |
+| --------------------------- | ------------------------------------------ | --------- | ---------------------------- | ------------- |
+| StartSHA                    | `4e53e545863f5ad184137f58569cc0942d405a64` | clean     | Week 07 작업 시작 전         | current       |
+| 프로토콜 문서 체크포인트    | `d3da682`                                  | clean     | RFC 프로토콜 커밋 후         | current       |
+| BeforeSHA                   | `e2e608b3c46e1003b44c1919b10906f78f1dc64b` | clean     | baseline Hero 통합 커밋 후   | current       |
+| Todo 7 final source SHA     | `ca2b6a7a461f7a0edbe28585d6a3640c6e2780fd` | clean     | semantic shell candidate 후  | current       |
+| Todo 8 rejected source SHA  | `f4167e9afebb9f2ae93b0d09e158767e2b951a80` | clean     | initial responsive candidate | rejected; FIX |
+| Todo 8 final source SHA     | `cee8cf7bf1d283048925f49d97fc8ab056f1aa2c` | clean     | mobile candidate fix 후      | current; KEEP |
+| BasicAfterSHA               | Pending                                    | Pending   | 최종 source 검증·커밋 후     | pending       |
+| Advanced Before/After SHA   | Pending                                    | Pending   | Advanced A 진입 시           | pending       |
+| 최종 evidence 문서 커밋 SHA | Pending                                    | Pending   | RFC와 근거 확정 후           | pending       |
 
 ## 환경
 
-| 항목                  | 확인 명령 또는 위치                  | 값                                                                                              | 상태    |
-| --------------------- | ------------------------------------ | ----------------------------------------------------------------------------------------------- | ------- |
-| Node.js               | `node --version`                     | `v24.9.0`                                                                                       | current |
-| pnpm                  | `pnpm --version`                     | `10.15.1`                                                                                       | current |
-| OS                    | `sw_vers`                            | macOS 27.0 (26A5388g)                                                                           | current |
-| Chrome 전체 버전      | Chrome executable version            | `150.0.7871.187`                                                                                | current |
-| Lighthouse 버전       | Lighthouse 결과 export               | `13.3.0`                                                                                        | current |
-| 브라우저 프로필       | 측정 전용, 확장 프로그램 없음        | Chrome Guest profile                                                                            | current |
-| 확장 프로그램 상태    | Guest profile                        | 기존 profile 확장 프로그램과 분리                                                               | current |
-| APP_ORIGIN            | build/runtime 공통                   | `http://127.0.0.1:3000`                                                                         | current |
-| production PID        | Before 측정 서버                     | `53177` (Before 수집 후 종료)                                                                   | current |
-| Todo 7 production PID | candidate 측정 서버                  | `30363` (Todo 7 수집 후 종료·포트 해제 확인)                                                    | current |
-| production 로그 경로  | 서버 시작 후 기록                    | `.local/week07-performance-evidence/e2e608b3c46e1003b44c1919b10906f78f1dc64b/before-server.log` | current |
-| `pnpm test`           | Todo 7 source                        | 17 files, 160 tests passed                                                                      | current |
-| `pnpm check`          | source 변경 전·BasicAfterSHA 확정 전 | exit 0                                                                                          | current |
+| 항목                    | 확인 명령 또는 위치                  | 값                                                                                              | 상태    |
+| ----------------------- | ------------------------------------ | ----------------------------------------------------------------------------------------------- | ------- |
+| Node.js                 | `node --version`                     | `v24.9.0`                                                                                       | current |
+| pnpm                    | `pnpm --version`                     | `10.15.1`                                                                                       | current |
+| OS                      | `sw_vers`                            | macOS 27.0 (26A5388g)                                                                           | current |
+| Chrome 전체 버전        | Chrome executable version            | `150.0.7871.187`                                                                                | current |
+| Lighthouse 버전         | Lighthouse 결과 export               | `13.3.0`                                                                                        | current |
+| 브라우저 프로필         | 측정 전용, 확장 프로그램 없음        | Chrome Guest profile                                                                            | current |
+| 확장 프로그램 상태      | Guest profile                        | 기존 profile 확장 프로그램과 분리                                                               | current |
+| APP_ORIGIN              | build/runtime 공통                   | `http://127.0.0.1:3000`                                                                         | current |
+| production PID          | Before 측정 서버                     | `53177` (Before 수집 후 종료)                                                                   | current |
+| Todo 7 production PID   | candidate 측정 서버                  | `30363` (Todo 7 수집 후 종료·포트 해제 확인)                                                    | current |
+| Todo 8 production PID   | final candidate 측정 서버            | wrapper `51823`, listener `51842` (수집 후 종료·포트 해제 확인)                                 | current |
+| production 로그 경로    | 서버 시작 후 기록                    | `.local/week07-performance-evidence/e2e608b3c46e1003b44c1919b10906f78f1dc64b/before-server.log` | current |
+| `pnpm test`             | Todo 7 source                        | 17 files, 160 tests passed                                                                      | current |
+| `pnpm check`            | source 변경 전·BasicAfterSHA 확정 전 | exit 0                                                                                          | current |
+| Todo 8 production build | final candidate source               | exit 0; 공식 측정 lifecycle에서 확인                                                            | current |
 
 현재 실행 환경에는 `nvm`이 없으므로 `.nvmrc`의 `24.17.0` 대신 `package.json`의
 지원 범위(`>=22.12.0`)에 포함되는 `v24.9.0`을 사용한다. Before와 After에서 같은
@@ -163,32 +166,45 @@ LCP candidate가 run마다 바뀐 것은 무효 사유가 아니다. 유효 run�
 `.local/week07-performance-evidence/<sha>/`에 보관한다. 제출 판단에 필요한 수치와 선별
 화면은 RFC 및 `docs/images/week07-performance/`에도 남긴다.
 
-| ID      | 상대 경로                                                                                                                    | SHA-256                                                            | byte 크기 | 캡처 시각                | source SHA                                 | URL                           | 도구·버전             | 프로토콜                             | 용도·연결된 주장                             | 상태    |
-| ------- | ---------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------ | --------- | ------------------------ | ------------------------------------------ | ----------------------------- | --------------------- | ------------------------------------ | -------------------------------------------- | ------- |
-| B-LH1   | `.local/week07-performance-evidence/e2e608b3c46e1003b44c1919b10906f78f1dc64b/before-lighthouse-run-1.json`                   | `d69b492eaff22f1b34ec0f38ae4c1e7c9b56bb27e7fc53349901b73e50d269ec` | 466393    | 2026-08-04T13:20:18.971Z | `e2e608b`                                  | `/?scenario=slow`             | Lighthouse 13.3.0     | Navigation/Desktop/Performance       | Before raw 1                                 | local   |
-| B-LH2   | `.local/week07-performance-evidence/e2e608b3c46e1003b44c1919b10906f78f1dc64b/before-lighthouse-run-2.json`                   | `69d1b378063d194e045bc75addf7e96b18f9a68b4449c146aeab5aa8b2f37d7e` | 474698    | 2026-08-04T13:30:03.892Z | `e2e608b`                                  | `/?scenario=slow`             | Lighthouse 13.3.0     | same as B-LH1                        | Before raw 2                                 | local   |
-| B-LH3   | `.local/week07-performance-evidence/e2e608b3c46e1003b44c1919b10906f78f1dc64b/before-lighthouse-run-3.json`                   | `cdc26771bc5dfdcfc25f720fe3cda02b49d0c47dcaf6dfc22d9e500bf5abfa75` | 467595    | 2026-08-04T13:32:48.183Z | `e2e608b`                                  | `/?scenario=slow`             | Lighthouse 13.3.0     | same as B-LH1                        | Before raw 3                                 | local   |
-| B-LH4   | `.local/week07-performance-evidence/e2e608b3c46e1003b44c1919b10906f78f1dc64b/before-lighthouse-run-4.json`                   | `e83a967f043f0cfe6c5058f47ca7bf0ae1cb2e05b4b4f36c4662f44b495d2e29` | 428235    | 2026-08-04T13:34:31.388Z | `e2e608b`                                  | `/?scenario=slow`             | Lighthouse 13.3.0     | same as B-LH1                        | Before raw 4                                 | local   |
-| B-LH5   | `.local/week07-performance-evidence/e2e608b3c46e1003b44c1919b10906f78f1dc64b/before-lighthouse-run-5.json`                   | `6fef73195fa7be9b677163ea343d499016c533132082a09c289a31129e33b08a` | 444500    | 2026-08-04T13:38:32.633Z | `e2e608b`                                  | `/?scenario=slow`             | Lighthouse 13.3.0     | same as B-LH1                        | Before raw 5                                 | local   |
-| B-HTR   | `.local/week07-performance-evidence/e2e608b3c46e1003b44c1919b10906f78f1dc64b/before-home-performance-trace.json.gz`          | `802d2f63f2fc739440f3ff7d89ab050748a75801575dc8badde98c6d457d20ef` | 705378    | 2026-08-04T14:07:41.430Z | `e2e608b`                                  | `/?scenario=slow`             | Chrome DevTools 150   | 1365×768/DPR1/Slow 4G/CPU4×          | Home insertion, discovery, filmstrip, shifts | local   |
-| B-HHAR  | `.local/week07-performance-evidence/e2e608b3c46e1003b44c1919b10906f78f1dc64b/before-home-network.har`                        | `a14231315363dee427d0356376b41f98f9dbac0dda232450005eb0c21fd39554` | 11536130  | 2026-08-04T14:12:58.185Z | `e2e608b`                                  | `/?scenario=slow`             | WebInspector HAR 1.2  | Slow 4G/cache disabled               | Document/API/Hero waterfall                  | local   |
-| B-PCTR  | `.local/week07-performance-evidence/e2e608b3c46e1003b44c1919b10906f78f1dc64b/before-products-cold-performance-trace.json.gz` | `54c0572c6f972927370580b6befbecf7c90818abec30508424704da317ca3572` | 846954    | 2026-08-04T14:17:46.641Z | `e2e608b`                                  | `/products?scenario=slow`     | Chrome DevTools 150   | supporting trace                     | Cold pending, product render, CLS            | local   |
-| B-PRTR  | `.local/week07-performance-evidence/e2e608b3c46e1003b44c1919b10906f78f1dc64b/before-products-rapid-filter-trace.json.gz`     | `797423daf09f14035f71d8d62aac080a53164924f5d556f70cf5c0a9e6936d99` | 1900314   | 2026-08-04T14:21:20.490Z | `e2e608b`                                  | `/products?...&scenario=slow` | Chrome DevTools 150   | manual warm interaction              | No cancellation, repeated shifts             | local   |
-| B-PRHAR | `.local/week07-performance-evidence/e2e608b3c46e1003b44c1919b10906f78f1dc64b/before-products-rapid-filter.har`               | `ae44e83106d272d38fded4ba6d97e09b7a2a8e80bf81cbdb84536a6960846ea4` | 573887    | 2026-08-04T14:21:26.142Z | `e2e608b`                                  | `/products?...&scenario=slow` | WebInspector HAR 1.2  | Slow 4G/cache disabled               | 11 completed product requests                | local   |
-| B-IMG1  | `docs/images/week07-performance/01-before-lighthouse.png`                                                                    | `0043040f552d82faaeb9fdd6676a3fa82b06dddfd0d42327781e8ba3f9818000` | 140322    | 2026-08-04T13:20:18.971Z | `e2e608b`                                  | `/?scenario=slow`             | selected PNG          | Lighthouse final screenshot          | Original Hero Before                         | tracked |
-| B-IMG2  | `docs/images/week07-performance/02-products-initial-pending.png`                                                             | `368251e3954f8d896094feb6f1c1cb28f70329e658bc5d6501a757ea1d1d2bf6` | 12317     | 2026-08-04T14:17:46.641Z | `e2e608b`                                  | `/products?scenario=slow`     | selected PNG          | trace filmstrip                      | Initial pending                              | tracked |
-| B-IMG3  | `docs/images/week07-performance/03-products-loaded.png`                                                                      | `bbb812532a00fd2cdbbc5706719808bfcee9518abc5c5f907335d8988e3ae7a6` | 92864     | 2026-08-04T14:17:46.641Z | `e2e608b`                                  | `/products?scenario=slow`     | selected PNG          | trace filmstrip                      | Loaded list                                  | tracked |
-| T7-LH1  | `.local/week07-performance-evidence/ca2b6a7a461f7a0edbe28585d6a3640c6e2780fd/todo7-lighthouse-run-1.json`                    | `c1a7cc7614789460b5d077676a66c2f516a3f47eb0b839e28037d333451ffe69` | 491695    | 2026-08-05T12:56:30.081Z | `ca2b6a7`                                  | `/?scenario=slow`             | Lighthouse 13.3.0     | headed Chrome/config parity          | Todo 7 raw 1                                 | local   |
-| T7-LH2  | `.local/week07-performance-evidence/ca2b6a7a461f7a0edbe28585d6a3640c6e2780fd/todo7-lighthouse-run-2.json`                    | `c96fe7edaad5ae66cf6fbd51a161e5708b62f9acd201a582486cb3b89d9e2894` | 541685    | 2026-08-05T12:57:20.418Z | `ca2b6a7`                                  | `/?scenario=slow`             | Lighthouse 13.3.0     | same as T7-LH1                       | Todo 7 raw 2                                 | local   |
-| T7-LH3  | `.local/week07-performance-evidence/ca2b6a7a461f7a0edbe28585d6a3640c6e2780fd/todo7-lighthouse-run-3.json`                    | `031f77408e77d14027a7c29f6cac240da1a04f0afca39078211e22095e2dca87` | 543290    | 2026-08-05T12:57:35.141Z | `ca2b6a7`                                  | `/?scenario=slow`             | Lighthouse 13.3.0     | same as T7-LH1                       | Todo 7 raw 3                                 | local   |
-| T7-LH4  | `.local/week07-performance-evidence/ca2b6a7a461f7a0edbe28585d6a3640c6e2780fd/todo7-lighthouse-run-4.json`                    | `37a271a38a33d161e5da8266d3c08fe4008778589444cbe5a98c27fbbae7b03d` | 521849    | 2026-08-05T12:57:49.662Z | `ca2b6a7`                                  | `/?scenario=slow`             | Lighthouse 13.3.0     | same as T7-LH1                       | Todo 7 raw 4                                 | local   |
-| T7-LH5  | `.local/week07-performance-evidence/ca2b6a7a461f7a0edbe28585d6a3640c6e2780fd/todo7-lighthouse-run-5.json`                    | `eec339bc1d3cc7adfd012472a35b96bb0e8a2601b0393ed49b42cc600baac095` | 521670    | 2026-08-05T12:58:08.423Z | `ca2b6a7`                                  | `/?scenario=slow`             | Lighthouse 13.3.0     | same as T7-LH1                       | Todo 7 raw 5                                 | local   |
-| T7-TR   | `.local/week07-performance-evidence/ca2b6a7a461f7a0edbe28585d6a3640c6e2780fd/todo7-home-playwright-trace.zip`                | `c7c5274485547518f370724ae5abc39cd50691b3255b167980b0bb04f1277268` | 260211    | 2026-08-05T13:01:18.000Z | `ca2b6a7`                                  | `/?scenario=slow`             | Playwright/Chrome 150 | 1365×768/cache off/Slow 4G/CPU4×     | Shell/API/Hero timeline·bounds·shift         | local   |
-| T7-IMG1 | `docs/images/week07-performance/04-home-semantic-shell-desktop.png`                                                          | `c097baa436332b58a96f2100a1052d393f53460a7b25e70f3e0448e76e57fdbd` | 21770     | 2026-08-05T12:38:23.000Z | `ca2b6a7`                                  | `/?scenario=slow`             | selected PNG          | 1365 desktop pending                 | API 전 semantic shell                        | tracked |
-| T7-IMG2 | `docs/images/week07-performance/05-home-hero-resolved-desktop.png`                                                           | `b709f9f3ffd95247f54ccbada9cbee13691dfd6129b0e678c6ef260ac602ead4` | 1512074   | 2026-08-05T12:38:25.000Z | `ca2b6a7`                                  | `/?scenario=slow`             | selected PNG          | 1365 desktop resolved                | Final Hero 동일 geometry                     | tracked |
-| T7-IMG3 | `docs/images/week07-performance/06-home-semantic-shell-mobile.png`                                                           | `6b5582414428c9b7e3fa0a8e74d8015b0fcb20ebf86822678150c4308d5f63f4` | 17962     | 2026-08-05T12:38:25.000Z | `ca2b6a7`                                  | `/?scenario=slow`             | selected PNG          | 375 mobile pending                   | Mobile semantic shell                        | tracked |
-| T7-IMG4 | `docs/images/week07-performance/07-home-hero-resolved-mobile.png`                                                            | `39bb1d36168e9b56cdbf09774c27300ad808ea0bc7d664ffa490b1d2ff777c5e` | 564643    | 2026-08-05T12:38:27.000Z | `ca2b6a7`                                  | `/?scenario=slow`             | selected PNG          | 375 mobile resolved                  | Mobile final Hero 동일 geometry              | tracked |
-| T8-AUD  | `.local/week07-performance-evidence/ca2b6a7a461f7a0edbe28585d6a3640c6e2780fd/todo8-candidate-audit.md`                       | `a8f01739d5bdb335f89aae4c58dffb375524b8a46ca768e3dd61c8b2572df1cc` | 18760     | 2026-08-05T14:30:22Z     | `ca2b6a7a461f7a0edbe28585d6a3640c6e2780fd` | `/?scenario=slow`             | independent audit     | existing B-HHAR/T7 evidence re-audit | Todo 8 displayed candidate·oversized gate    | local   |
+| ID        | 상대 경로                                                                                                                    | SHA-256                                                            | byte 크기 | 캡처 시각                | source SHA                                 | URL                           | 도구·버전             | 프로토콜                                 | 용도·연결된 주장                             | 상태    |
+| --------- | ---------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------ | --------- | ------------------------ | ------------------------------------------ | ----------------------------- | --------------------- | ---------------------------------------- | -------------------------------------------- | ------- |
+| B-LH1     | `.local/week07-performance-evidence/e2e608b3c46e1003b44c1919b10906f78f1dc64b/before-lighthouse-run-1.json`                   | `d69b492eaff22f1b34ec0f38ae4c1e7c9b56bb27e7fc53349901b73e50d269ec` | 466393    | 2026-08-04T13:20:18.971Z | `e2e608b`                                  | `/?scenario=slow`             | Lighthouse 13.3.0     | Navigation/Desktop/Performance           | Before raw 1                                 | local   |
+| B-LH2     | `.local/week07-performance-evidence/e2e608b3c46e1003b44c1919b10906f78f1dc64b/before-lighthouse-run-2.json`                   | `69d1b378063d194e045bc75addf7e96b18f9a68b4449c146aeab5aa8b2f37d7e` | 474698    | 2026-08-04T13:30:03.892Z | `e2e608b`                                  | `/?scenario=slow`             | Lighthouse 13.3.0     | same as B-LH1                            | Before raw 2                                 | local   |
+| B-LH3     | `.local/week07-performance-evidence/e2e608b3c46e1003b44c1919b10906f78f1dc64b/before-lighthouse-run-3.json`                   | `cdc26771bc5dfdcfc25f720fe3cda02b49d0c47dcaf6dfc22d9e500bf5abfa75` | 467595    | 2026-08-04T13:32:48.183Z | `e2e608b`                                  | `/?scenario=slow`             | Lighthouse 13.3.0     | same as B-LH1                            | Before raw 3                                 | local   |
+| B-LH4     | `.local/week07-performance-evidence/e2e608b3c46e1003b44c1919b10906f78f1dc64b/before-lighthouse-run-4.json`                   | `e83a967f043f0cfe6c5058f47ca7bf0ae1cb2e05b4b4f36c4662f44b495d2e29` | 428235    | 2026-08-04T13:34:31.388Z | `e2e608b`                                  | `/?scenario=slow`             | Lighthouse 13.3.0     | same as B-LH1                            | Before raw 4                                 | local   |
+| B-LH5     | `.local/week07-performance-evidence/e2e608b3c46e1003b44c1919b10906f78f1dc64b/before-lighthouse-run-5.json`                   | `6fef73195fa7be9b677163ea343d499016c533132082a09c289a31129e33b08a` | 444500    | 2026-08-04T13:38:32.633Z | `e2e608b`                                  | `/?scenario=slow`             | Lighthouse 13.3.0     | same as B-LH1                            | Before raw 5                                 | local   |
+| B-HTR     | `.local/week07-performance-evidence/e2e608b3c46e1003b44c1919b10906f78f1dc64b/before-home-performance-trace.json.gz`          | `802d2f63f2fc739440f3ff7d89ab050748a75801575dc8badde98c6d457d20ef` | 705378    | 2026-08-04T14:07:41.430Z | `e2e608b`                                  | `/?scenario=slow`             | Chrome DevTools 150   | 1365×768/DPR1/Slow 4G/CPU4×              | Home insertion, discovery, filmstrip, shifts | local   |
+| B-HHAR    | `.local/week07-performance-evidence/e2e608b3c46e1003b44c1919b10906f78f1dc64b/before-home-network.har`                        | `a14231315363dee427d0356376b41f98f9dbac0dda232450005eb0c21fd39554` | 11536130  | 2026-08-04T14:12:58.185Z | `e2e608b`                                  | `/?scenario=slow`             | WebInspector HAR 1.2  | Slow 4G/cache disabled                   | Document/API/Hero waterfall                  | local   |
+| B-PCTR    | `.local/week07-performance-evidence/e2e608b3c46e1003b44c1919b10906f78f1dc64b/before-products-cold-performance-trace.json.gz` | `54c0572c6f972927370580b6befbecf7c90818abec30508424704da317ca3572` | 846954    | 2026-08-04T14:17:46.641Z | `e2e608b`                                  | `/products?scenario=slow`     | Chrome DevTools 150   | supporting trace                         | Cold pending, product render, CLS            | local   |
+| B-PRTR    | `.local/week07-performance-evidence/e2e608b3c46e1003b44c1919b10906f78f1dc64b/before-products-rapid-filter-trace.json.gz`     | `797423daf09f14035f71d8d62aac080a53164924f5d556f70cf5c0a9e6936d99` | 1900314   | 2026-08-04T14:21:20.490Z | `e2e608b`                                  | `/products?...&scenario=slow` | Chrome DevTools 150   | manual warm interaction                  | No cancellation, repeated shifts             | local   |
+| B-PRHAR   | `.local/week07-performance-evidence/e2e608b3c46e1003b44c1919b10906f78f1dc64b/before-products-rapid-filter.har`               | `ae44e83106d272d38fded4ba6d97e09b7a2a8e80bf81cbdb84536a6960846ea4` | 573887    | 2026-08-04T14:21:26.142Z | `e2e608b`                                  | `/products?...&scenario=slow` | WebInspector HAR 1.2  | Slow 4G/cache disabled                   | 11 completed product requests                | local   |
+| B-IMG1    | `docs/images/week07-performance/01-before-lighthouse.png`                                                                    | `0043040f552d82faaeb9fdd6676a3fa82b06dddfd0d42327781e8ba3f9818000` | 140322    | 2026-08-04T13:20:18.971Z | `e2e608b`                                  | `/?scenario=slow`             | selected PNG          | Lighthouse final screenshot              | Original Hero Before                         | tracked |
+| B-IMG2    | `docs/images/week07-performance/02-products-initial-pending.png`                                                             | `368251e3954f8d896094feb6f1c1cb28f70329e658bc5d6501a757ea1d1d2bf6` | 12317     | 2026-08-04T14:17:46.641Z | `e2e608b`                                  | `/products?scenario=slow`     | selected PNG          | trace filmstrip                          | Initial pending                              | tracked |
+| B-IMG3    | `docs/images/week07-performance/03-products-loaded.png`                                                                      | `bbb812532a00fd2cdbbc5706719808bfcee9518abc5c5f907335d8988e3ae7a6` | 92864     | 2026-08-04T14:17:46.641Z | `e2e608b`                                  | `/products?scenario=slow`     | selected PNG          | trace filmstrip                          | Loaded list                                  | tracked |
+| T7-LH1    | `.local/week07-performance-evidence/ca2b6a7a461f7a0edbe28585d6a3640c6e2780fd/todo7-lighthouse-run-1.json`                    | `c1a7cc7614789460b5d077676a66c2f516a3f47eb0b839e28037d333451ffe69` | 491695    | 2026-08-05T12:56:30.081Z | `ca2b6a7`                                  | `/?scenario=slow`             | Lighthouse 13.3.0     | headed Chrome/config parity              | Todo 7 raw 1                                 | local   |
+| T7-LH2    | `.local/week07-performance-evidence/ca2b6a7a461f7a0edbe28585d6a3640c6e2780fd/todo7-lighthouse-run-2.json`                    | `c96fe7edaad5ae66cf6fbd51a161e5708b62f9acd201a582486cb3b89d9e2894` | 541685    | 2026-08-05T12:57:20.418Z | `ca2b6a7`                                  | `/?scenario=slow`             | Lighthouse 13.3.0     | same as T7-LH1                           | Todo 7 raw 2                                 | local   |
+| T7-LH3    | `.local/week07-performance-evidence/ca2b6a7a461f7a0edbe28585d6a3640c6e2780fd/todo7-lighthouse-run-3.json`                    | `031f77408e77d14027a7c29f6cac240da1a04f0afca39078211e22095e2dca87` | 543290    | 2026-08-05T12:57:35.141Z | `ca2b6a7`                                  | `/?scenario=slow`             | Lighthouse 13.3.0     | same as T7-LH1                           | Todo 7 raw 3                                 | local   |
+| T7-LH4    | `.local/week07-performance-evidence/ca2b6a7a461f7a0edbe28585d6a3640c6e2780fd/todo7-lighthouse-run-4.json`                    | `37a271a38a33d161e5da8266d3c08fe4008778589444cbe5a98c27fbbae7b03d` | 521849    | 2026-08-05T12:57:49.662Z | `ca2b6a7`                                  | `/?scenario=slow`             | Lighthouse 13.3.0     | same as T7-LH1                           | Todo 7 raw 4                                 | local   |
+| T7-LH5    | `.local/week07-performance-evidence/ca2b6a7a461f7a0edbe28585d6a3640c6e2780fd/todo7-lighthouse-run-5.json`                    | `eec339bc1d3cc7adfd012472a35b96bb0e8a2601b0393ed49b42cc600baac095` | 521670    | 2026-08-05T12:58:08.423Z | `ca2b6a7`                                  | `/?scenario=slow`             | Lighthouse 13.3.0     | same as T7-LH1                           | Todo 7 raw 5                                 | local   |
+| T7-TR     | `.local/week07-performance-evidence/ca2b6a7a461f7a0edbe28585d6a3640c6e2780fd/todo7-home-playwright-trace.zip`                | `c7c5274485547518f370724ae5abc39cd50691b3255b167980b0bb04f1277268` | 260211    | 2026-08-05T13:01:18.000Z | `ca2b6a7`                                  | `/?scenario=slow`             | Playwright/Chrome 150 | 1365×768/cache off/Slow 4G/CPU4×         | Shell/API/Hero timeline·bounds·shift         | local   |
+| T7-IMG1   | `docs/images/week07-performance/04-home-semantic-shell-desktop.png`                                                          | `c097baa436332b58a96f2100a1052d393f53460a7b25e70f3e0448e76e57fdbd` | 21770     | 2026-08-05T12:38:23.000Z | `ca2b6a7`                                  | `/?scenario=slow`             | selected PNG          | 1365 desktop pending                     | API 전 semantic shell                        | tracked |
+| T7-IMG2   | `docs/images/week07-performance/05-home-hero-resolved-desktop.png`                                                           | `b709f9f3ffd95247f54ccbada9cbee13691dfd6129b0e678c6ef260ac602ead4` | 1512074   | 2026-08-05T12:38:25.000Z | `ca2b6a7`                                  | `/?scenario=slow`             | selected PNG          | 1365 desktop resolved                    | Final Hero 동일 geometry                     | tracked |
+| T7-IMG3   | `docs/images/week07-performance/06-home-semantic-shell-mobile.png`                                                           | `6b5582414428c9b7e3fa0a8e74d8015b0fcb20ebf86822678150c4308d5f63f4` | 17962     | 2026-08-05T12:38:25.000Z | `ca2b6a7`                                  | `/?scenario=slow`             | selected PNG          | 375 mobile pending                       | Mobile semantic shell                        | tracked |
+| T7-IMG4   | `docs/images/week07-performance/07-home-hero-resolved-mobile.png`                                                            | `39bb1d36168e9b56cdbf09774c27300ad808ea0bc7d664ffa490b1d2ff777c5e` | 564643    | 2026-08-05T12:38:27.000Z | `ca2b6a7`                                  | `/?scenario=slow`             | selected PNG          | 375 mobile resolved                      | Mobile final Hero 동일 geometry              | tracked |
+| T8-AUD    | `.local/week07-performance-evidence/ca2b6a7a461f7a0edbe28585d6a3640c6e2780fd/todo8-candidate-audit.md`                       | `a8f01739d5bdb335f89aae4c58dffb375524b8a46ca768e3dd61c8b2572df1cc` | 18760     | 2026-08-05T14:30:22Z     | `ca2b6a7a461f7a0edbe28585d6a3640c6e2780fd` | `/?scenario=slow`             | independent audit     | existing B-HHAR/T7 evidence re-audit     | Todo 8 displayed candidate·oversized gate    | local   |
+| T8-R-AUD  | `.local/week07-performance-evidence/f4167e9afebb9f2ae93b0d09e158767e2b951a80/todo8-official-candidate-audit.md`              | `cee6914433e0e3c7850952e852d51e955fb7ef5a0c3987006a22dec56fafdc68` | 15027     | 2026-08-05T15:35:37Z     | `f4167e9afebb9f2ae93b0d09e158767e2b951a80` | `/?scenario=slow`             | independent audit     | production/clean SHA/5 Lighthouse runs   | Rejected candidate FIX decision              | local   |
+| T8-F-AUD  | `.local/week07-performance-evidence/cee8cf7bf1d283048925f49d97fc8ab056f1aa2c/todo8-fix-official-candidate-audit.md`          | `504e47ce1cd7c118ce34aba1eae4dcf9830fc3069f19b877a03c77f6b4533fc4` | 16568     | 2026-08-05T16:33:23Z     | `cee8cf7bf1d283048925f49d97fc8ab056f1aa2c` | `/?scenario=slow`             | independent audit     | production/clean SHA/final official wave | Todo 8 final KEEP decision                   | local   |
+| T8-F-LH1  | `.local/week07-performance-evidence/cee8cf7bf1d283048925f49d97fc8ab056f1aa2c/todo8-fix-official-lighthouse-run-1.json`       | `81d825f01b1439c28f9c3424ce87f302fbecbdd926836e280211e0ba658d0838` | 497866    | 2026-08-05T16:14:50Z     | `cee8cf7`                                  | `/?scenario=slow`             | Lighthouse 13.3.0     | Todo 7 config parity                     | Todo 8 final raw 1                           | local   |
+| T8-F-LH2  | `.local/week07-performance-evidence/cee8cf7bf1d283048925f49d97fc8ab056f1aa2c/todo8-fix-official-lighthouse-run-2.json`       | `99b9858fe0a6542eb751b5ce5854325e100c9bd9a4afbdb9d9bca43cc8e13827` | 497772    | 2026-08-05T16:15:04Z     | `cee8cf7`                                  | `/?scenario=slow`             | Lighthouse 13.3.0     | same as T8-F-LH1                         | Todo 8 final raw 2                           | local   |
+| T8-F-LH3  | `.local/week07-performance-evidence/cee8cf7bf1d283048925f49d97fc8ab056f1aa2c/todo8-fix-official-lighthouse-run-3.json`       | `3a52fe6487233ce11d210d7d3a5feb8e19fff2f5f0930f30773e72107a9c34d2` | 497593    | 2026-08-05T16:15:17Z     | `cee8cf7`                                  | `/?scenario=slow`             | Lighthouse 13.3.0     | same as T8-F-LH1                         | Todo 8 final raw 3                           | local   |
+| T8-F-LH4  | `.local/week07-performance-evidence/cee8cf7bf1d283048925f49d97fc8ab056f1aa2c/todo8-fix-official-lighthouse-run-4.json`       | `bfc543ba822ae3e68a0b3d1410a427571c2152d32bd80abe925bcacca8d882e9` | 497580    | 2026-08-05T16:15:31Z     | `cee8cf7`                                  | `/?scenario=slow`             | Lighthouse 13.3.0     | same as T8-F-LH1                         | Todo 8 final raw 4                           | local   |
+| T8-F-LH5  | `.local/week07-performance-evidence/cee8cf7bf1d283048925f49d97fc8ab056f1aa2c/todo8-fix-official-lighthouse-run-5.json`       | `e2c8b2c193c230ac1641b0af935565413bd848db1a8778e1202a719b1f0c754b` | 497761    | 2026-08-05T16:15:44Z     | `cee8cf7`                                  | `/?scenario=slow`             | Lighthouse 13.3.0     | same as T8-F-LH1                         | Todo 8 final raw 5                           | local   |
+| T8-F-TR   | `.local/week07-performance-evidence/cee8cf7bf1d283048925f49d97fc8ab056f1aa2c/todo8-fix-official-home-playwright-trace.zip`   | `61c60e5ff534820ad3f5b3b5746d92b15e5486885916e5f4b4f59eb2a41ca239` | 585407    | 2026-08-05T16:18:05Z     | `cee8cf7`                                  | `/?scenario=slow`             | Playwright/Chrome 150 | 1365×768/DPR1/cache off/Slow 4G/CPU4×    | candidate network·geometry·shift             | local   |
+| T8-F-BR   | `.local/week07-performance-evidence/cee8cf7bf1d283048925f49d97fc8ab056f1aa2c/todo8-fix-official-browser-observations.json`   | `b87e911e8982074c6dcbc8f6db69bc4a0111e2612e1aa30b52445ba59d55fd0e` | 4351      | 2026-08-05T16:19:28Z     | `cee8cf7`                                  | `/?scenario=slow`             | Playwright/Chrome 150 | desktop/mobile DPR1/cache disabled       | bounds·sizes·raster·semantics·errors         | local   |
+| T8-F-NET  | `.local/week07-performance-evidence/cee8cf7bf1d283048925f49d97fc8ab056f1aa2c/todo8-fix-official-network.json`                | `8114751fc8fc98bf8e387f2e9fe70d32947a1aadbc6709b5c899d3ba920c6e48` | 1712      | 2026-08-05T16:19:28Z     | `cee8cf7`                                  | `/?scenario=slow`             | CDP Network           | desktop/mobile cache disabled            | displayed URL·format·resource/transfer bytes | local   |
+| T8-F-REV  | `.local/week07-performance-evidence/cee8cf7bf1d283048925f49d97fc8ab056f1aa2c/todo8-fix-official-visual-review-receipts.md`   | `29781c787a5600f935c577fa71a478c93e1d22a0404573086158159ef05359f4` | 2081      | 2026-08-05T16:30:40Z     | `cee8cf7`                                  | `/?scenario=slow`             | independent review    | direct Hero pixel review                 | conflict resolution and final PASS           | local   |
+| T8-F-IMG1 | `docs/images/week07-performance/hero-responsive-candidate-desktop.png`                                                       | `5e279316349fbb8c6d9e9b5fabf3aa1347d33a04bda3af9962a024e392e9a0b8` | 1237704   | 2026-08-05T16:18:05Z     | `cee8cf7`                                  | `/?scenario=slow`             | selected PNG          | 1365×768 DPR1 full resolved page         | desktop geometry·crop·quality                | tracked |
+| T8-F-IMG2 | `docs/images/week07-performance/hero-responsive-candidate-mobile.png`                                                        | `bd946d1be3e3ef10898919fdd46598094df9931d562e412b4294f269559829cf` | 446524    | 2026-08-05T16:18:07Z     | `cee8cf7`                                  | `/?scenario=slow`             | selected PNG          | 375×812 DPR1 full resolved page          | mobile geometry·crop·quality                 | tracked |
 
 ## Before
 
@@ -287,11 +303,11 @@ B-LH3의 top-level simulated LCP는 `6967.505ms`이지만 같은 export의
 
 ## Hero 실험과 결정
 
-| 순서 | 실험                            | 사전 가설                                                            | 판정 threshold                                                                                     | 반증 조건                                                                                      | candidate SHA | 측정 결과                                    | 결정·이유                  | evidence ID                                       |
-| ---- | ------------------------------- | -------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- | ------------- | -------------------------------------------- | -------------------------- | ------------------------------------------------- |
-| 1    | semantic shell/loading boundary | API 전 shell+reserved frame, LCP 개선 예측 없음                      | semantic contract 전부 통과; timing은 <6711.6814 improved, >7251.28685 regression                  | API 전 shell 실패, duplicate h1, bounds/shift/hydration/a11y/function regression               | `ca2b6a7`     | shell 계약 통과; LCP 6913.341ms              | keep; timing inconclusive  | T7-LH1-T7-LH5/T7-TR/T7-IMG1-T7-IMG4               |
-| 2    | displayed size/candidate audit  | raw 3840×2160 request is oversized; responsive delivery lowers bytes | right-sized optimizer candidate+material byte reduction; geometry/crop/CLS/a11y/function unchanged | raw/original-size candidate, no byte reduction, or visual/crop/quality/CLS/function regression | Pending       | audit gate met; implementation·After Pending | locked; source result 아님 | B-HHAR/T7-LH1-T7-LH5/T7-TR/T7-IMG2/T7-IMG4/T8-AUD |
-| 3    | optional discovery/priority     | Pending                                                              | Pending                                                                                            | Pending                                                                                        | Pending       | Pending                                      | Pending                    | Pending                                           |
+| 순서 | 실험                            | 사전 가설                                                            | 판정 threshold                                                                                     | 반증 조건                                                                                      | candidate SHA         | 측정 결과                                                                                                        | 결정·이유                 | evidence ID                                                              |
+| ---- | ------------------------------- | -------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- | --------------------- | ---------------------------------------------------------------------------------------------------------------- | ------------------------- | ------------------------------------------------------------------------ |
+| 1    | semantic shell/loading boundary | API 전 shell+reserved frame, LCP 개선 예측 없음                      | semantic contract 전부 통과; timing은 <6711.6814 improved, >7251.28685 regression                  | API 전 shell 실패, duplicate h1, bounds/shift/hydration/a11y/function regression               | `ca2b6a7`             | shell 계약 통과; LCP 6913.341ms                                                                                  | keep; timing inconclusive | T7-LH1-T7-LH5/T7-TR/T7-IMG1-T7-IMG4                                      |
+| 2    | displayed size/candidate audit  | raw 3840×2160 request is oversized; responsive delivery lowers bytes | right-sized optimizer candidate+material byte reduction; geometry/crop/CLS/a11y/function unchanged | raw/original-size candidate, no byte reduction, or visual/crop/quality/CLS/function regression | `f4167e9` → `cee8cf7` | f416 mobile quality fail; cee8 candidates/bytes/preservation pass; FCP inconclusive, LCP directional improvement | FIX then **KEEP**         | T8-R-AUD/T8-F-AUD/T8-F-LH1-T8-F-LH5/T8-F-TR/T8-F-REV/T8-F-IMG1-T8-F-IMG2 |
+| 3    | optional discovery/priority     | Pending                                                              | Pending                                                                                            | Pending                                                                                        | Pending               | Pending                                                                                                          | Pending                   | Pending                                                                  |
 
 ### Todo 7 semantic shell 결과
 
@@ -342,10 +358,10 @@ source SHA는 `ca2b6a7a461f7a0edbe28585d6a3640c6e2780fd`다.
 수정하지 않았다. supporting protocol의 DPR 1은 고정 조건이지만 T7 trace 자체에 직렬화된
 값은 아니다.
 
-| 시점   | CSS 표시 크기                                             | DPR                                                  | intrinsic/request candidate         | format  | compression                     | resource/transfer bytes   | quality·crop                                                   | CLS     | evidence ID                                       |
-| ------ | --------------------------------------------------------- | ---------------------------------------------------- | ----------------------------------- | ------- | ------------------------------- | ------------------------- | -------------------------------------------------------------- | ------- | ------------------------------------------------- |
-| Before | desktop `1104×621`; tablet `720×405`; mobile `327×408.75` | supporting protocol `1`; trace에는 독립 직렬화 안 됨 | raw original `3840×2160`, no srcset | JPEG    | HAR content `0` (B-HHAR/T8-AUD) | `7,545,239` / `7,545,525` | numeric quality unavailable; object-cover; mobile `56% center` | `0`     | B-HHAR/T7-LH1-T7-LH5/T7-TR/T7-IMG2/T7-IMG4/T8-AUD |
-| After  | Pending                                                   | Pending                                              | Pending                             | Pending | Pending                         | Pending                   | Pending                                                        | Pending | Pending                                           |
+| 시점         | CSS 표시 크기                                             | DPR                                                  | intrinsic/request candidate         | format | compression                     | resource/transfer bytes                             | quality·crop                                                   | CLS | evidence ID                                       |
+| ------------ | --------------------------------------------------------- | ---------------------------------------------------- | ----------------------------------- | ------ | ------------------------------- | --------------------------------------------------- | -------------------------------------------------------------- | --- | ------------------------------------------------- |
+| Before       | desktop `1104×621`; tablet `720×405`; mobile `327×408.75` | supporting protocol `1`; trace에는 독립 직렬화 안 됨 | raw original `3840×2160`, no srcset | JPEG   | HAR content `0` (B-HHAR/T8-AUD) | `7,545,239` / `7,545,525`                           | numeric quality unavailable; object-cover; mobile `56% center` | `0` | B-HHAR/T7-LH1-T7-LH5/T7-TR/T7-IMG2/T7-IMG4/T8-AUD |
+| Todo 8 final | desktop `1104×621`; mobile `327×408.75`                   | desktop/mobile supporting browser `1`                | desktop `w=1200`; mobile `w=750`    | WebP   | Next optimizer `q=75`           | desktop `80536` / `80965`; mobile `31994` / `32423` | native `1200×675` / `750×422`; crop·quality PASS               | `0` | T8-F-AUD/T8-F-TR/T8-F-IMG1-T8-F-IMG2              |
 
 Before의 HAR content `compression = 0`은 transport/body-size accounting 값이며 numeric
 JPEG encoder quality 값이 아니다. JPEG encoder quality는 계속 unavailable이다 (B-HHAR/T8-AUD).
@@ -384,6 +400,103 @@ gate는 **met**이다. tablet/mobile 비율과 단위 구분, raw URL, resource/
   `a8f01739d5bdb335f89aae4c58dffb375524b8a46ca768e3dd61c8b2572df1cc`, 크기는
   `18,760` bytes, audit 시각은 `2026-08-05T14:30:22Z`다. 현재 HEAD와 Todo 7 source의
   `src/`·`public/`은 동일함을 재확인했다.
+
+### Todo 8 rejected candidate: `f4167e9`
+
+첫 구현 `f4167e9afebb9f2ae93b0d09e158767e2b951a80`은 clean production SHA에서 candidate와
+byte gate는 통과했지만 mobile 품질 보존 계약을 실패해 **FIX**로 판정했다. 이 결과는 최종
+candidate에 덮어쓰지 않고 `T8-R-AUD`로 보존한다.
+
+| 항목                          | Desktop                        | Mobile                                                         |
+| ----------------------------- | ------------------------------ | -------------------------------------------------------------- |
+| viewport / DPR / CSS bounds   | `1365×768` / 1 / `1104×621`    | `375×812` / 1 / `327×408.75`                                   |
+| displayed candidate           | `w=1200&q=75`, WebP `1200×675` | `w=384&q=75`, WebP `384×216`                                   |
+| resource / CDP transfer bytes | `80,536` / `80,965`            | `9,982` / `10,410`                                             |
+| candidate·byte gate           | pass                           | pass                                                           |
+| quality gate                  | pass                           | **fail**; 16:9 raster를 4:5 cover box에 확대해 detail이 저하됨 |
+| independent review            | desktop blocker 없음           | 두 reviewer 모두 `REVISE`                                      |
+
+`f4167e9`의 Lighthouse median은 FCP `223.1552ms`로 Todo 7 median 대비 `3.5153ms` 낮아
+**inconclusive**, LCP `1289.8712ms`로 `5623.4698ms` 낮아 **directional improvement**였고,
+CLS는 5/5 `0`이었다. timing 개선이 품질 실패를 상쇄하지 않는다는 locked rule에 따라
+revert가 아니라 mobile `sizes` correction 후 재측정을 선택했다 (T8-R-AUD).
+
+### Todo 8 final official result: `cee8cf7`
+
+최종 source는 `cee8cf7bf1d283048925f49d97fc8ab056f1aa2c`다. 공식 sidecar
+`T8-F-AUD`는 SHA-256
+`504e47ce1cd7c118ce34aba1eae4dcf9830fc3069f19b877a03c77f6b4533fc4`, `16,568`
+bytes, UTC timestamp `2026-08-05T16:33:23Z`이며, initial과 매 Lighthouse run 전 tracked
+porcelain이 비어 있었다. production build/runtime는 동일
+`APP_ORIGIN=http://127.0.0.1:3000`을 사용했고 수집 후 PID와 port 3000이 정리됐다.
+
+다섯 export는 Todo 7 및 rejected wave와 같은 Lighthouse `13.3.0`, Chrome `150`, exact
+URL, Navigation/Desktop/Performance only 설정을 사용했다. 실행 flags는
+`--form-factor=desktop`, `--screenEmulation.disabled=true`, simulated throttling
+`rttMs=40`, `throughputKbps=10240`, `cpuSlowdownMultiplier=1`, extension-disabled incognito다.
+authoritative `configSettings`는 `onlyCategories=["performance"]`, `formFactor=desktop`,
+disabled `screenEmulation={mobile:true,width:412,height:823,deviceScaleFactor:1.75}`와
+throttling `{rttMs:40,throughputKbps:10240,requestLatencyMs:562.5,downloadThroughputKbps:1474.56,uploadThroughputKbps:675,cpuSlowdownMultiplier:1}`로
+모두 일치했다. disabled screen-emulation 값은 supporting viewport로 해석하지 않는다.
+
+| Run | FCP (ms) | LCP (ms) | CLS | LCP candidate | config parity | evidence ID |
+| --- | -------: | -------: | --: | ------------- | ------------- | ----------- |
+| 1   | 213.6218 | 887.2436 |   0 | Hero `img`    | match         | T8-F-LH1    |
+| 2   | 211.3606 | 882.7212 |   0 | Hero `img`    | match         | T8-F-LH2    |
+| 3   | 208.9861 | 857.9722 |   0 | Hero `img`    | match         | T8-F-LH3    |
+| 4   | 208.8470 | 857.6940 |   0 | Hero `img`    | match         | T8-F-LH4    |
+| 5   | 209.4302 | 858.8604 |   0 | Hero `img`    | match         | T8-F-LH5    |
+
+LCP candidate는 다섯 run 모두
+`body > main.mx-auto > section.relative > img.block`의 Hero image였다.
+
+| 지표 | raw 값 (run 순서)                                  |   median |      min |      max |   range |
+| ---- | -------------------------------------------------- | -------: | -------: | -------: | ------: |
+| FCP  | `213.6218, 211.3606, 208.9861, 208.8470, 209.4302` | 209.4302 | 208.8470 | 213.6218 |  4.7748 |
+| LCP  | `887.2436, 882.7212, 857.9722, 857.6940, 858.8604` | 858.8604 | 857.6940 | 887.2436 | 29.5496 |
+| CLS  | `0, 0, 0, 0, 0`                                    |        0 |        0 |        0 |       0 |
+
+| 지표 | Todo 7 median / range | Todo 8 median |   Todo 7 - Todo 8 | locked classification                             |
+| ---- | --------------------: | ------------: | ----------------: | ------------------------------------------------- |
+| FCP  |    226.6705 / 17.5535 |      209.4302 |   17.2403ms lower | **inconclusive**; `17.2403 <= 17.5535`            |
+| LCP  |     6913.341 / 55.107 |      858.8604 | 6054.4806ms lower | **directional improvement**; `6054.4806 > 55.107` |
+| CLS  |                 0 / 0 |             0 |                 0 | no change                                         |
+
+FCP는 개선 방향 수치지만 Todo 7 range를 넘지 않았으므로 directional improvement로
+주장하지 않는다. LCP만 locked threshold에 따른 directional improvement다
+(T8-F-LH1-T8-F-LH5).
+
+| 항목                          | Desktop                                                                | Mobile                                                                | 결과·근거                                                      |
+| ----------------------------- | ---------------------------------------------------------------------- | --------------------------------------------------------------------- | -------------------------------------------------------------- |
+| viewport / DPR                | `1365×768` / 1                                                         | `375×812` / 1                                                         | protocol match; T8-F-BR/T8-F-TR                                |
+| CSS bounds                    | `1104×621`                                                             | `327×408.75`                                                          | Todo 7 geometry 유지; T8-F-BR                                  |
+| parsed source size            | `1104`                                                                 | `726.66655`                                                           | browser `sizes` parsing; T8-F-BR                               |
+| optimizer URL                 | `/_next/image?url=%2Fimages%2Fweek-07%2Fhero-original.jpg&w=1200&q=75` | `/_next/image?url=%2Fimages%2Fweek-07%2Fhero-original.jpg&w=750&q=75` | displayed `currentSrc`; T8-F-BR/T8-F-NET                       |
+| format / native raster        | WebP `1200×675`                                                        | WebP `750×422`                                                        | cache-disabled explicit WebP decode; T8-F-BR                   |
+| resource / CDP transfer bytes | `80,536` / `80,965`                                                    | `31,994` / `32,423`                                                   | original transfer `7,545,525`보다 material reduction; T8-F-NET |
+| DPR1 native coverage          | `1200 >= 1104`, `675 >= 621`                                           | `750 >= 726.66655`, `422 >= 408.75`                                   | no upscale; T8-F-BR                                            |
+| object crop                   | `cover`, `50% 50%`                                                     | `cover`, `56% 50%`                                                    | focal position 유지; T8-F-BR                                   |
+
+| 보존 계약                    | 관찰                                                                                  | 결과 | evidence ID                  |
+| ---------------------------- | ------------------------------------------------------------------------------------- | ---- | ---------------------------- |
+| geometry / crop              | Todo 7 desktop/mobile bounds와 focal composition 동일                                 | pass | T8-F-TR/T8-F-IMG1/T8-F-IMG2  |
+| quality / copy               | desktop detail 유지; mobile texture·edge·product detail 복원; 문구와 기존 줄바꿈 동일 | pass | T8-F-REV/T8-F-IMG1/T8-F-IMG2 |
+| semantics / accessibility    | desktop/mobile 각각 `main=1`, `h1=1`, decorative `alt=""`                             | pass | T8-F-BR/T8-F-TR              |
+| CLS                          | Lighthouse 5/5 `0`; desktop/mobile no-recent-input shift 없음                         | pass | T8-F-LH1-T8-F-LH5/T8-F-TR    |
+| errors / function            | console·hydration·page error 없음; Hero와 주변 UI 정상 resolve                        | pass | T8-F-BR/T8-F-TR              |
+| responsive candidate / bytes | URL·width·q·format·native coverage·material reduction 전부 충족                       | pass | T8-F-BR/T8-F-NET             |
+
+strict `image-diff`는 JPEG와 WebP의 모든 channel 차이를 세며 사전 acceptance threshold가
+없다. 최초 contract review `bg_f53fe1f9`의 `REVISE`는 이 ratio를 perceptual blocker로
+사용한 **method mismatch**였으며 숨기지 않고 보존한다. 같은 fresh screenshot을 직접 pixel로
+검토한 최종 독립 reviewer `bg_db982583`, `bg_b7b1f09f`는 각각 high-confidence `PASS`, blocker
+없음을 반환했다. 따라서 conflicting history는 `T8-F-REV`에서 해소됐고 final visual gate는
+PASS다.
+
+최종 판정은 **KEEP**이다. responsive candidate와 material byte reduction, no-upscale,
+geometry·crop·quality·copy·semantics·CLS·error·function gate를 모두 통과했다. timing은 별도
+분류로 FCP inconclusive, LCP directional improvement, CLS no change다. 이 판정은 Todo 8만
+완료하며 Todo 9 priority 실험을 시작하거나 결정하지 않는다.
 
 ## 상품 목록 여섯 시나리오
 
@@ -476,18 +589,18 @@ Browser Network만으로 서버 호출 횟수를 판정하지 않는다.
 
 ## 회귀 검증
 
-| 범주                | 확인 시나리오                                       | 결과                          | evidence ID            | 상태            |
-| ------------------- | --------------------------------------------------- | ----------------------------- | ---------------------- | --------------- |
-| Home semantic shell | Header, 하나의 h1, 설명, Hero                       | 통과                          | T7-TR/T7-IMG1-T7-IMG4  | current         |
-| Products states     | loading, refresh, empty, error, retry, cancellation | Pending                       | Pending                | pending         |
-| URL restoration     | 검색·카테고리·정렬·페이지, 뒤로·앞으로              | Pending                       | Pending                | pending         |
-| Commerce state      | cart, wishlist, Header count                        | Pending                       | Pending                | pending         |
-| Hydration           | hydration warning과 초기 HTML                       | Todo 7 warning 없음           | T7-TR                  | current-partial |
-| CLS                 | Hero fallback과 product list 교체                   | Hero 교체 0; products Pending | T7-LH1-T7-LH5/T7-TR    | current-partial |
-| Accessibility       | landmark, heading, link, alt, focus                 | Todo 7 통과                   | T7-TR/T7-IMG1-T7-IMG4  | current-partial |
-| Responsive          | desktop `1365 × 768`, mobile `375 × 812`            | Todo 7 통과                   | T7-IMG1-T7-IMG4        | current-partial |
-| Image quality       | 시각적 역할, crop, 주요 피사체, 문구                | Todo 7 변경 없음·review PASS  | T7-IMG2/T7-IMG4/B-IMG1 | current-partial |
-| FSD                 | 의존 방향, direct-file import, slice 경계           | Todo 7 direct import 유지     | source/tests           | current-partial |
+| 범주                | 확인 시나리오                                       | 결과                                 | evidence ID                           | 상태            |
+| ------------------- | --------------------------------------------------- | ------------------------------------ | ------------------------------------- | --------------- |
+| Home semantic shell | Header, 하나의 h1, 설명, Hero                       | Todo 8 final에서도 통과              | T7-TR/T8-F-BR/T8-F-IMG1-T8-F-IMG2     | current         |
+| Products states     | loading, refresh, empty, error, retry, cancellation | Pending                              | Pending                               | pending         |
+| URL restoration     | 검색·카테고리·정렬·페이지, 뒤로·앞으로              | Pending                              | Pending                               | pending         |
+| Commerce state      | cart, wishlist, Header count                        | Pending                              | Pending                               | pending         |
+| Hydration           | hydration warning과 초기 HTML                       | Todo 8 final warning 없음            | T8-F-BR/T8-F-TR                       | current-partial |
+| CLS                 | Hero fallback과 product list 교체                   | Hero 5/5 `0`; products Pending       | T8-F-LH1-T8-F-LH5/T8-F-TR             | current-partial |
+| Accessibility       | landmark, heading, link, alt, focus                 | Hero `main=1`, `h1=1`, `alt=""` 유지 | T8-F-BR/T8-F-TR                       | current-partial |
+| Responsive          | desktop `1365 × 768`, mobile `375 × 812`            | Todo 8 bounds/candidate 통과         | T8-F-BR/T8-F-IMG1-T8-F-IMG2           | current-partial |
+| Image quality       | 시각적 역할, crop, 주요 피사체, 문구                | f416 REVISE 후 cee8 review PASS      | T8-R-AUD/T8-F-REV/T8-F-IMG1-T8-F-IMG2 | current-partial |
+| FSD                 | 의존 방향, direct-file import, slice 경계           | Todo 7 direct import 유지            | source/tests                          | current-partial |
 
 ## Advanced A 진입 게이트
 
@@ -506,11 +619,13 @@ Basic 완료 후 아래 네 조건을 모두 충족할 때만 진입한다.
 
 ## 결정 로그
 
-| 시각                 | source SHA | 관찰한 사실                                                                                       | 가설                                                                                | 반증 방법                                                                                  | 가장 작은 실험                                        | 사전 threshold                                                    | 결과   | keep/revert/reject와 이유              |
-| -------------------- | ---------- | ------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ | ----------------------------------------------------- | ----------------------------------------------------------------- | ------ | -------------------------------------- |
-| 2026-08-04T15:11:59Z | `e2e608b`  | slow query가 shell/Hero insertion을 막고, late discovery 뒤 7.55MB transfer가 별도 병목이다.      | shell boundary 분리로 API 전 semantic shell을 노출할 수 있다.                       | same-run filmstrip/trace에서 API 전 shell, bounds, shifts와 회귀를 확인한다.               | semantic shell + fixed-geometry local fallback만 변경 | semantic contract 전부 통과; timing 분류는 6711.6814/7251.28685ms | locked | source change 전 locked                |
-| 2026-08-05T13:15:43Z | `ca2b6a7`  | API 전 shell, viewport별 동일 bounds, Hero replacement shift 0, LCP median 6913.341ms를 관찰했다. | semantic shell 계약은 충족하고 LCP 변화는 noise 안일 것이다.                        | tests·production browser·5회 JSON·독립 visual review로 회귀와 threshold를 확인했다.        | 변경 추가 없음; candidate를 그대로 판정               | semantic contract pass; 6913.341ms는 inconclusive band            | pass   | keep; timing inconclusive              |
-| 2026-08-05T14:30:22Z | `ca2b6a7`  | raw 3840×2160 JPEG가 desktop DPR1 target보다 area 12.098299× 크고 7,545,525 bytes를 전송한다.     | accurate sizes의 Next Image가 width/DPR 적합 candidate와 실질적 byte 감소를 만든다. | actual optimizer URL·width·DPR·bytes와 geometry/crop/quality/CLS/a11y/function을 측정한다. | raw Hero `<img>`만 `fill`+accurate `sizes`로 교체     | right-sized candidate+material byte reduction+모든 보존 계약 통과 | locked | source result 아님; 구현·After pending |
+| 시각                 | source SHA | 관찰한 사실                                                                                                                           | 가설                                                                                    | 반증 방법                                                                                                    | 가장 작은 실험                                        | 사전 threshold                                                    | 결과   | keep/revert/reject와 이유                                              |
+| -------------------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------- | ----------------------------------------------------------------- | ------ | ---------------------------------------------------------------------- |
+| 2026-08-04T15:11:59Z | `e2e608b`  | slow query가 shell/Hero insertion을 막고, late discovery 뒤 7.55MB transfer가 별도 병목이다.                                          | shell boundary 분리로 API 전 semantic shell을 노출할 수 있다.                           | same-run filmstrip/trace에서 API 전 shell, bounds, shifts와 회귀를 확인한다.                                 | semantic shell + fixed-geometry local fallback만 변경 | semantic contract 전부 통과; timing 분류는 6711.6814/7251.28685ms | locked | source change 전 locked                                                |
+| 2026-08-05T13:15:43Z | `ca2b6a7`  | API 전 shell, viewport별 동일 bounds, Hero replacement shift 0, LCP median 6913.341ms를 관찰했다.                                     | semantic shell 계약은 충족하고 LCP 변화는 noise 안일 것이다.                            | tests·production browser·5회 JSON·독립 visual review로 회귀와 threshold를 확인했다.                          | 변경 추가 없음; candidate를 그대로 판정               | semantic contract pass; 6913.341ms는 inconclusive band            | pass   | keep; timing inconclusive                                              |
+| 2026-08-05T14:30:22Z | `ca2b6a7`  | raw 3840×2160 JPEG가 desktop DPR1 target보다 area 12.098299× 크고 7,545,525 bytes를 전송한다.                                         | accurate sizes의 Next Image가 width/DPR 적합 candidate와 실질적 byte 감소를 만든다.     | actual optimizer URL·width·DPR·bytes와 geometry/crop/quality/CLS/a11y/function을 측정한다.                   | raw Hero `<img>`만 `fill`+accurate `sizes`로 교체     | right-sized candidate+material byte reduction+모든 보존 계약 통과 | locked | source result 아님; 구현·After pending                                 |
+| 2026-08-05T15:33:40Z | `f4167e9`  | desktop `w=1200`은 pass지만 mobile `w=384` 16:9 raster가 4:5 box에서 확대돼 detail이 저하됐고 reviewer 2개가 REVISE했다.              | mobile object-cover source size를 반영하면 byte 절감과 보존 계약을 함께 만족할 수 있다. | mobile native coverage와 직접 visual review를 clean fix SHA에서 반복한다.                                    | mobile `sizes` branch만 교정                          | candidate·bytes pass여도 quality fail이면 FIX                     | fail   | **FIX**; timing이 아니라 mobile 품질 회귀 때문                         |
+| 2026-08-05T16:33:23Z | `cee8cf7`  | desktop `w=1200`, mobile `w=750`이 DPR1을 cover하고 material byte reduction, geometry·quality·semantics·CLS·function gate를 통과했다. | corrected sizes가 locked responsive-delivery 계약을 충족한다.                           | 5회 JSON, Network/native raster, trace, tracked screenshots와 conflicting review resolution을 교차 확인했다. | 변경 추가 없음; fixed candidate 판정                  | candidate+bytes+보존 계약 pass; timing은 range rule로 별도 분류   | pass   | **KEEP**; FCP inconclusive, LCP directional improvement, CLS no change |
 
 ## AI 활용
 
@@ -520,6 +635,11 @@ Basic 완료 후 아래 네 조건을 모두 충족할 때만 진입한다.
   필터 변경, 화면 관찰.
 - Todo 7에서는 사용자가 브라우저 조작까지 위임해 AI가 production Playwright 관찰,
   headed Chrome Lighthouse export, 통계·hash 계산과 시각 reviewer 실행을 수행했다.
+- Todo 8에서는 AI가 clean committed SHA별 production build/lifecycle, Lighthouse 5회 export,
+  Network·native raster·geometry·CLS 관찰, artifact hash 계산과 독립 visual reviewer 조정을
+  수행했다. 사용자는 별도 verifier session에서 final evidence와 KEEP 판정을 재확인했다.
+- `f4167e9`의 두 REVISE와 `cee8cf7` strict-diff REVISE를 성공 근거에서 제거하지 않았고,
+  직접 pixel 검토 receipt와 locked threshold로 각각 FIX 및 method-mismatch resolution을 기록했다.
 - 직접 검토 기준: 과제 checklist, raw artifact, production 재현, 테스트와 회귀 결과.
 - AI 제안은 측정 근거와 반증 결과 없이 구현 정답이나 통과 증거로 사용하지 않는다.
 
@@ -541,11 +661,20 @@ Basic 완료 후 아래 네 조건을 모두 충족할 때만 진입한다.
   area oversize `12.098299×`와 `7,545,525` transfer bytes를 확인했고 Todo 8 gate를 충족했다.
 - Todo 8의 가설, 최소 `fill`+`sizes` 실험, keep/correction/revert/falsification, timing
   classification, scope exclusions를 source 변경 전에 locked 상태로 기록했다.
+- initial candidate `f4167e9`은 desktop candidate와 byte gate는 통과했지만 mobile
+  `w=384` raster의 확대·품질 저하와 독립 reviewer 2개의 REVISE 때문에 FIX로 판정했다.
+- fixed source `cee8cf7`의 official Lighthouse 5회는 FCP median `209.4302ms`
+  (inconclusive), LCP median `858.8604ms` (directional improvement), CLS `0`이다.
+- `cee8cf7`은 desktop `w=1200`/`80,965` transfer bytes, mobile
+  `w=750`/`32,423` transfer bytes로 no-upscale와 material reduction을 충족했고,
+  geometry·crop·quality·copy·semantics·CLS·error·function gate를 통과해 Todo 8을 KEEP했다.
+- official full resolved desktop/mobile screenshots를 descriptive tracked path로 선별하고
+  sidecar, raw JSON, trace, Network, reviewer receipt와 함께 manifest했다.
 
 ### Pending
 
 - 상품 목록 여섯 시나리오
-- Todo 8 Next Image candidate 구현, clean candidate 측정, After row와 keep/fix/revert 판정
+- Todo 9 current-SHA discovery/priority 재평가와 조건부 실험
 - metadata 문서·응답 시점·서버 호출 계수
 - clean BasicAfterSHA와 After Lighthouse 5회
 - 기능·접근성·반응형·FSD 회귀 검증
@@ -573,8 +702,8 @@ Basic 완료 후 아래 네 조건을 모두 충족할 때만 진입한다.
 
 - [x] 고용량 Hero 원본을 사용한 Before를 먼저 남겼는가
 - [x] 이미지 표시 크기·전송 크기·요청 시작 시점과 LCP 구간을 확인했는가
-- [ ] Hero의 시각적 역할과 품질을 유지하면서 실제 병목을 줄였는가
-- [ ] `next/image` 사용 여부가 아니라 실제 요청과 LCP 결과를 확인했는가
+- [x] Hero의 시각적 역할과 품질을 유지하면서 실제 병목을 줄였는가
+- [x] `next/image` 사용 여부가 아니라 실제 요청과 LCP 결과를 확인했는가
 - [x] Header·`h1`·페이지 설명이 느린 Hero와 함께 막히지 않는가
 - [x] fallback 교체가 눈에 띄는 layout shift를 만들지 않는가
 
@@ -622,7 +751,7 @@ Basic 완료 후 아래 네 조건을 모두 충족할 때만 진입한다.
 - [ ] 검색·카테고리·정렬·페이지와 뒤로 가기·앞으로 가기가 같은 화면을 복원하는가
 - [ ] 장바구니·위시리스트·Header 개수, 로딩·에러·빈 상태·재시도가 유지되는가
 - [ ] FSD 의존 방향과 슬라이스 Public API를 우회하지 않았는가
-- [ ] 효과가 없거나 악화된 결과도 남겼는가
+- [x] 효과가 없거나 악화된 결과도 남겼는가
 
 ### Advanced A를 선택한 경우에만
 
