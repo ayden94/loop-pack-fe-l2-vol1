@@ -1,0 +1,113 @@
+import {
+  QueryClient,
+  QueryClientProvider,
+  QueryObserver,
+} from '@tanstack/react-query'
+import { renderToStaticMarkup } from 'react-dom/server'
+import { describe, expect, it } from 'vitest'
+
+import type { ProductListResponse } from '@/entities/product/model/types'
+
+import { ProductListSection } from './ProductListSection'
+
+const emptyResponse = {
+  products: [],
+  categories: [],
+  totalCount: 0,
+  page: 1,
+  pageSize: 12,
+} satisfies ProductListResponse
+
+function renderSection(
+  queryClient: QueryClient,
+  query: ReturnType<QueryObserver<ProductListResponse>['getCurrentResult']>,
+  displayedData: ProductListResponse | undefined,
+) {
+  return renderToStaticMarkup(
+    <QueryClientProvider client={queryClient}>
+      <ProductListSection
+        query={query}
+        displayedData={displayedData}
+        scope="current-product-key"
+      />
+    </QueryClientProvider>,
+  )
+}
+
+describe('ProductListSection presentation', () => {
+  it('renders a stable busy region and twelve skeleton slots while cold pending', () => {
+    const queryClient = new QueryClient()
+    const observer = new QueryObserver<ProductListResponse>(queryClient, {
+      queryKey: ['products', 'pending'],
+      queryFn: () => new Promise<ProductListResponse>(() => undefined),
+    })
+    const unsubscribe = observer.subscribe(() => undefined)
+
+    const markup = renderSection(
+      queryClient,
+      observer.getCurrentResult(),
+      undefined,
+    )
+
+    expect(markup).toContain('aria-label="상품 검색 결과"')
+    expect(markup).toContain('aria-busy="true"')
+    expect(markup).toContain('role="status"')
+    expect(markup.match(/data-product-skeleton-slot="true"/g)).toHaveLength(12)
+    expect(markup).not.toContain('role="alert"')
+    unsubscribe()
+  })
+
+  it('renders successful empty separately from an error', () => {
+    const queryClient = new QueryClient()
+    const queryKey = ['products', 'empty'] as const
+    queryClient.setQueryData(queryKey, emptyResponse)
+    const observer = new QueryObserver<ProductListResponse>(queryClient, {
+      queryKey,
+      queryFn: () => Promise.resolve(emptyResponse),
+    })
+
+    const markup = renderSection(
+      queryClient,
+      observer.getCurrentResult(),
+      emptyResponse,
+    )
+
+    expect(markup).toContain('aria-busy="false"')
+    expect(markup).toContain('총 0개')
+    expect(markup).toContain('검색 결과가 없습니다.')
+    expect(markup.match(/data-product-geometry-slot="true"/g)).toHaveLength(12)
+    expect(markup).not.toContain('role="alert"')
+  })
+
+  it('keeps retained count and geometry beside a current-key error', async () => {
+    const queryClient = new QueryClient({
+      defaultOptions: { queries: { retry: false } },
+    })
+    const observer = new QueryObserver<ProductListResponse>(queryClient, {
+      queryKey: ['products', 'error'],
+      queryFn: () => Promise.reject(new Error('상품 목록 요청 실패')),
+    })
+    const errorResultPromise = new Promise<
+      ReturnType<typeof observer.getCurrentResult>
+    >((resolve) => {
+      const unsubscribe = observer.subscribe((result) => {
+        if (result.isError) {
+          unsubscribe()
+          resolve(result)
+        }
+      })
+    })
+
+    const markup = renderSection(queryClient, await errorResultPromise, {
+      ...emptyResponse,
+      totalCount: 30,
+    })
+
+    expect(markup).toContain('aria-busy="false"')
+    expect(markup).toContain('총 30개')
+    expect(markup).toContain('role="alert"')
+    expect(markup).toContain('상품 목록 요청 실패')
+    expect(markup).toContain('<button')
+    expect(markup.match(/data-product-geometry-slot="true"/g)).toHaveLength(12)
+  })
+})

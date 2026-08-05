@@ -2,12 +2,17 @@
 
 import { useQuery } from '@tanstack/react-query'
 import Link from 'next/link'
+import { useSearchParams } from 'next/navigation'
 
 import { productEntity } from '@/entities/product/api/ProductService'
-import type { DiagnosticScenario } from '@/entities/product/model/DiagnosticScenario'
+import {
+  type DiagnosticScenario,
+  parseDiagnosticScenario,
+} from '@/entities/product/model/DiagnosticScenario'
 import { DEFAULT_PAGE_SIZE } from '@/entities/product/model/ProductQuerySchema'
 import { useProductFilters } from '@/features/product-filter/model/useProductFilters'
 import { FilterBar } from '@/features/product-filter/ui/FilterBar'
+import { useProductListState } from '@/views/product-list/model/useProductListState'
 import { ProductListSection } from '@/widgets/product-list/ui/ProductListSection'
 
 type ProductListViewProps = {
@@ -15,6 +20,12 @@ type ProductListViewProps = {
 }
 
 export function ProductListView({ diagnosticScenario }: ProductListViewProps) {
+  const searchParams = useSearchParams()
+  const scenarioSearchParam = searchParams.get('scenario')
+  const currentDiagnosticScenario =
+    scenarioSearchParam === diagnosticScenario.scenario
+      ? diagnosticScenario
+      : parseDiagnosticScenario(scenarioSearchParam)
   const { filters, updateFilter, updatePage } = useProductFilters()
   const productListQueryInput = {
     ...filters,
@@ -22,11 +33,18 @@ export function ProductListView({ diagnosticScenario }: ProductListViewProps) {
   }
   const productListScope = JSON.stringify({
     query: productListQueryInput,
-    diagnosticScenario,
+    diagnosticScenario: currentDiagnosticScenario,
   })
 
-  const productListQuery = useQuery(
-    productEntity.getProductList(productListQueryInput, diagnosticScenario),
+  const productListOptions = productEntity.getProductList(
+    productListQueryInput,
+    currentDiagnosticScenario,
+  )
+  const productListQuery = useQuery(productListOptions)
+  const productListState = useProductListState(
+    productListQuery,
+    productListOptions.queryKey,
+    productListScope,
   )
 
   return (
@@ -38,14 +56,18 @@ export function ProductListView({ diagnosticScenario }: ProductListViewProps) {
       <section className="mb-6">
         <FilterBar
           filters={filters}
-          totalCount={productListQuery.data?.totalCount ?? 0}
+          totalCount={productListState.displayedData?.totalCount ?? 0}
           pageSize={DEFAULT_PAGE_SIZE}
           updateFilter={updateFilter}
           updatePage={updatePage}
         />
       </section>
 
-      <ProductListSection query={productListQuery} scope={productListScope} />
+      <ProductListSection
+        query={productListQuery}
+        displayedData={productListState.displayedData}
+        scope={productListScope}
+      />
 
       <div className="mt-8">
         <Link
