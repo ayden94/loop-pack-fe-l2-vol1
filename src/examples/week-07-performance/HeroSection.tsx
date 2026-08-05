@@ -15,7 +15,7 @@ export function HeroSection({ title, description }: HeroSectionProps) {
         src="/images/week-07/hero-original.jpg"
         alt=""
         fill
-        sizes="(max-width: 1152px) calc(100vw - 48px), 1104px"
+        sizes="(max-width: 640px) calc(222.2222vw - 106.6667px), (max-width: 1152px) calc(100vw - 48px), 1104px"
       />
       <div className="absolute [inset:auto_auto_clamp(20px,5vw,64px)_clamp(20px,5vw,64px)] w-[min(440px,calc(100%_-_40px))] p-[clamp(18px,3vw,32px)] [backdrop-filter:blur(8px)] [background:rgb(255_253_248_/_88%)]">
         <p className="[font-size:13px] leading-[1.6] [font-weight:700] tracking-[0.12em]">

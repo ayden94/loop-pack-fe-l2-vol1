@@ -22,7 +22,7 @@ describe('HeroSection', () => {
       '[@media(max-width:640px)]:[object-position:56%_center]',
     )
     expect(markup).toContain(
-      'sizes="(max-width: 1152px) calc(100vw - 48px), 1104px"',
+      'sizes="(max-width: 640px) calc(222.2222vw - 106.6667px), (max-width: 1152px) calc(100vw - 48px), 1104px"',
     )
     expect(markup).toContain(
       'srcSet="/_next/image?url=%2Fimages%2Fweek-07%2Fhero-original.jpg',
