@@ -19,13 +19,22 @@ type ProductListViewProps = {
   readonly diagnosticScenario: DiagnosticScenario
 }
 
+export function resolveProductListDiagnosticScenario(
+  scenarioSearchParam: string | null,
+  diagnosticScenario: DiagnosticScenario,
+): DiagnosticScenario {
+  return scenarioSearchParam === diagnosticScenario.scenario
+    ? diagnosticScenario
+    : parseDiagnosticScenario(scenarioSearchParam)
+}
+
 export function ProductListView({ diagnosticScenario }: ProductListViewProps) {
   const searchParams = useSearchParams()
   const scenarioSearchParam = searchParams.get('scenario')
-  const currentDiagnosticScenario =
-    scenarioSearchParam === diagnosticScenario.scenario
-      ? diagnosticScenario
-      : parseDiagnosticScenario(scenarioSearchParam)
+  const currentDiagnosticScenario = resolveProductListDiagnosticScenario(
+    scenarioSearchParam,
+    diagnosticScenario,
+  )
   const { filters, updateFilter, updatePage } = useProductFilters()
   const productListQueryInput = {
     ...filters,
