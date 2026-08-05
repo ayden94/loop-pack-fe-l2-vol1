@@ -722,8 +722,10 @@ metadata/hydration, global Basic After를 완료하지 않는다.
   예약하지 않는다. B-PCTR에서 text → list 교체의 CLS `0.017433`을 관찰했다.
 - product query에는 `placeholderData`가 없다. key가 바뀌면 `data`가 없어져 grid와
   `totalCount`가 각각 pending text와 `0`으로 바뀔 수 있다.
-- initial error와 기존 데이터를 본 뒤 발생한 refresh/key-change error가 모두 목록을 교체하는 같은
-  `InlineQueryError` UI를 사용한다. recoverable list error도 retained grid 없이 section을 점유한다.
+- current `scenario=error` HTTP 500은 `ApiErrorPolicy.retry`에 따라 한 번 자동 재시도된 뒤,
+  global `throwOnError`가 5xx를 throw하므로 `InlineQueryError`가 아니라
+  `src/app/products/error.tsx` route boundary로 전달된다. 따라서 current source는 cold/refresh 500을
+  inline 상태로 구분하지 못하며, retained grid를 유지한 refresh-error UI도 없다.
 - 마지막 non-placeholder success query key를 기억하지 않으므로 current key가 error가 되면 이전
   real-success cache를 명시적으로 찾을 수 없다.
 - Todo 10의 browser query cancellation은 동작한다. 세 superseded transport가 abort되고 latest
@@ -769,8 +771,18 @@ placeholder, error, cancellation은 갱신하지 않는다. identity placeholder
 - product query orchestration과 current/last-success key 선택은 product list view/widget 경계에 둔다.
   여섯 상태 rendering은 `ProductListSection`이 맡고, skeleton은 `ProductGrid` 옆 widget 내부 파일로
   둔다. FSD slice-root barrel을 만들지 않고 현재 direct-file import를 유지한다.
-- `src/app/products/loading.tsx`와 `error.tsx` route boundary는 변경하지 않는다. client query의
-  recoverable initial/refresh error가 route-level boundary를 takeover하게 만들지 않는다.
+- Todo 11의 browser product-list `useQuery` options에만 `throwOnError: false`를 명시해 cold/refresh
+  500을 inline 상태로 돌린다. `ApiErrorPolicy.throwOnError`, provider default, Home/server/metadata query,
+  `src/app/products/loading.tsx`와 `error.tsx` route boundary는 변경하지 않는다. 이 override가 없거나
+  다른 query로 퍼지면 implementation failure다.
+- global retry policy는 유지한다. HTTP 500 한 logical fetch는 initial GET + automatic retry 1회로 최대
+  2 GETs다. 사용자가 retry/refetch를 한 번 누르면 current key에 대한 새 logical fetch가 시작되어 다시
+  최대 2 GETs를 만든다. 취소된 superseded request에는 automatic retry, manual-retry UI, error count를
+  추가하지 않는다.
+- `ProductListView`가 client `useSearchParams()`의 read-only `scenario` 값을
+  `parseDiagnosticScenario()`로 해석하는 seam을 Todo 11 범위에서 둔다. `scenario`는 계속
+  `FilterBar`, `useProductFilters()`와 사용자 filter state에 들어가지 않는다. server prop snapshot에
+  의존해 same-document scenario 변경을 놓치는 구현은 허용하지 않는다.
 - query key, GET builder, Route Handler의 1.5초 slow delay와 error/empty policy는 변경하지 않는다.
   Todo 10 browser-only signal과 signal-free server path도 그대로 유지한다.
 
@@ -786,25 +798,48 @@ lg:grid-cols-5`, 같은 gap과 card footprint를 쓴다. 각 card의 image place
   `false`다. 갱신 실패의 alert와 retry는 retained grid와 같은 region 안에 남는다.
 - retry는 focus 가능한 native `button`이며 keyboard Enter/Space, visible focus와 retry 중 중복 실행
   방지를 유지한다. 상태는 색상만으로 구분하지 않는다.
-- `375 × 812`와 `1365 × 768`에서 2/3/5-column 전환, square image box, content clipping, touch target,
+- `1365 × 768` desktop은 5-column, `768 × 1024` tablet은 3-column, `375 × 812` mobile은
+  2-column이어야 한다. 세 viewport에서 square image box, content clipping, touch target,
   Tab/Shift+Tab 순서와 screen-reader 불필요 skeleton 제외를 확인한다.
-- skeleton/content 및 retained content/error 교체에 귀속되는 no-recent-input Layout Shift가 없어야 한다.
-  trace에 event가 있으면 수치와 affected node를 기록하고 material CLS가 남은 candidate는 KEEP하지
+- 12-card skeleton과 result body는 같은 card footprint를 쓴다. sparse success는 부족한 slot을,
+  empty와 initial error는 12 slot 전체를 `visibility:hidden`·`aria-hidden="true"`인 non-content geometry
+  spacer로 채우고 실제 status/error를 overlay해 12-slot footprint를 유지한다. spacer에는 shimmer,
+  text, image, link, button role을 두지 않는다. retained refresh/error는 기존 real cards를 그대로
+  유지한다. 따라서 sparse/empty/error settle이 아래 content를 갑자기 끌어올리지 않아야 한다.
+- 각 recipe와 세 viewport에서 result replacement에 귀속된 no-recent-input Layout Shift entry가
+  **0개**이고 scenario cumulative CLS가 **`<= 0.01`**이어야 PASS다. entry count와 exact cumulative
+  CLS 값을 기록한다. 둘 중 하나라도 실패하면 원인 node를 기록하고 geometry를 고친 뒤 affected
+  recipe를 다시 실행하며, threshold를 넘은 candidate를 “material하지 않음”으로 해석해 KEEP하지
   않는다.
 
 ### Production reset과 공통 기록 규칙
 
 - 각 cold recipe 1, 3, 4, 6 전에 production process를 재시작하고 해당 origin의 cookies,
   local/session storage, Cache Storage와 HTTP cache를 지운 뒤 새 browser context에서 시작한다. 시작
-  QueryClient에 product cache가 없음을 기록한다. 이전 recipe의 탭이나 process를 재사용하지 않는다.
+  QueryClient가 새로 생성되는 조건을 만들고 이전 recipe의 탭이나 process를 재사용하지 않는다.
+  cache empty는 QueryObserver setup/test receipt가 증명하며 production browser가 private cache를 직접
+  관찰했다고 기록하지 않는다.
 - warm recipe 2와 5는 같은 recipe 안에서 먼저 `/products` real success를 완료한다. 그 직후 cache를
-  지우거나 reload하지 않고 후속 URL을 적용한다.
+  지우거나 reload하지 않고, `window.history.pushState`로 아래 exact URL을 적용해 Next client
+  `useSearchParams()`와 통합된 same-document transition을 만든다. `page.goto`, document navigation,
+  reload 또는 새 browser context로 warm 상태를 흉내 내지 않는다.
+- warm transition 전후 `performance.getEntriesByType('navigation')` count와 document identity가
+  바뀌지 않고 root provider가 remount되지 않아 같은 QueryClient/cache가 유지되어야 한다. browser는
+  no reload와 retained DOM을 관찰하고, focused integration test는 root QueryClient identity와 warm
+  cache retention을 증명한다. native `pushState`와 Next search params 연동이 구현에서 성립하지 않으면
+  `page.goto`로 대체하지 않고 FIX한다.
 - build/runtime는 `APP_ORIGIN=http://127.0.0.1:3000`, production mode, Chrome Guest, viewport
   `1365 × 768`, DPR 1, zoom 100%, cache disabled를 기본으로 한다. responsive 계약은 별도
-  `375 × 812` pass에서도 확인한다.
-- 각 단계마다 timestamp, browser URL, full active key, method와 full GET, query
-  `status`/`isPending`/`isFetching`/`isPlaceholderData`/`dataUpdatedAt`, last-success key, response IDs,
-  visible IDs, `totalCount`/page, cancellation terminal event, error text, retry GET과 recovery를 기록한다.
+  `768 × 1024`와 `375 × 812` pass에서도 확인한다.
+- 내부 telemetry는 QueryObserver/focused integration tests만 소유한다. 각 transition의
+  `status`/`isPending`/`isFetching`/`isPlaceholderData`/`isError`/`dataUpdatedAt`, current key,
+  last-success key와 `queryClient.getQueryData()` cache result를 test report에 기록한다. production
+  browser evidence가 이 private state를 직접 관찰했다고 주장하지 않는다.
+- production browser는 timestamp, visible browser URL, Network method/full GET/status와 automatic/manual
+  retry cardinality, canceled terminal event, DOM product IDs/status/error/focus, count/page label과 button
+  enabled state, navigation count/document identity, Layout Shift entry와 cumulative CLS만 기록한다.
+  active key와 last-success cache의 정합성은 같은 URL/GET/DOM evidence에 대응하는 QueryObserver test가
+  담당한다.
 - cold reset receipt, source SHA, build ID, PID, browser version, viewport, cache 상태와 cleanup receipt를
   local sidecar에 남긴다. 실패하거나 중단된 run은 accepted evidence에 섞지 않는다.
 
@@ -814,27 +849,34 @@ fixture의 default first page expected IDs는
 `p26,p6,p27,p24,p1,p28,p19,p2,p29,p11,p22,p3`다. `q=stanley`의 default latest
 IDs는 `p19,p20,p17`, price ascending IDs는 `p17,p20,p19`이며 `totalCount=3`이다.
 
-| #   | reset·시작 cache    | 정확한 action과 URL 순서                                                                                                                                                                                                                                                         | 단계별 기대 visible state·IDs                                                                                                                                                                                           | cancellation·recovery와 최종 기대                                                                                                                                                                                                                                                                               | evidence |
-| --- | ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- |
-| 1   | cold empty          | direct `/products?scenario=slow`                                                                                                                                                                                                                                                 | `K('',all,latest,1,slow)`/`G(sort=latest&page=1&pageSize=12&scenario=slow)`; 12 skeleton 뒤 default 12 IDs                                                                                                              | cancel 없음; 200 real success, `totalCount=30`, last-success=current key                                                                                                                                                                                                                                        | `08`     |
-| 2   | warm normal success | `/products` success 후 완료를 기다리지 않고 `/products?q=stanley&scenario=slow` → `/products?q=stanley&category=home&scenario=slow` → `/products?q=stanley&category=home&sort=price-asc&scenario=slow` → `/products?q=stanley&category=home&sort=price-asc&page=2&scenario=slow` | warm default IDs → 네 slow pending 모두 직전 real-success default IDs를 placeholder로 유지; 첫 세 단계는 retained `totalCount=30`/current page 1, 마지막 단계는 retained `totalCount=30`/current page 2 pagination 표시 | 네 slow GET 중 앞 세 개 abort, page-2 GET만 200. final key는 `K(stanley,home,price-asc,2,slow)`, final GET은 `q=stanley&category=home&sort=price-asc&page=2&pageSize=12&scenario=slow`, final `products=[]`, visible product IDs 없음, `totalCount=3`, `page=2`; successful empty이므로 last-success=page-2 key | `09`     |
-| 3   | cold empty          | direct `/products?q=__week07_no_match__`                                                                                                                                                                                                                                         | cold skeleton → `K(__week07_no_match__,all,latest,1,none)`의 real-success empty; GET `q=__week07_no_match__&sort=latest&page=1&pageSize=12`; visible IDs 없음, `totalCount=0`                                           | cancel/error 없음; no-match 설명과 current count/page 유지, last-success=current empty key                                                                                                                                                                                                                      | `10`     |
-| 4   | cold empty          | direct `/products?scenario=error`                                                                                                                                                                                                                                                | cold skeleton → `K('',all,latest,1,error)`/GET `sort=latest&page=1&pageSize=12&scenario=error`의 initial error; retained grid와 visible IDs 없음                                                                        | 같은 current GET을 retry하고 initial-error UI에 머무는지 확인; retry가 route boundary를 takeover하지 않음                                                                                                                                                                                                       | `11`     |
-| 5   | warm normal success | `/products` real success → `/products?q=stanley&scenario=error`; error 뒤 retry 1회 → URL에서 `scenario=error`만 제거                                                                                                                                                            | request와 error 동안 default 12 IDs, `totalCount=30`, page 1 유지; current error는 `K(stanley,all,latest,1,error)`에 연결                                                                                               | retry GET은 `q=stanley&sort=latest&page=1&pageSize=12&scenario=error`; 실패해도 retained data 유지. scenario 제거 뒤 GET `q=stanley&sort=latest&page=1&pageSize=12`가 200, IDs `p19,p20,p17`, `totalCount=3`, last-success=recovered current key                                                                | `12`     |
-| 6   | cold empty          | `/products?scenario=slow` 시작 후 완료 전 `/products?q=sta&scenario=slow` → `/products?q=stanley&scenario=slow`                                                                                                                                                                  | real success 전에는 매 단계 12 skeleton이며 canceled request를 error로 표시하지 않음. final `K(stanley,all,latest,1,slow)`만 IDs `p19,p20,p17` 표시                                                                     | GET은 차례로 `sort=latest&page=1&pageSize=12&scenario=slow`, `q=sta&sort=latest&page=1&pageSize=12&scenario=slow`, `q=stanley&sort=latest&page=1&pageSize=12&scenario=slow`; 첫 두 GET abort, final 200와 post-wait no overwrite/error, last-success=final key                                                  | `13`     |
+| #   | reset·시작 cache    | 정확한 action과 URL 순서                                                                                                                                                                                                                                                                                         | 단계별 기대 visible state·IDs                                                                                                                                                                                          | cancellation·recovery와 최종 기대                                                                                                                                                                                                                                                        | evidence |
+| --- | ------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- |
+| 1   | cold empty          | direct `/products?scenario=slow`                                                                                                                                                                                                                                                                                 | `K('',all,latest,1,slow)`/`G(sort=latest&page=1&pageSize=12&scenario=slow)`; 12 skeleton 뒤 default 12 IDs                                                                                                             | cancel 없음; 200 real success, `totalCount=30`, last-success=current key                                                                                                                                                                                                                 | `08`     |
+| 2   | warm normal success | `/products` success 후 same-document `pushState`로, 앞 완료를 기다리지 않고 `/products?q=stanley&scenario=slow` → `/products?q=stanley&category=home&scenario=slow` → `/products?q=stanley&category=home&sort=price-asc&scenario=slow` → `/products?q=stanley&category=home&sort=price-asc&page=2&scenario=slow` | warm default IDs → 네 slow pending 모두 직전 real-success default IDs를 placeholder로 유지; 첫 세 단계는 retained `totalCount=30`/current page 1, 마지막 단계는 retained `totalCount=30`/current page 2의 `2 / 3` 표시 | 앞 세 slow GET은 abort되고 retry 없음, page-2 GET만 200. final key/GET은 requested page 2를 유지하고 `products=[]`, IDs 없음, `totalCount=3`, `page=2`, label `2 / 1`, 이전 enabled, 다음 disabled; successful empty이므로 last-success=page-2 key. additional navigation entry/reload 0 | `09`     |
+| 3   | cold empty          | direct `/products?q=__week07_no_match__`                                                                                                                                                                                                                                                                         | cold skeleton → `K(__week07_no_match__,all,latest,1,none)`의 real-success empty; GET `q=__week07_no_match__&sort=latest&page=1&pageSize=12`; visible IDs 없음, `totalCount=0`                                          | cancel/error 없음; no-match 설명과 current count/page 유지, last-success=current empty key                                                                                                                                                                                               | `10`     |
+| 4   | cold empty          | direct `/products?scenario=error`                                                                                                                                                                                                                                                                                | cold skeleton → `K('',all,latest,1,error)`의 GET `sort=latest&page=1&pageSize=12&scenario=error` initial logical fetch; 2 GETs 뒤 inline error, retained grid/IDs 없음                                                 | manual retry 1회는 같은 current key/GET으로 최대 2 GETs를 추가한다. accepted run은 initial 2 + manual 2 = total 4 error GETs, route boundary takeover 없음, retry button focus 유지                                                                                                      | `11`     |
+| 5   | warm normal success | `/products` real success → same-document `pushState('/products?q=stanley&scenario=error')`; inline error 뒤 manual retry 1회 → `pushState`로 `scenario=error`만 제거                                                                                                                                             | GET `q=stanley&sort=latest&page=1&pageSize=12&scenario=error` logical fetch의 2 GETs 동안과 settle 뒤 default 12 IDs, `totalCount=30`, page 1 유지; current error는 `K(stanley,all,latest,1,error)`에 연결             | manual retry는 같은 error GET 최대 2개를 추가한다. initial 2 + manual 2 뒤 retained data 유지; recovery normal GET 1개가 200, IDs `p19,p20,p17`, `totalCount=3`, last-success=recovered key. document/root QueryClient 유지                                                              | `12`     |
+| 6   | cold empty          | `/products?scenario=slow` 시작 후 완료 전 `/products?q=sta&scenario=slow` → `/products?q=stanley&scenario=slow`                                                                                                                                                                                                  | real success 전에는 매 단계 12 skeleton이며 canceled request를 error로 표시하지 않음. final `K(stanley,all,latest,1,slow)`만 IDs `p19,p20,p17` 표시                                                                    | GET은 차례로 `sort=latest&page=1&pageSize=12&scenario=slow`, `q=sta&sort=latest&page=1&pageSize=12&scenario=slow`, `q=stanley&sort=latest&page=1&pageSize=12&scenario=slow`; 첫 두 GET abort, final 200와 post-wait no overwrite/error, last-success=final key                           | `13`     |
 
-recipe 2의 네 slow 단계는 다음 exact contract로 기록한다.
+recipe 2의 네 slow 단계는 다음 exact contract로 기록한다. active key는 QueryObserver/focused
+integration test의 assertion이며 production browser의 private-state 관찰값으로 기록하지 않는다.
 
 | 단계 | browser URL                                                             | active key                         | GET                                                                       | pending visible IDs | terminal expectation |
 | ---- | ----------------------------------------------------------------------- | ---------------------------------- | ------------------------------------------------------------------------- | ------------------- | -------------------- |
-| 1    | `/products?q=stanley&scenario=slow`                                     | `K(stanley,all,latest,1,slow)`     | `q=stanley&sort=latest&page=1&pageSize=12&scenario=slow`                  | warm default 12     | aborted              |
-| 2    | `/products?q=stanley&category=home&scenario=slow`                       | `K(stanley,home,latest,1,slow)`    | `q=stanley&category=home&sort=latest&page=1&pageSize=12&scenario=slow`    | warm default 12     | aborted              |
-| 3    | `/products?q=stanley&category=home&sort=price-asc&scenario=slow`        | `K(stanley,home,price-asc,1,slow)` | `q=stanley&category=home&sort=price-asc&page=1&pageSize=12&scenario=slow` | warm default 12     | aborted              |
+| 1    | `/products?q=stanley&scenario=slow`                                     | `K(stanley,all,latest,1,slow)`     | `q=stanley&sort=latest&page=1&pageSize=12&scenario=slow`                  | warm default 12     | aborted; retry 0     |
+| 2    | `/products?q=stanley&category=home&scenario=slow`                       | `K(stanley,home,latest,1,slow)`    | `q=stanley&category=home&sort=latest&page=1&pageSize=12&scenario=slow`    | warm default 12     | aborted; retry 0     |
+| 3    | `/products?q=stanley&category=home&sort=price-asc&scenario=slow`        | `K(stanley,home,price-asc,1,slow)` | `q=stanley&category=home&sort=price-asc&page=1&pageSize=12&scenario=slow` | warm default 12     | aborted; retry 0     |
 | 4    | `/products?q=stanley&category=home&sort=price-asc&page=2&scenario=slow` | `K(stanley,home,price-asc,2,slow)` | `q=stanley&category=home&sort=price-asc&page=2&pageSize=12&scenario=slow` | warm default 12     | HTTP 200             |
 
 첫 세 request가 real success 전에 취소되므로 last-success key는 warm normal key에 머물고,
 placeholder가 observer chain에서 이전 표시 데이터를 전달하더라도 key metadata를 갱신하지 않는다.
 final page-2 success만 key를 갱신한다.
+
+page 2 final은 current fixture의 의도적인 out-of-range diagnostic edge다. requested browser URL,
+`K(stanley,home,price-asc,2,slow)`와 page-2 GET을 그대로 유지하며 `totalCount=3`, `products=[]`,
+label `2 / 1`, 이전 enabled, 다음 disabled를 expected DOM contract로 기록한다. Todo 11에서 URL을
+page 1로 clamp/replace하거나 pagination을 재설계하지 않는다. production evidence가 이 current
+`FilterBar` 계산과 다르면 기대값을 꾸며 맞추지 않고 FIX/revisit로 표시한다.
 
 ### Evidence filename 예약
 
@@ -850,20 +892,48 @@ final page-2 success만 key를 갱신한다.
 이 checkpoint에서는 filename만 예약한다. image, local trace/video, manifest hash와 production 결과를
 미리 만들거나 pass로 채우지 않는다.
 
+### Acceptance evidence ownership
+
+| 계약                                      | acceptance evidence                                                                                                                                                             | 결과    |
+| ----------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------- |
+| six-state internal transition             | QueryObserver tests의 exact flags, current/last-success key, cache lookup과 cancellation transition report                                                                      | Pending |
+| product-list-only inline 500 override     | browser product-list options가 `throwOnError:false`임을 증명하는 focused test + provider `ApiErrorPolicy.throwOnError`와 Home/other query가 그대로임을 증명하는 regression test | Pending |
+| 500 retry cardinality                     | policy/focused test의 logical fetch당 2 attempts + production Network의 initial 2/manual 2 exact GET count                                                                      | Pending |
+| same-document diagnostic scenario seam    | `useSearchParams` scenario parse test + `pushState` integration test의 no document/root-provider remount, same QueryClient identity와 warm cache retention                      | Pending |
+| production-visible state and cancellation | URL, Network, DOM IDs/status/focus, no reload, cancellation/retry count와 post-wait receipt; private Query state claim 없음                                                     | Pending |
+
+CLS result는 accepted run 뒤 각 cell을 `entries=<exact count>, CLS=<exact raw value>`로 채운다. 세 viewport
+모두 column 계약과 square image geometry도 같은 receipt에 기록한다.
+
+| viewport             | recipe 1 | recipe 2 | recipe 3 | recipe 4 | recipe 5 | recipe 6 | column result |
+| -------------------- | -------- | -------- | -------- | -------- | -------- | -------- | ------------- |
+| desktop `1365 × 768` | Pending  | Pending  | Pending  | Pending  | Pending  | Pending  | Pending / 5   |
+| tablet `768 × 1024`  | Pending  | Pending  | Pending  | Pending  | Pending  | Pending  | Pending / 3   |
+| mobile `375 × 812`   | Pending  | Pending  | Pending  | Pending  | Pending  | Pending  | Pending / 2   |
+
 ### KEEP, FIX/REVERT와 stop rule
 
 - **KEEP**: QueryObserver tests가 cold pending → real success, success → identity placeholder →
   success, successful empty, initial error/retry, retained refresh error/current-key retry,
-  cancellation/no-overwrite 전이를 모두 증명해야 한다. 여섯 production recipes와 reset receipt가
-  통과하고 URL/key/GET/visible IDs가 일치해야 한다.
+  cancellation/no-overwrite 전이와 private flags/key/cache를 모두 증명해야 한다. product-list-only
+  `throwOnError:false`와 unchanged global policy test, same-document scenario seam/QueryClient retention
+  test도 통과해야 한다.
 - **KEEP**: placeholder와 refresh error에서 previous grid, `totalCount`, pagination이 유지되고 retry는
-  current key를 요청해야 한다. old response/error/cancel은 current UI를 덮지 않으며 skeleton/content
-  replacement에 material CLS가 없어야 한다. keyboard, screen-reader semantics, mobile/desktop geometry,
-  focused/full tests, lint, typecheck와 production build가 통과해야 한다.
+  current key를 요청해야 한다. 500은 logical fetch마다 최대 2 GETs, manual retry 1회는 새 logical fetch
+  최대 2 GETs이고 cancellation retry는 0이어야 한다. old response/error/cancel은 current UI를 덮지
+  않아야 한다.
+- **KEEP**: 여섯 production recipes를 same-document seam과 locked cold reset으로 실행해
+  URL/GET/visible IDs/status/focus/no reload가 일치해야 한다. 세 viewport 모두 expected 2/3/5 columns,
+  result-replacement no-recent-input shift entry 0개, scenario cumulative CLS `<=0.01`과 exact raw 값이
+  있어야 한다. page-2 edge는 requested URL/GET, empty IDs, `totalCount=3`, `2 / 1`, 이전 enabled/다음
+  disabled를 유지한다. keyboard, screen-reader semantics, focused/full tests, lint, typecheck와 production
+  build도 통과해야 한다.
 - **FIX 후 affected recipes 재실행**: response data를 local/Zustand에 복사함, placeholder/error/cancel에서
   last-success key 갱신, wrong-key retry, refresh 중 grid/count 제거, empty와 error의 generic 혼동,
-  recoverable error의 route boundary takeover, stale overwrite, skeleton/content CLS, 접근성·기능·build
-  regression 중 하나라도 있으면 KEEP하지 않는다.
+  product 500의 route boundary takeover, global error-policy 변경, 500/cancel retry count drift,
+  `page.goto`/reload/QueryClient 교체로 만든 warm recipe, private browser-state claim, page-2 silent
+  normalization, stale overwrite, CLS threshold/geometry, 접근성·기능·build regression 중 하나라도 있으면
+  KEEP하지 않는다.
 - **REVERT**: 최소 correction 뒤에도 QueryObserver transition, exact production recipe, retained
   count/pagination, current-key retry, no stale/error overwrite, geometry/CLS/accessibility 또는 build/function
   gate를 만족하지 못하면 Todo 11 source candidate를 별도 revert하고 `b123b91` product behavior로
@@ -879,6 +949,8 @@ final page-2 success만 key를 갱신한다.
 - Todo 13의 metadata, prefetch, dehydration/hydration, initial HTML과 Hero 재측정을 시작하지 않는다.
 - Route Handler delay/error/empty policy, abort propagation 또는 server execution/call-count를 바꾸거나
   browser cancellation에서 추론하지 않는다.
+- global/provider `ApiErrorPolicy`와 route loading/error boundary를 바꾸지 않고, out-of-range page를
+  clamp하는 pagination redesign도 하지 않는다.
 - memoization, global loading/error boundary redesign, unrelated component refactor와 final Basic After를
   추가하지 않는다. `BasicAfterSHA`와 global After는 계속 Pending이다.
 
@@ -990,16 +1062,17 @@ Basic 완료 후 아래 네 조건을 모두 충족할 때만 진입한다.
 
 ## 결정 로그
 
-| 시각                 | source SHA | 관찰한 사실                                                                                                                              | 가설                                                                                                           | 반증 방법                                                                                                         | 가장 작은 실험                                        | 사전 threshold                                                      | 결과    | keep/revert/reject와 이유                                              |
-| -------------------- | ---------- | ---------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------- | ------------------------------------------------------------------- | ------- | ---------------------------------------------------------------------- |
-| 2026-08-04T15:11:59Z | `e2e608b`  | slow query가 shell/Hero insertion을 막고, late discovery 뒤 7.55MB transfer가 별도 병목이다.                                             | shell boundary 분리로 API 전 semantic shell을 노출할 수 있다.                                                  | same-run filmstrip/trace에서 API 전 shell, bounds, shifts와 회귀를 확인한다.                                      | semantic shell + fixed-geometry local fallback만 변경 | semantic contract 전부 통과; timing 분류는 6711.6814/7251.28685ms   | locked  | source change 전 locked                                                |
-| 2026-08-05T13:15:43Z | `ca2b6a7`  | API 전 shell, viewport별 동일 bounds, Hero replacement shift 0, LCP median 6913.341ms를 관찰했다.                                        | semantic shell 계약은 충족하고 LCP 변화는 noise 안일 것이다.                                                   | tests·production browser·5회 JSON·독립 visual review로 회귀와 threshold를 확인했다.                               | 변경 추가 없음; candidate를 그대로 판정               | semantic contract pass; 6913.341ms는 inconclusive band              | pass    | keep; timing inconclusive                                              |
-| 2026-08-05T14:30:22Z | `ca2b6a7`  | raw 3840×2160 JPEG가 desktop DPR1 target보다 area 12.098299× 크고 7,545,525 bytes를 전송한다.                                            | accurate sizes의 Next Image가 width/DPR 적합 candidate와 실질적 byte 감소를 만든다.                            | actual optimizer URL·width·DPR·bytes와 geometry/crop/quality/CLS/a11y/function을 측정한다.                        | raw Hero `<img>`만 `fill`+accurate `sizes`로 교체     | right-sized candidate+material byte reduction+모든 보존 계약 통과   | locked  | source result 아님; 구현·After pending                                 |
-| 2026-08-05T15:33:40Z | `f4167e9`  | desktop `w=1200`은 pass지만 mobile `w=384` 16:9 raster가 4:5 box에서 확대돼 detail이 저하됐고 reviewer 2개가 REVISE했다.                 | mobile object-cover source size를 반영하면 byte 절감과 보존 계약을 함께 만족할 수 있다.                        | mobile native coverage와 직접 visual review를 clean fix SHA에서 반복한다.                                         | mobile `sizes` branch만 교정                          | candidate·bytes pass여도 quality fail이면 FIX                       | fail    | **FIX**; timing이 아니라 mobile 품질 회귀 때문                         |
-| 2026-08-05T16:33:23Z | `cee8cf7`  | desktop `w=1200`, mobile `w=750`이 DPR1을 cover하고 material byte reduction, geometry·quality·semantics·CLS·function gate를 통과했다.    | corrected sizes가 locked responsive-delivery 계약을 충족한다.                                                  | 5회 JSON, Network/native raster, trace, tracked screenshots와 conflicting review resolution을 교차 확인했다.      | 변경 추가 없음; fixed candidate 판정                  | candidate+bytes+보존 계약 pass; timing은 range rule로 별도 분류     | pass    | **KEEP**; FCP inconclusive, LCP directional improvement, CLS no change |
-| 2026-08-05T17:18:21Z | `cee8cf7`  | resource-load-delay median `1648.630ms`는 dominant지만 pending `526.5ms`에 Hero가 없고 request는 attachment 최초 확인 전에 시작했다.     | already-attached Hero의 late discovery가 증명될 때만 priority hint가 delay를 줄일 수 있다.                     | exact insertion과 request start 사이의 실제 wait를 fresh current-SHA trace로 관찰해야 한다.                       | source 실험 없음; current trace만 재평가              | attachment-before-request와 측정 가능한 discovery wait 증명         | closed  | **GATE CLOSED**; priority/preload/eager candidate와 source commit 없음 |
-| 2026-08-05T18:16:23Z | `e318b92`  | 세 superseded request는 CDP abort, final `12991.399`만 200이며 URL/key/GET/IDs와 post-wait `p17,p20,p19`가 일치했다.                     | browser queryFn의 consumed signal이 superseded transport를 중단하고 latest-result integrity를 유지한다.        | raw CDP, browser report, tests/gates와 독립 verifier로 abort/no-error/no-stale 및 scope를 교차 확인했다.          | source `345e13f`의 browser-only signal overlay        | 3 abort+final 200+정합성+no error/stale; server count 추론 금지     | pass    | **KEEP**; browser transport only, Todo 11-13/Basic After는 Pending     |
-| 2026-08-05T18:38:08Z | `b123b91`  | cold pending은 text-only이고 key transition/error에서 grid·count를 잃으며 last real-success key가 없다. Todo 10 cancellation은 동작한다. | identity placeholder와 cache-key-only retention으로 여섯 상태를 구분하면서 current-key retry를 유지할 수 있다. | QueryObserver transitions와 reset된 여섯 exact production recipes에서 URL/key/GET/IDs/cancel/recovery를 확인한다. | source 실험 전 decision checkpoint만 기록             | retained grid/count/page+current retry+no stale/CLS/a11y/build 회귀 | Pending | pre-source lock 완료; Todo 11 구현·production 결과는 **Pending**       |
+| 시각                 | source SHA | 관찰한 사실                                                                                                                                     | 가설                                                                                                                             | 반증 방법                                                                                                           | 가장 작은 실험                                        | 사전 threshold                                                      | 결과    | keep/revert/reject와 이유                                              |
+| -------------------- | ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------- | ------------------------------------------------------------------- | ------- | ---------------------------------------------------------------------- |
+| 2026-08-04T15:11:59Z | `e2e608b`  | slow query가 shell/Hero insertion을 막고, late discovery 뒤 7.55MB transfer가 별도 병목이다.                                                    | shell boundary 분리로 API 전 semantic shell을 노출할 수 있다.                                                                    | same-run filmstrip/trace에서 API 전 shell, bounds, shifts와 회귀를 확인한다.                                        | semantic shell + fixed-geometry local fallback만 변경 | semantic contract 전부 통과; timing 분류는 6711.6814/7251.28685ms   | locked  | source change 전 locked                                                |
+| 2026-08-05T13:15:43Z | `ca2b6a7`  | API 전 shell, viewport별 동일 bounds, Hero replacement shift 0, LCP median 6913.341ms를 관찰했다.                                               | semantic shell 계약은 충족하고 LCP 변화는 noise 안일 것이다.                                                                     | tests·production browser·5회 JSON·독립 visual review로 회귀와 threshold를 확인했다.                                 | 변경 추가 없음; candidate를 그대로 판정               | semantic contract pass; 6913.341ms는 inconclusive band              | pass    | keep; timing inconclusive                                              |
+| 2026-08-05T14:30:22Z | `ca2b6a7`  | raw 3840×2160 JPEG가 desktop DPR1 target보다 area 12.098299× 크고 7,545,525 bytes를 전송한다.                                                   | accurate sizes의 Next Image가 width/DPR 적합 candidate와 실질적 byte 감소를 만든다.                                              | actual optimizer URL·width·DPR·bytes와 geometry/crop/quality/CLS/a11y/function을 측정한다.                          | raw Hero `<img>`만 `fill`+accurate `sizes`로 교체     | right-sized candidate+material byte reduction+모든 보존 계약 통과   | locked  | source result 아님; 구현·After pending                                 |
+| 2026-08-05T15:33:40Z | `f4167e9`  | desktop `w=1200`은 pass지만 mobile `w=384` 16:9 raster가 4:5 box에서 확대돼 detail이 저하됐고 reviewer 2개가 REVISE했다.                        | mobile object-cover source size를 반영하면 byte 절감과 보존 계약을 함께 만족할 수 있다.                                          | mobile native coverage와 직접 visual review를 clean fix SHA에서 반복한다.                                           | mobile `sizes` branch만 교정                          | candidate·bytes pass여도 quality fail이면 FIX                       | fail    | **FIX**; timing이 아니라 mobile 품질 회귀 때문                         |
+| 2026-08-05T16:33:23Z | `cee8cf7`  | desktop `w=1200`, mobile `w=750`이 DPR1을 cover하고 material byte reduction, geometry·quality·semantics·CLS·function gate를 통과했다.           | corrected sizes가 locked responsive-delivery 계약을 충족한다.                                                                    | 5회 JSON, Network/native raster, trace, tracked screenshots와 conflicting review resolution을 교차 확인했다.        | 변경 추가 없음; fixed candidate 판정                  | candidate+bytes+보존 계약 pass; timing은 range rule로 별도 분류     | pass    | **KEEP**; FCP inconclusive, LCP directional improvement, CLS no change |
+| 2026-08-05T17:18:21Z | `cee8cf7`  | resource-load-delay median `1648.630ms`는 dominant지만 pending `526.5ms`에 Hero가 없고 request는 attachment 최초 확인 전에 시작했다.            | already-attached Hero의 late discovery가 증명될 때만 priority hint가 delay를 줄일 수 있다.                                       | exact insertion과 request start 사이의 실제 wait를 fresh current-SHA trace로 관찰해야 한다.                         | source 실험 없음; current trace만 재평가              | attachment-before-request와 측정 가능한 discovery wait 증명         | closed  | **GATE CLOSED**; priority/preload/eager candidate와 source commit 없음 |
+| 2026-08-05T18:16:23Z | `e318b92`  | 세 superseded request는 CDP abort, final `12991.399`만 200이며 URL/key/GET/IDs와 post-wait `p17,p20,p19`가 일치했다.                            | browser queryFn의 consumed signal이 superseded transport를 중단하고 latest-result integrity를 유지한다.                          | raw CDP, browser report, tests/gates와 독립 verifier로 abort/no-error/no-stale 및 scope를 교차 확인했다.            | source `345e13f`의 browser-only signal overlay        | 3 abort+final 200+정합성+no error/stale; server count 추론 금지     | pass    | **KEEP**; browser transport only, Todo 11-13/Basic After는 Pending     |
+| 2026-08-05T18:38:08Z | `b123b91`  | cold pending은 text-only이고 key transition/error에서 grid·count를 잃으며 last real-success key가 없다. Todo 10 cancellation은 동작한다.        | identity placeholder와 cache-key-only retention으로 여섯 상태를 구분하면서 current-key retry를 유지할 수 있다.                   | QueryObserver transitions와 reset된 여섯 exact production recipes에서 URL/key/GET/IDs/cancel/recovery를 확인한다.   | source 실험 전 decision checkpoint만 기록             | retained grid/count/page+current retry+no stale/CLS/a11y/build 회귀 | Pending | pre-source lock 완료; Todo 11 구현·production 결과는 **Pending**       |
+| 2026-08-05T18:58:30Z | `c0fd99f`  | verifier는 global 5xx throw, retry count, server scenario snapshot, private browser telemetry, tablet/CLS와 page-2 semantics 미결정을 확인했다. | list-only error override와 same-client seam, evidence ownership, exact geometry/cardinality를 잠그면 구현 추측을 제거할 수 있다. | focused policy/seam/QueryObserver tests와 same-document production recipes의 observable evidence를 분리해 검증한다. | RFC protocol correction only                          | 500=2 GET/logical fetch; no reload; shift entries=0; CLS<=0.01      | Pending | blockers를 protocol에 반영; source·test·production result는 Pending    |
 
 ## AI 활용
 
@@ -1059,6 +1132,9 @@ Basic 완료 후 아래 네 조건을 모두 충족할 때만 진입한다.
 - Todo 11 source 변경 전 clean `b123b91`에서 current defects, TanStack v5 상태 판별,
   last-success query-key-only retention, fixed 12-card skeleton, exact six production recipes,
   accessibility/geometry/evidence와 KEEP/FIX/REVERT/stop rule을 decision-complete 상태로 고정했다.
+- independent verifier의 `NOT_CONFIRMED` blockers를 반영해 list-only 5xx override, exact retry
+  cardinality, same-document `useSearchParams` seam, internal/browser evidence 분리, tablet과 numeric CLS,
+  out-of-range page-2 DOM 계약을 source 변경 전에 추가로 고정했다. 결과는 계속 Pending이다.
 
 ### Pending
 
