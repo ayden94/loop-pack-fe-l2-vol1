@@ -152,7 +152,8 @@ pnpm build
 
 - **홈 쿼리** — `staleTime: 60_000`(1분). 홈은 여러 섹션을 묶어 한 번에 가져오고 갱신 주기가 짧지 않아 1분 정도 신선도를 유지한다. `gcTime`은 기본값(5분)으로 두어 컴포넌트 언마운트 후 재방문 시 캐시를 재사용한다.
 - **목록 쿼리** — `staleTime: 30_000`(30초). 검색·카테고리·정렬·페이지 조건이 query key에 들어가 조건별 캐시가 만들어진다. 30초면 사용자가 같은 조건으로 돌아올 때 최신 결과를 다시 보여주면서도 짧은 시간 내 재방문은 캐시로 처리한다. `gcTime`은 기본값으로 두어 앞뒤 이동 중 캐시가 유지되도록 한다.
-- **scenario** — mock API 검증 전용 제어값. 사용자가 관리하는 URL 상태나 `ProductListQuery`에 포함하지 않는다. 서버에서 `MockApiScenario`로 구분한다.
+- **scenario** — mock API 검증 전용 제어값. 사용자가 관리하는 `ProductListQuery`와 필터 상태에는 포함하지 않지만, 진단 결과의 캐시 격리를 위해 product query key와 실제 GET에는 의도적으로 포함한다. 서버에서 `MockApiScenario`로 구분한다.
+- **목록 요청 취소 경계** — 브라우저 `getProductList` query function만 TanStack Query의 `signal`을 Ky에 전달해 대체된 요청을 취소한다. 같은 key·GET을 만드는 `getServerProductList` descriptor는 native fetch memoization 검증 자격을 보존하도록 signal을 전달하지 않으며, options에 `signal: undefined`도 만들지 않는다. 브라우저의 abort 관찰만으로 Route Handler 실행 중단이나 서버 call count 감소를 주장하지 않는다.
 
 ### 전역으로 올리지 않은 상태
 
@@ -186,7 +187,7 @@ pnpm build
 
 - **Zustand action + selector** — `src/entities/cart/model/CartStore.test.ts`, `src/entities/wishlist/model/WishlistStore.test.ts`. addToCart·removeFromCart·clearCart·toggleWishlist 액션이 items 집합을 의도대로 변경하는지, cartSelectors.count·isInCart·wishlistSelectors.count·isInWishlist가 store state에서 올바르게 파생되는지 검증한다. 개수를 별도 상태로 저장하지 않고 파생한다는 과제 계약을 테스트가 보호한다.
 - **Header 개수 파생** — count selector가 items 길이를 반환하고 추가·제거에 따라 정확히 증감하는지 검증한다. Header가 별도 count 상태를 두지 않는다는 계약을 보호.
-- **nuqs URL 조건 ↔ query key 일치** — `src/features/product-filter/model/useProductFilters.test.ts`에서 `productFilterParsers`의 기본값(q='', category='all', sort='latest', page=1)과 enum을 검증하고, `src/entities/product/api/ProductService.test.ts`에서 `queryKeyFactory.product.list(query)`가 ProductListQuery 전체를 key에 반영하는지, q·category·sort·page·pageSize 각 변경이 key를 바꾸는지, 동일 쿼리는 동일 key를 반환하는지, scenario가 key에 들어가지 않는지 검증한다.
+- **nuqs URL 조건 ↔ query key 일치** — `src/features/product-filter/model/useProductFilters.test.ts`에서 `productFilterParsers`의 기본값(q='', category='all', sort='latest', page=1)과 enum을 검증하고, `src/entities/product/api/ProductService.test.ts`에서 `queryKeyFactory.product.list(query, diagnosticScenario)`가 ProductListQuery 전체와 진단 descriptor를 key에 반영하는지, q·category·sort·page·pageSize·scenario 각 변경이 key를 바꾸는지, 동일 입력은 동일 key를 반환하는지 검증한다.
 - **홈·목록 store 동기화** — cart/wishlist entity 테스트가 각 store의 action·selector 계약을 보호하고, 홈·목록이 같은 store를 공유하는지와 route 전환 중 상태가 유지되는지는 dev 서버를 통한 브라우저 route-sync 흐름으로 확인한다. 별도의 자동화 store-sync 테스트 파일은 두지 않는다.
 
 **테스트 경계** — 단위 테스트는 순수 로직과 타입 계약만 검증한다. React 렌더링 결과, nuqs의 실제 URL 동기화, hydration 시점의 store 값 변화, 페이지 전환 중 카운트 유지는 dev 서버를 띄운 뒤 수동으로 확인한다(`검증 결과` 섹션). 이 경계를 둔 이유는 단위 테스트가 DOM·Next.js 라우터 없이 빠르게 돌고 상태 계약 자체를 명확히 검증하며, UI 흐름은 실제 라우터와 마운트 타이밍 위에서 확인하는 쪽이 신뢰도가 높기 때문이다.
