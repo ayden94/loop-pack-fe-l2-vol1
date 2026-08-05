@@ -15,6 +15,24 @@ type ProductListSectionProps = {
   readonly scope: string
 }
 
+type DisplayedProductGridProps = {
+  readonly displayedData: ProductListResponse | undefined
+  readonly displayedDataKey: QueryKey | null
+}
+
+export function DisplayedProductGrid({
+  displayedData,
+  displayedDataKey,
+}: DisplayedProductGridProps) {
+  return (
+    <ProductGrid
+      key={JSON.stringify(displayedDataKey)}
+      products={displayedData?.products ?? []}
+      reserveTwelveSlots
+    />
+  )
+}
+
 export function ProductListSection({
   query,
   displayedData,
@@ -66,10 +84,9 @@ export function ProductListSection({
         {displayedData === undefined && query.isPending ? (
           <ProductListSkeleton />
         ) : (
-          <ProductGrid
-            key={JSON.stringify(displayedDataKey)}
-            products={displayedData?.products ?? []}
-            reserveTwelveSlots
+          <DisplayedProductGrid
+            displayedData={displayedData}
+            displayedDataKey={displayedDataKey}
           />
         )}
 

@@ -8,7 +8,7 @@ import { describe, expect, it } from 'vitest'
 
 import type { ProductListResponse } from '@/entities/product/model/types'
 
-import { ProductListSection } from './ProductListSection'
+import { DisplayedProductGrid, ProductListSection } from './ProductListSection'
 
 const emptyResponse = {
   products: [],
@@ -36,6 +36,24 @@ function renderSection(
 }
 
 describe('ProductListSection presentation', () => {
+  it('remounts the product grid when the displayed cache key changes', () => {
+    const firstKey = ['products', 'list', { q: 'first' }] as const
+    const secondKey = ['products', 'list', { q: 'second' }] as const
+
+    const firstGrid = DisplayedProductGrid({
+      displayedData: emptyResponse,
+      displayedDataKey: firstKey,
+    })
+    const secondGrid = DisplayedProductGrid({
+      displayedData: emptyResponse,
+      displayedDataKey: secondKey,
+    })
+
+    expect(firstGrid.key).toBe(JSON.stringify(firstKey))
+    expect(secondGrid.key).toBe(JSON.stringify(secondKey))
+    expect(secondGrid.key).not.toBe(firstGrid.key)
+  })
+
   it('renders a stable busy region and twelve skeleton slots while cold pending', () => {
     const queryClient = new QueryClient()
     const observer = new QueryObserver<ProductListResponse>(queryClient, {
