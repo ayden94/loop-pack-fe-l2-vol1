@@ -1,9 +1,10 @@
 import { QueryObserver } from '@tanstack/react-query'
 import { describe, expect, it } from 'vitest'
 
-import { createQueryClient } from '@/app/providers'
 import { ProductService } from '@/entities/product/api/ProductService'
+import { ProductListRequestModel } from '@/entities/product/model/ProductListRequest'
 import type { ProductListResponse } from '@/entities/product/model/types'
+import { getQueryClient } from '@/shared/lib/getQueryClient'
 import { resolveProductListDiagnosticScenario } from '@/views/product-list/ui/ProductListView'
 
 const retainedResponse = {
@@ -24,10 +25,10 @@ const finalResponse = {
 
 describe('same-document product scenario transition', () => {
   it('re-resolves the URL scenario while retaining data in one QueryClient', async () => {
-    const queryClient = createQueryClient()
+    const queryClient = getQueryClient()
     const providerQueryClient = queryClient
     const service = new ProductService()
-    const query = {
+    const queryInput = {
       q: 'stanley',
       category: 'all' as const,
       sort: 'latest' as const,
@@ -45,8 +46,16 @@ describe('same-document product scenario transition', () => {
       nextSearchParams.get('scenario'),
       serverScenario,
     )
-    const initialOptions = service.getProductList(query, initialScenario)
-    const nextOptions = service.getProductList(query, nextScenario)
+    const initialRequest = ProductListRequestModel.normalize({
+      ...queryInput,
+      ...initialScenario,
+    })
+    const nextRequest = ProductListRequestModel.normalize({
+      ...queryInput,
+      ...nextScenario,
+    })
+    const initialOptions = service.getProductList(initialRequest)
+    const nextOptions = service.getProductList(nextRequest)
     let resolveNext: (response: ProductListResponse) => void = () => undefined
     const nextResponse = new Promise<ProductListResponse>((resolve) => {
       resolveNext = resolve

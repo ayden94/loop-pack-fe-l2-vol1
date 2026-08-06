@@ -9,6 +9,7 @@ import {
   type DiagnosticScenario,
   parseDiagnosticScenario,
 } from '@/entities/product/model/DiagnosticScenario'
+import { ProductListRequestModel } from '@/entities/product/model/ProductListRequest'
 import { DEFAULT_PAGE_SIZE } from '@/entities/product/model/ProductQuerySchema'
 import { useProductFilters } from '@/features/product-filter/model/useProductFilters'
 import { FilterBar } from '@/features/product-filter/ui/FilterBar'
@@ -36,19 +37,14 @@ export function ProductListView({ diagnosticScenario }: ProductListViewProps) {
     diagnosticScenario,
   )
   const { filters, updateFilter, updatePage } = useProductFilters()
-  const productListQueryInput = {
+  const productListRequest = ProductListRequestModel.normalize({
     ...filters,
     pageSize: DEFAULT_PAGE_SIZE,
-  }
-  const productListScope = JSON.stringify({
-    query: productListQueryInput,
-    diagnosticScenario: currentDiagnosticScenario,
+    ...currentDiagnosticScenario,
   })
+  const productListScope = JSON.stringify(productListRequest)
 
-  const productListOptions = productEntity.getProductList(
-    productListQueryInput,
-    currentDiagnosticScenario,
-  )
+  const productListOptions = productEntity.getProductList(productListRequest)
   const productListQuery = useQuery(productListOptions)
   const productListState = useProductListState(
     productListQuery,
