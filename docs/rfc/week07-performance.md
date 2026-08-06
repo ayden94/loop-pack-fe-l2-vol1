@@ -25,8 +25,12 @@
 - 현재: Todo 14가 확정한 clean BasicAfterSHA `d1278d0778492f13d2a70c064432df64e6b238f5`에서
   Todo 15 final After, document/timing, disposable Route Handler call-count와 전체 회귀 evidence를
   수집했다. final build `Cpe6odTds91l9-w7IWHfG`, 276-entry seal, 16/16 mutation rejection과
-  세 reviewer PASS를 근거로 Basic evidence를 완료했다. Todo 16 Advanced A와 Todo 17 final RFC는
-  아직 시작하지 않았다.
+  세 reviewer PASS를 근거로 Basic evidence를 완료했다.
+- 현재: Todo 16 Advanced A는 clean BasicAfterSHA의 headed normal build에서 3회 측정하고 별도
+  profiling build에서 24개 card render를 확인했다. processing은 세 번 모두 50ms 이상이고
+  dominant했으며 관계없는 23개 card도 render됐지만, total median `120ms`가 잠근 `200ms` gate보다
+  작아 **NOT ENTERED**로 종료했다. candidate와 Advanced After source는 없고 Todo 17 final RFC만
+  Pending이다.
 
 ## 범위와 불변 조건
 
@@ -73,7 +77,9 @@
 | Todo 12 result commit SHA         | `03445cd2336803ab68c35383c9ee951706e657dc` | clean     | 2026-08-06T01:05:49Z; final evidence와 KEEP 기록           | current; KEEP |
 | Todo 13 final source SHA          | `d1278d0778492f13d2a70c064432df64e6b238f5` | clean     | metadata/hydration 구현과 regression fix 후                | current; KEEP |
 | BasicAfterSHA                     | `d1278d0778492f13d2a70c064432df64e6b238f5` | clean     | Todo 14 source freeze; Todo 15 전체 evidence의 측정 source | current       |
-| Advanced Before/After SHA         | Pending                                    | Pending   | Advanced A 진입 시                                         | pending       |
+| Advanced gate docs checkpoint     | `f1875cd4d94e91c0c65037c4fa148624a2146777` | clean     | Todo 16 data 전 네 조건 고정                               | current       |
+| Advanced Before source SHA        | `d1278d0778492f13d2a70c064432df64e6b238f5` | clean     | normal 3회와 profile causality 측정                        | NOT ENTERED   |
+| Advanced candidate/After SHA      | N/A                                        | clean     | total median gate 실패로 source experiment 미진입          | not created   |
 | 최종 evidence 문서 커밋 SHA       | Pending                                    | Pending   | RFC와 근거 확정 후                                         | pending       |
 
 ## 환경
@@ -2077,12 +2083,12 @@ loop를 수행한다. 이는 측정 동기일 뿐 관계없는 카드 render나 
 Advanced A는 아래 네 조건이 **모두** 참일 때만 진입한다. 하나라도 false, unavailable 또는 invalid면
 not-entered로 판정하고 source candidate를 만들지 않는다.
 
-| 조건                                                     | Before 데이터 | 충족 여부 | evidence ID |
-| -------------------------------------------------------- | ------------- | --------- | ----------- |
-| processing duration이 3회 모두 50ms 이상                 | Pending       | Pending   | Pending     |
-| median total duration이 200ms 이상                       | Pending       | Pending   | Pending     |
-| processing duration이 아래 정의로 지배적                 | Pending       | Pending   | Pending     |
-| Profiler가 한 번의 click에서 관계없는 카드 render를 증명 | Pending       | Pending   | Pending     |
+| 조건                                                     | Before 데이터                                  | 충족 여부 | evidence ID         |
+| -------------------------------------------------------- | ---------------------------------------------- | --------- | ------------------- |
+| processing duration이 3회 모두 50ms 이상                 | `84.7 / 84.3 / 84.1ms`                         | PASS      | T16-TR1~3           |
+| median total duration이 200ms 이상                       | median `120ms`                                 | **FAIL**  | T16-SUM             |
+| processing duration이 아래 정의로 지배적                 | 각 run과 median 모두 input/presentation 초과   | PASS      | T16-SUM             |
+| Profiler가 한 번의 click에서 관계없는 카드 render를 증명 | `p1` click commit에 `p1`~`p24`, unrelated 23개 | PASS      | T16-PROF/T16-REASON |
 
 - `total duration = input delay + processing duration + presentation delay`로 같은 click Interaction의
   세 phase만 더한다. Lighthouse TBT나 다른 interaction 값을 대입하지 않는다.
@@ -2114,11 +2120,18 @@ Before와 entered candidate After는 아래 절차를 각각 정확히 세 번 �
 6. 세 run 뒤 raw 값과 각 phase/total의 median, min, max, range를 계산한다. 측정 종료 후 process를
    중지하고 PID 부재와 port release를 확인한다.
 
-| Before run | target ID | input delay | processing | presentation | total   | source SHA / normal build / PID | 유효 여부·사유 | evidence ID |
-| ---------- | --------- | ----------- | ---------- | ------------ | ------- | ------------------------------- | -------------- | ----------- |
-| 1          | Pending   | Pending     | Pending    | Pending      | Pending | Pending                         | Pending        | Pending     |
-| 2          | Pending   | Pending     | Pending    | Pending      | Pending | Pending                         | Pending        | Pending     |
-| 3          | Pending   | Pending     | Pending    | Pending      | Pending | Pending                         | Pending        | Pending     |
+| Before run | target ID | input delay | processing | presentation | total   | source SHA / normal build / PID               | 유효 여부·사유                                     | evidence ID |
+| ---------- | --------- | ----------- | ---------- | ------------ | ------- | --------------------------------------------- | -------------------------------------------------- | ----------- |
+| 1          | `p1`      | `5.3ms`     | `84.7ms`   | `30.0ms`     | `120ms` | `d1278d0` / `NRz9Rrqn5i_R0rqpWZUz5` / `80014` | valid: 24 images/cards, exact reset/click/feedback | T16-TR1     |
+| 2          | `p1`      | `4.6ms`     | `84.3ms`   | `31.1ms`     | `120ms` | same source/build/PID                         | valid: same protocol                               | T16-TR2     |
+| 3          | `p1`      | `4.5ms`     | `84.1ms`   | `31.4ms`     | `120ms` | same source/build/PID                         | valid: same protocol                               | T16-TR3     |
+
+| phase        |   median |      min |      max |   range |
+| ------------ | -------: | -------: | -------: | ------: |
+| input delay  |  `4.6ms` |  `4.5ms` |  `5.3ms` | `0.8ms` |
+| processing   | `84.3ms` | `84.1ms` | `84.7ms` | `0.6ms` |
+| presentation | `31.1ms` | `30.0ms` | `31.4ms` | `1.4ms` |
+| total        |  `120ms` |  `120ms` |  `120ms` |   `0ms` |
 
 ### Profile causality procedure
 
@@ -2129,10 +2142,10 @@ normal Before timing process를 종료하고 port release를 확인한 뒤 같�
 click의 commit만 선택해 rendered `PerformanceProductCard` product ID 전체, target/non-target 구분,
 각 render reason과 commit count를 기록한다.
 
-| Profile phase | source/build/PID | target ID | rendered card IDs | unrelated IDs/reasons | fixture/start/click parity | gate/격리 증명 | evidence ID |
-| ------------- | ---------------- | --------- | ----------------- | --------------------- | -------------------------- | -------------- | ----------- |
-| Before        | Pending          | Pending   | Pending           | Pending               | Pending                    | Pending        | Pending     |
-| After         | Pending          | Pending   | Pending           | Pending               | Pending                    | Pending        | Pending     |
+| Profile phase | source/build/PID                              | target ID | rendered card IDs | unrelated IDs/reasons                                                                         | fixture/start/click parity                                                   | gate/격리 증명             | evidence ID         |
+| ------------- | --------------------------------------------- | --------- | ----------------- | --------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- | -------------------------- | ------------------- |
+| Before        | `d1278d0` / `dU64e2jZFkN8hOL2DwYJf` / `82165` | `p1`      | `p1`~`p24`        | `p2`~`p24`; 각 card의 `wishlistIds` hook snapshot `[] → ["p1"]`, product prop identity stable | 24 images/cards, unselected `p1`, one click, immediate pressed/text feedback | unrelated render gate PASS | T16-PROF/T16-REASON |
+| After         | N/A                                           | `p1`      | N/A               | total median gate 실패로 candidate/profile After 미실행                                       | candidate 없음                                                               | NOT ENTERED                | T16-SUM             |
 
 profile 관찰이 끝나면 profile process를 종료하고 port release를 확인한다. 이후 normal production build를
 다시 만들고 normal build ID와 fresh PID/health를 확인한 뒤 종료한다. profile build를 남긴 상태에서 candidate
@@ -2174,29 +2187,57 @@ Before와 같은 target/reset/route/image/network/CPU/click/extraction 절차를
 production build를 다시 복구해 build ID/PID/health와 최종 port release를 확인한다. source identity는 다음처럼
 분리한다.
 
-| identity                                    | SHA / build                                | 상태                           |
-| ------------------------------------------- | ------------------------------------------ | ------------------------------ |
-| Basic After source / Advanced Before source | `d1278d0778492f13d2a70c064432df64e6b238f5` | locked                         |
-| Basic evidence commit                       | `dd7ec10171ad35b190d1ca626ac7ca89f42a03fb` | locked                         |
-| Advanced gate docs checkpoint               | Pending                                    | 이 docs-only commit 후 기록    |
-| Advanced candidate source commit            | Pending                                    | gate entered인 경우에만 생성   |
-| Advanced normal After build                 | Pending                                    | clean candidate commit 뒤 생성 |
-| Advanced evidence docs commit               | Pending                                    | 결과 기록 뒤 생성              |
+| identity                                    | SHA / build                                | 상태                      |
+| ------------------------------------------- | ------------------------------------------ | ------------------------- |
+| Basic After source / Advanced Before source | `d1278d0778492f13d2a70c064432df64e6b238f5` | locked                    |
+| Basic evidence commit                       | `dd7ec10171ad35b190d1ca626ac7ca89f42a03fb` | locked                    |
+| Advanced gate docs checkpoint               | `f1875cd4d94e91c0c65037c4fa148624a2146777` | data 전 locked            |
+| Advanced normal Before build                | `NRz9Rrqn5i_R0rqpWZUz5`                    | 3 valid timing runs       |
+| Advanced causality profile build            | `dU64e2jZFkN8hOL2DwYJf`                    | timing에 사용하지 않음    |
+| Advanced candidate source commit            | N/A                                        | gate 실패로 생성하지 않음 |
+| Advanced normal After build                 | N/A                                        | gate 실패로 생성하지 않음 |
+| restored normal build                       | `rVds5miwE-1x2bLIx_8Bw`                    | 3개 HTTP 200 확인 후 종료 |
+| Advanced evidence docs commit               | Pending                                    | 이 결과 commit 후 기록    |
 
-| After run | target ID | input delay | processing | presentation | total   | candidate SHA / normal build / PID | 유효 여부·사유 | evidence ID |
-| --------- | --------- | ----------- | ---------- | ------------ | ------- | ---------------------------------- | -------------- | ----------- |
-| 1         | Pending   | Pending     | Pending    | Pending      | Pending | Pending                            | Pending        | Pending     |
-| 2         | Pending   | Pending     | Pending    | Pending      | Pending | Pending                            | Pending        | Pending     |
-| 3         | Pending   | Pending     | Pending    | Pending      | Pending | Pending                            | Pending        | Pending     |
+After 3회 표는 적용 대상이 아니다. 네 조건 중 total median 조건이 실패한 시점에 source experiment가
+금지됐으므로 candidate SHA와 After timing/profile을 만들지 않았다.
 
 candidate는 unrelated-card render 제거, 보존 계약과 valid After evidence를 모두 만족할 때만 KEEP한다. 격리가
 증명되지 않거나 기능·접근성·즉시 feedback이 회귀하면 별도 revert 후 normal build를 복구한다. gate를 통과하지
 못하면 이 candidate/After 표는 Pending으로 남기지 않고 Todo 16 결과 기록 시 not-entered 사유와 no-source-change를
 명시하되, 이 pre-data checkpoint에서는 어떤 결과도 선기입하지 않는다.
 
-- Advanced A 결정: Pending
-- 진입하지 않은 경우 이유: Pending
-- 진입한 경우 실험·3회 Before/After·Profiler 결과: Pending
+- Advanced A 결정: **NOT ENTERED**
+- 진입하지 않은 경우 이유: normal production 3회 total median `120ms`가 predeclared `200ms`보다
+  작다. 나머지 세 조건이 PASS여도 네 조건은 conjunctive이므로 source candidate를 만들 수 없다.
+- 진입한 경우 실험·3회 Before/After·Profiler 결과: N/A; source/package/config 변경 없음
+
+### Todo 16 evidence identity
+
+evidence root는
+`.local/week07-performance-evidence/d1278d0778492f13d2a70c064432df64e6b238f5/todo16/`다.
+`manifest.json`은 self-excluded seal이며 SHA-256
+`7e40c12e0bb38f193ca245e9f2fce91bebf2afd1143c944f54d8cb8f0457a12f`, `8366` bytes다.
+39 entries, 총 `2,606,941` bytes를 봉인하고 `node scripts/validate-evidence.mjs`는
+`pass: true`, errors 0을 반환했다.
+
+| ID         | 파일                                   | SHA-256                                                            |  bytes | 용도                                                     |
+| ---------- | -------------------------------------- | ------------------------------------------------------------------ | -----: | -------------------------------------------------------- |
+| T16-TR1    | `before-timing/run-1.trace.json`       | `c59fec4b5bae0dcb1d15bfda1b9b96fad46009d896130b8dd77de24a9ec65644` | 321903 | headed normal click trace 1                              |
+| T16-TR2    | `before-timing/run-2.trace.json`       | `40f17b1255ba6f7e0c8e45034efce600cd61ed17192a466f2076d85db7d2c949` | 291699 | headed normal click trace 2                              |
+| T16-TR3    | `before-timing/run-3.trace.json`       | `48aa8b4f875c480a6767644c5fc8a6e28a4aa760f6d35da4a02b5f08d5d368a6` | 293805 | headed normal click trace 3                              |
+| T16-RUNS   | `before-timing/runs.json`              | `68eadf10448903ddc194255e09bff1775164cbe2cf613f13fc7cf9b5eeb3236b` |   3944 | raw phase rows and identities                            |
+| T16-PROF   | `before-profile/profile.json`          | `c63f22362a95e3d1c5e0a8ab828bfbf45a55fb8b2be27d6f62039014d048b42a` |  68241 | profile-build click commit and hook-state cause          |
+| T16-REASON | `before-profile/profile-analysis.json` | `97f37e6f76ae6101ec6cef48913c37a8f2667009f6520d467d1a9661c6acd6fe` |   7470 | 24개 card별 explicit wishlist subscription render reason |
+| T16-HEALTH | `normal-restored/health-receipt.json`  | `8b5ac17c65054bedaabe7754c2074fb7913c301f1037f65e37ecf5d936024ec1` |    800 | restored source/build/PID와 3개 HTTP 200 identity        |
+| T16-SUM    | `summary.json`                         | `8697a7a90532b8730368602b08c1ae87395ca76c9643cb96743119d2884d4bdb` |   6863 | statistics, gates, decision and cleanup                  |
+
+최초 observer fixed-wait run은 click entry delivery 전에 읽어 무효 처리했고, headless wave는 background
+paint scheduling으로 presentation이 `638.1`~`656.1ms`로 부풀어 headed DevTools protocol과 달라 폐기했다.
+둘 다 valid 3회 표와 manifest의 accepted timing row로 사용하지 않았다. profile process 종료 뒤 normal build를
+복구해 `/`, `/api/home`, exact lab route의 HTTP 200과 source/build/PID를 별도 receipt로 기록했다. validator는
+summary boolean을 신뢰하지 않고 raw phase arithmetic·threshold·dominance와 raw profile 24/23 card/reason을
+재계산하며, PID/port `3000`·`9222` 부재와 Chrome profile 제거도 확인한다.
 
 ## 결정 로그
 
@@ -2221,6 +2262,7 @@ candidate는 unrelated-card render 제거, 보존 계약과 valid After evidence
 | 2026-08-06T03:45:42.813Z | `d1278d0`  | metadata/document/hydration/loading과 fresh Hero trace가 locked contract를 충족하고 96-entry manifest와 12 mutation probes가 fail-closed validator를 통과했다.                       | non-blocking prefetch/hydration과 explicit metadata builders가 initial shell, canonical request와 retained Hero 결정을 보존한다.                        | source gate, alternating 3+3 timing, raw documents, active DOM, repair trace/loading, reviewers와 independent oracle를 교차 확인했다.                                  | Todo 13 source/evidence closure only                                                   | 37 files/260 tests; final build `Ye_LK9AOWlPxT_v14dfz9`; validator/review PASS           | pass      | **KEEP**; Todo 8 KEEP/Todo 9 GATE CLOSED 유지, Todo 15 count Pending      |
 | 2026-08-06T05:50:11.843Z | `d1278d0`  | final After 5회, documents/UA timing, 서버 counter와 23-PNG regression이 source 변경 없이 완료됐다.                                                                                  | Todo 8/9/13 결정을 유지한 frozen source가 Basic 성능·metadata·state·접근성 계약을 함께 보존한다.                                                        | raw Lighthouse, documents, server logs/CDP, browser report, cleanup, 3 reviewer와 276-entry fail-closed seal을 교차 확인했다.                                          | source 변경 없음; Basic evidence만 기록                                                | build `Cpe6odTds91l9-w7IWHfG`; validator PASS; 16/16 rejection                           | pass      | **Todo 15 complete**; Todo 16 Advanced A와 Todo 17 finalization은 Pending |
 | 2026-08-06T06:08:48Z     | `d1278d0`  | 24개 card가 전체 `wishlistIds` 배열을 구독하고 각 render에서 150,000회 presentation 계산을 하지만 timing/profile data는 아직 없다.                                                   | 한 card click이 관계없는 card 계산을 유발한다면 processing-dominant interaction과 non-target Profiler render가 함께 나타날 것이다.                      | normal production 3회 중 하나라도 processing `<50ms`, median total `<200ms`, dominance 실패 또는 Profiler non-target render 부재면 gate를 닫고 source를 바꾸지 않는다. | gate 통과 시 per-card boolean subscription과 measured render-boundary isolation만 허용 | 네 조건 전부 conjunctive; exact reset/click/build/profile separation과 preservation 계약 | locked    | pre-data checkpoint only; 모든 data/result Pending, Todo 16 미완료        |
+| 2026-08-06T06:47:12.671Z | `d1278d0`  | headed normal 3회는 processing `84.7/84.3/84.1ms`, total `120/120/120ms`였고 profile click commit은 `p1`~`p24`의 wishlist hook update를 기록했다.                                    | unrelated render가 있어도 interaction 전체가 200ms gate 아래면 optional source experiment의 비용을 정당화하지 못한다.                                   | raw phase arithmetic, 24-image/reset/feedback identity, explicit card reasons, restored health와 39-entry seal을 validator로 교차 확인한다.                            | source 변경 없음; gate 결과만 기록                                                     | 4개 중 total median만 FAIL; conjunctive rule                                             | fail      | **NOT ENTERED**; candidate/After 없음, normal build 복구                  |
 
 ## AI 활용
 
@@ -2251,6 +2293,11 @@ candidate는 unrelated-card render 제거, 보존 계약과 valid After evidence
   counter, production regression/AX/keyboard/CLS payload, hash manifest와 cleanup을 수집했다. Browser Network만으로
   call count를 추론하지 않고 server marker와 CDP를 대응시켰으며, 세 reviewer PASS와 16/16 fail-closed probe 뒤에
   Basic evidence만 기록했다. human VoiceOver와 pre-existing visual debt는 완료로 표현하지 않는다.
+- Todo 16에서는 AI가 clean BasicAfterSHA의 headed Chrome normal timing 3회, separate profiling build의
+  fiber commit/hook-state evidence, phase 통계, hash manifest와 cleanup validator를 수집했다. 폐기한
+  observer-delay/headless wave를 accepted data로 섞지 않았고 total median gate 실패에 따라 source candidate를
+  만들지 않았다. independent verifier의 initial NEEDS-FIX 세 항목은 explicit render-reason 분석, restored
+  health receipt와 raw-data gate 재계산으로 보강했다.
 - `f4167e9`의 두 REVISE와 `cee8cf7` strict-diff REVISE를 성공 근거에서 제거하지 않았고,
   직접 pixel 검토 receipt와 locked threshold로 각각 FIX 및 method-mismatch resolution을 기록했다.
 - 직접 검토 기준: 과제 checklist, raw artifact, production 재현, 테스트와 회귀 결과.
@@ -2338,10 +2385,12 @@ candidate는 unrelated-card render 제거, 보존 계약과 valid After evidence
   1개, 총 2개를 server log/CDP로 확인했다. commit `4a7f566`은 unmerged이며 branch/worktree/counter가 제거됐다.
 - final seal은 276 entries/155219 bytes, validator PASS, 16/16 mutation rejection이다. functional/visual,
   CJK/accessibility, direct visual reviewer가 PASS했고 final processes/ports/profiles cleanup도 통과했다.
+- Todo 16은 gate checkpoint `f1875cd` 뒤 clean BasicAfter source에서 normal timing 3회와 causality-only
+  profile을 분리했다. processing `84.1`~`84.7ms`와 unrelated 23-card render는 확인했지만 total median
+  `120ms < 200ms`라 **NOT ENTERED**다. candidate/After source는 없고 normal build 복구와 cleanup을 완료했다.
 
 ### Pending
 
-- Advanced A 진입 여부 판정
 - Todo 17 final assignment checklist와 전체 artifact manifest 감사
 - human VoiceOver 수동 검증, pre-existing mobile Hero Korean wrap, unnamed Home regions는 Todo 15
   nonblocking debt이며 Todo 15에서 수정 완료로 주장하지 않는다.
@@ -2422,6 +2471,9 @@ Route Handler 횟수는 Todo 15 disposable instrumentation의 server marker와 C
 - [x] 효과가 없거나 악화된 결과도 남겼는가
 
 ### Advanced A를 선택한 경우에만
+
+Todo 16 gate 결과가 **NOT ENTERED**이므로 아래 Before/After 최적화 완료조건은 적용 대상이 아니다.
+Basic 완료, normal Before 3회와 profile gate 관찰까지만 수행했고 candidate/After는 만들지 않았다.
 
 - [ ] Basic을 먼저 완료했는가
 - [ ] 24개 카드를 유지한 같은 조건에서 Before와 After를 각각 3회 측정했는가
