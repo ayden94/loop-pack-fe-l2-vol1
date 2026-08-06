@@ -1413,8 +1413,10 @@ Readonly<{ method: 'GET' }> }>`다. `Options`는 Ky의 type-only import이고 se
   사용한다. localhost fallback, request-header fallback과 client env read는 없다.
 - native server repository는 non-ok body를 text로 한 번 읽고 valid API error message/status 또는
   `요청 중 오류가 발생했습니다.` fallback의 `ApiClientError`를 throw한다. success JSON은 한 번 parse해
-  Zod schema를 적용하며 native `SyntaxError`, `ZodError`, fetch `TypeError` identity를 보존한다. browser
-  Ky abort는 유지하지만 native/Ky retry parity는 정의하거나 주장하지 않는다.
+  Zod schema를 적용하며 Todo 12 measured source에서는 native `SyntaxError`, `ZodError`, fetch `TypeError`
+  identity를 보존했다. Todo 13은 exact fetch invocation만 cause-preserving `ProductServerFetchError`로
+  변환하고 다른 세 identity는 그대로 두는 intentional contract correction을 적용한다. browser Ky abort는
+  유지하지만 native/Ky retry parity는 정의하거나 주장하지 않는다.
 - retained driver source와 실행 temporary source SHA-256은 모두
   `b7355cfb3fb3370b40fdd18890d8a54ea204e0a3a12d6e4c50ef699237a7269b`로 실행 전 동일했다.
   `npx --yes tsx --tsconfig <repo>/tsconfig.json <temp>/todo12-driver.ts`, `tsx v4.23.8`, Node
@@ -1447,10 +1449,11 @@ Readonly<{ method: 'GET' }> }>`다. `Options`는 Ky의 type-only import이고 se
 
 ## Todo 13 metadata/prefetch/hydration pre-source checkpoint
 
-이 절은 source 변경 전 구현 계약이다. 기준 source는 Todo 12 final `4a54e50`을 **KEEP**한 current
-HEAD `0532aba1a8ee33347daffb69daeaa23278508e11`이며, 이 checkpoint 자체는 metadata, hydration,
-production 결과 또는 성능 개선을 주장하지 않는다. 구현은 이 절의 file/API, 출력, 실패, shell,
-loading, test와 evidence 계약을 먼저 red로 잠근 뒤 시작한다.
+이 절은 source 변경 전 구현 계약이다. 기준 source는 Todo 12 final `4a54e50`을 **KEEP**한 상태로
+동일하며, 최초 checkpoint `180077e5c9adc3676a81474209ade95fa1ef716b` 뒤 Oracle
+`ses_02b53e3ccffeJu7OXzZUKab0Bo`의 blockers를 이 docs-only correction에서 모두 반영한다. 이 checkpoint
+자체는 metadata, hydration, production 결과 또는 성능 개선을 주장하지 않는다. 구현은 이 절의 file/API,
+출력, 실패, shell, loading, test와 evidence 계약을 먼저 red로 잠근 뒤 시작한다.
 
 ### File/API와 의존 방향
 
@@ -1458,11 +1461,13 @@ loading, test와 evidence 계약을 먼저 red로 잠근 뒤 시작한다.
 | ------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `src/shared/config/SiteMetadata.ts`                    | pure `createSiteMetadata(origin: AppOrigin): Metadata`, `createPageOpenGraph(parentOpenGraph: Metadata['openGraph'], input: PageOpenGraphInput): NonNullable<Metadata['openGraph']>`, `SITE_METADATA` 상수를 export한다. validated `AppOrigin`만 받고 fetch, env, `server-only`, client import가 없다. |
 | `src/entities/product/model/ProductQueryKeyFactory.ts` | pure `ProductQueryKeyFactory.home(diagnosticScenario)`와 `.productList(request)`를 export한다. browser/server service가 모두 이 파일을 직접 import하며 `ProductService.queryKeyFactory`와 `ProductListRequestModel.queryKey`의 중복 key ownership은 제거한다.                                          |
-| `src/entities/product/api/ProductServerRepository.ts`  | 기존 native product-list path에 `getHome(diagnosticScenario, origin): Promise<HomeResponse>`를 추가한다. absolute `api/home` URL, optional valid `scenario`, exact `{ method: 'GET' }`, own `signal` 없음과 기존 native error/schema identity를 공유한다.                                              |
+| `src/entities/product/model/ProductListRouteParams.ts` | `ProductListRouteParams.toRequest(input: ProductListRouteInput): ProductListRequest`와 `.canonicalSearchParams(request): URLSearchParams`를 export한다. Next record와 `URLSearchParams.get` shape를 한 adapter가 처리하고 route와 client view가 같이 쓴다.                                             |
+| `src/entities/product/api/ProductServerFetchError.ts`  | native fetch invocation rejection만 감싸는 typed `ProductServerFetchError`를 export한다. `name`과 readonly `cause: TypeError`를 보존하며 HTTP/schema/programming error에는 사용하지 않는다.                                                                                                            |
+| `src/entities/product/api/ProductServerRepository.ts`  | 기존 native product-list path에 `getHome(diagnosticScenario, origin): Promise<HomeResponse>`를 추가한다. absolute `api/home` URL, optional valid `scenario`, exact `{ method: 'GET' }`, own `signal` 없음과 기존 HTTP/schema identity를 공유하고 fetch call만 typed transport error로 변환한다.        |
 | `src/entities/product/api/ProductServerService.ts`     | `getHome(diagnosticScenario, origin)` query options를 추가한다. key는 `ProductQueryKeyFactory.home`, `staleTime: 60_000`, signal-free queryFn이며 browser `ProductService.getHome`과 동일하다.                                                                                                         |
-| `src/views/home/model/HomeMetadata.ts`                 | `buildHomeMetadata(input: HomeMetadataInput, dependencies: HomeMetadataDependencies): Promise<Metadata>`를 export한다. dependency는 `getQueryClient` factory와 canonical `ProductServerService`; builder가 호출마다 factory를 정확히 한 번 호출한다.                                                   |
-| `src/views/product-list/model/ProductListMetadata.ts`  | `buildProductListMetadata(input: ProductListMetadataInput, dependencies: ProductListMetadataDependencies): Promise<Metadata>`를 export한다. normalized `ProductListRequest`, parent metadata, validated origin을 받고 호출마다 fresh client와 canonical server service를 쓴다.                         |
-| `src/shared/lib/dehydratePendingQueries.ts`            | `dehydratePendingQueries(queryClient: QueryClient): DehydratedState`를 export한다. success는 `defaultShouldDehydrateQuery(query)`, pending은 `query.state.status === 'pending'` 조건으로만 포함하고 error query/Error object는 직렬화하지 않는다.                                                      |
+| `src/views/home/model/HomeMetadata.ts`                 | `buildHomeMetadata(input: HomeMetadataInput, dependencies: HomeMetadataDependencies): Promise<Metadata>`를 export한다. dependencies는 fresh client factory와 narrow injected `loadHome` callback뿐이며 server service/getter를 import하지 않는다.                                                      |
+| `src/views/product-list/model/ProductListMetadata.ts`  | `buildProductListMetadata(input: ProductListMetadataInput, dependencies: ProductListMetadataDependencies): Promise<Metadata>`를 export한다. dependencies는 fresh client factory와 narrow injected `loadProductList` callback뿐이며 type-only entity model imports만 가진다.                            |
+| `src/shared/lib/dehydratePendingQueries.ts`            | `dehydratePendingQueries(queryClient: QueryClient): DehydratedState`를 export한다. exact pending selection과 rejection redaction을 이 helper 하나가 소유한다.                                                                                                                                          |
 | `src/app/layout.tsx`                                   | `getAppOrigin()`을 호출해 strict origin failure를 유지하고, 그 값을 `createSiteMetadata`의 `metadataBase`/absolute URL 입력으로 사용한다.                                                                                                                                                              |
 | `src/app/page.tsx`                                     | synchronous default export와 static shell을 유지하고 async `HomeHydration` child만 추가한다. `generateMetadata`는 `HomeMetadata` builder에 위임한다.                                                                                                                                                   |
 | `src/app/products/page.tsx`                            | `generateMetadata`와 async route body가 같은 normalization, origin, server service와 key factory를 소비한다. body는 route `loading.tsx` 아래에서 params를 await한다.                                                                                                                                   |
@@ -1470,16 +1475,38 @@ loading, test와 evidence 계약을 먼저 red로 잠근 뒤 시작한다.
 
 `HomeMetadataInput`은 정확히 `origin: AppOrigin`, `diagnosticScenario: DiagnosticScenario`,
 `parent: ResolvingMetadata`이고 `ProductListMetadataInput`은 `origin: AppOrigin`,
-`request: ProductListRequest`, `parent: ResolvingMetadata`다. 각 dependencies는
-`getQueryClient: () => QueryClient`와 주입된 `ProductServerService`만 가진다. route module이 production
-instances를 조립하고 model tests는 fakes를 주입한다. metadata model은 `process.env`, global fetch,
-browser repository/service 또는 client view를 직접 import하지 않는다.
+`request: ProductListRequest`, `parent: ResolvingMetadata`다. `HomeMetadataDependencies`는
+`getQueryClient: () => QueryClient`와
+`loadHome(client: QueryClient, scenario: DiagnosticScenario, origin: AppOrigin): Promise<HomeResponse>`,
+`ProductListMetadataDependencies`는 같은 client factory와
+`loadProductList(client: QueryClient, request: ProductListRequest, origin: AppOrigin): Promise<ProductListResponse>`
+만 가진다. metadata model의 entity imports는 `import type`뿐이며 concrete `ProductServerService`,
+`ProductServerRepository`, `getAppOrigin`, `process.env`, global fetch, browser service와 client view를 import하지
+않는다. route module이 `getAppOrigin()`, fresh factory와 canonical server service를 callback에 조립하고 model
+tests는 narrow fakes를 주입한다.
 
 Home native descriptor는 `new URL('api/home', `${origin}/`)`에 valid scenario만 추가한다. browser
 repository의 기존 `api/home` 요청과 pathname/search가 같아야 한다. product path는 Todo 12의
 `ProductListRequestModel.serverDescriptor`를 그대로 쓰며 metadata용 URL/options builder를 새로 만들지
 않는다. 모든 server queryFn은 signal을 받거나 전달하지 않고 `gcTime`과 global QueryClient defaults는
 변경하지 않는다.
+
+`ProductListRouteInput`은 Next의 readonly record
+`Record<string, string | ReadonlyArray<string> | undefined>` 또는 structural
+`Pick<URLSearchParams, 'get'>`이다. adapter는 q/category/sort/page/scenario만 읽는다. record의 repeated
+array는 첫 원소를 사용해 `URLSearchParams.get(name)`의 first-value semantics와 맞춘다. empty array는
+missing이다. 외부 `pageSize`는 scalar/array와 값에 관계없이 읽지 않고 항상 `DEFAULT_PAGE_SIZE` 12를
+주입한 뒤 한 번만 normalize한다. server page, client `ProductListView`, metadata와 body prefetch가 이 exact
+adapter output을 key와 fetch에 사용한다. canonical search는 q-empty/category-all/scenario/pageSize를
+제외하고 `q`, `category`, `sort`, `page` 순서로 만든다.
+
+Todo 12에서 native fetch `TypeError` identity 보존은 당시 source/evidence에 대한 historical KEEP
+contract다. Todo 13은 metadata가 programming `TypeError`를 expected failure로 오인하지 않도록 이 한 점을
+의도적으로 좁힌다. repository의 exact `await this.fetch(descriptor.input, descriptor.init)`만
+`try/catch`하고, 그 invocation이 `TypeError`로 reject할 때 `new ProductServerFetchError(error)`를 throw한다.
+error는 `cause`로 원본 identity/message를 보존한다. fetch 이외 코드의 `TypeError`, response JSON
+`SyntaxError`, schema `ZodError`, `ApiClientError`와 unknown error는 감싸지 않는다. 이 correction은 Todo 12의
+URL/key/signal/native HTTP/schema/per-call client KEEP를 뒤집거나 과거 source 결과를 소급 변경하지 않는다.
 
 ### Root metadata와 shallow merge
 
@@ -1511,8 +1538,9 @@ query failure에서 `{}`를 반환하면 title, description, OG, robots 전체�
 
 Home success는 다음 exact mapping을 반환한다.
 
-- `title`: `data.banner.title`; 최종 document title은 root template을 적용한
-  `${data.banner.title} | Loopers Commerce`
+- `title`: `{ absolute: `${data.banner.title} | Loopers Commerce` }`; Home page와 root layout이 같은 root
+  segment에 있으므로 layout template 적용에 의존하지 않는다. raw/final document title은 exact full title
+  `${data.banner.title} | Loopers Commerce`다.
 - `description`: `data.banner.description`
 - canonical과 `openGraph.url`: absolute `/`
 - `openGraph.title`/`description`: banner title/description
@@ -1541,10 +1569,11 @@ description은 mutually exclusive하게 다음 순서로 만든다.
 유지하고 두 번째 description을 사용한다. `totalCount === 0`만 explicit zero-results다.
 
 canonical과 `openGraph.url`은 absolute `/products`에 normalized params를 붙인다. ordering과 omission은
-Todo 12 `ProductListRequestModel.searchParams(request)`를 재사용하되 진단 전용 `scenario`만 canonical에서
-삭제한다. 따라서 q-empty/category-all은 생략되고 `sort`, `page`, `pageSize`는 항상 이 순서로 남는다.
-metadata/body server fetch descriptor는 scenario를 포함한 원래 request를 그대로 써야 하므로 canonical
-정리와 fetch identity를 혼동하지 않는다.
+`ProductListRouteParams.canonicalSearchParams(request)`를 사용한다. q-empty/category-all, 진단 전용
+`scenario`와 고정 transport field `pageSize`는 canonical에서 제외하고 `q`, `category`, `sort`, `page`만
+normalized order로 둔다. Products `title`은 plain string으로 반환해 root `%s | Loopers Commerce` template을
+사용한다. metadata/body server fetch descriptor는 scenario와 forced `pageSize: 12`를 포함한 adapter output을
+그대로 써야 하므로 canonical page URL과 fetch identity를 혼동하지 않는다.
 
 Product OG title/description은 위 page 값과 같고, image는 `data.products[0]?.image`를 origin에 resolve한
 absolute URL 한 개다. products가 비었으면 totalCount와 무관하게 root fallback absolute image 한 개를
@@ -1552,15 +1581,17 @@ absolute URL 한 개다. products가 비었으면 totalCount와 무관하게 roo
 
 ### Metadata failure policy
 
-각 builder는 input normalization, parent resolve, fresh client 생성과 options 생성까지 try/catch 밖에서
-수행한다. try/catch는 정확히 `await queryClient.fetchQuery(serverService.getHome(...))` 또는
-`await queryClient.fetchQuery(serverService.getProductList(...))` 한 statement만 감싼다.
+각 builder는 input normalization, parent resolve와 fresh client 생성까지 try/catch 밖에서 수행한다.
+try/catch는 정확히 `await dependencies.loadHome(...)` 또는 `await dependencies.loadProductList(...)` 한
+injected loader invocation만 감싼다. production route callback 내부가 canonical server service options로
+`client.fetchQuery(...)`를 호출한다.
 
-- `ApiClientError`와 그 native service call에서 나온 fetch `TypeError`는 expected query failure로 보고
-  `{}`를 반환한다.
+- `ApiClientError`와 exact native invocation에서 변환된 `ProductServerFetchError`만 expected query failure로
+  보고 `{}`를 반환한다.
 - malformed successful JSON의 `SyntaxError`, schema-invalid success의 `ZodError`, parent/metadata mapping/
-  key/options/client factory의 programming error는 rethrow한다.
-- function 전체를 broad catch하지 않고 service call 밖의 `TypeError`는 절대 `{}`로 바꾸지 않는다.
+  key/options/client factory/loader 내부의 programming `TypeError`와 unknown error는 rethrow한다.
+- function 전체를 broad catch하지 않고 raw `TypeError`는 위치와 무관하게 metadata expected failure로
+  분류하지 않는다.
 - expected failure `{}`는 root metadata를 상속하며 error metadata, `noindex`, synthetic title 또는 fallback
   page OG를 만들지 않는다.
 
@@ -1569,19 +1600,35 @@ absolute URL 한 개다. products가 비었으면 totalCount와 무관하게 roo
 Home default export는 `async`로 바꾸지 않는다. 현재 `<main>`, 유일한 static `<h1>Loopers
 Commerce</h1>`, 설명과 local Suspense fallback은 async child 밖에 남긴다. root `loading.tsx`는 만들지
 않는다. `HomeHydration`만 searchParams를 await해 scenario를 parse하고, fresh `getQueryClient()`를 만든
-뒤 canonical server home options로 `void queryClient.prefetchQuery(options)`를 시작한다. promise를 await하지
-않고 `dehydratePendingQueries(queryClient)`를 즉시 `HydrationBoundary`에 넘겨 기존 `HomeView`를 감싼다.
-fallback과 final Hero의 Todo 7/8 aspect geometry는 그대로다.
+뒤 deterministic diagnostic `scenario === 'error'`가 아닐 때만 canonical server home options로
+`void queryClient.prefetchQuery(options)`를 시작한다. normal/slow/empty prefetch promise는 await하지 않고
+`dehydratePendingQueries(queryClient)`를 즉시 `HydrationBoundary`에 넘겨 기존 `HomeView`를 감싼다. error
+scenario는 server pending rejection을 만들지 않고 empty dehydrated state로 client의 기존 fetch/error
+policy를 실행한다. fallback과 final Hero의 Todo 7/8 aspect geometry는 그대로다.
 
 Products route body는 route `loading.tsx` 아래에서 searchParams를 await하고 한 번 normalize한다. fresh
-client에서 canonical product server options의 prefetch를 await하지 않고 시작한 뒤 pending+success state로
-`HydrationBoundary`를 만들고 기존 `ProductListView`를 감싼다. hydration이 성공하면 browser observer가
-동일 key의 pending promise/success data를 이어받아 initial duplicate browser API request를 만들지 않아야
-한다. hydration이 실패한 query는 serialize하지 않으므로 기존 browser retry, inline error, retained-data와
-cancel policies가 그대로 적용된다.
+client에서 `scenario !== 'error'`일 때만 canonical product server options의 prefetch를 await하지 않고 시작한
+뒤 promise-bearing pending 또는 settled-success state로 `HydrationBoundary`를 만들고 기존
+`ProductListView`를 감싼다. hydration이
+성공하면 browser observer가 동일 key의 pending promise/success data를 이어받아 initial duplicate browser
+API request를 만들지 않아야 한다. error scenario는 prefetch를 skip하고 client의 기존 retry, inline error,
+retained-data와 cancel policies를 그대로 적용한다.
 
-`dehydratePendingQueries`는 success와 pending만 포함한다. failed query, failure reason, stack 또는 Error
-serialization을 추가하지 않는다. pending promise rejection을 metadata failure로 재사용하지 않으며
+`dehydratePendingQueries`의 exact options는
+`shouldDehydrateQuery: (query) => defaultShouldDehydrateQuery(query) || query.state.status === 'pending'`과
+`shouldRedactErrors: () => true`다. settled success는 TanStack default로 포함하고 settled error는 default에서
+제외한다. pending snapshot은 `query.promise`를 포함하므로 snapshot 시점 뒤 reject하면 rejection이 hydration
+stream을 건널 수 있다. 이 사실을 숨기거나 “error가 전혀 직렬화되지 않는다”고 주장하지 않는다.
+
+settled error query의 `state.error`, message와 stack은 dehydrated state에 포함하지 않는다. pending promise가
+나중에 reject하면 TanStack redaction path가 original error/message/stack 대신 redacted rejection만 전달하며,
+원본 server error를 serialize하지 않는다. 해당 rejection은 HydrationBoundary/observer가 소유하게 해
+unhandled rejection을 만들지 않고 client query의 retry/refetch/inline error policy가 최종 상태를 결정한다.
+helper는 `shouldRedactErrors: false`, custom Error serializer, promise `.catch(() => undefined)` 또는 success
+변환을 사용하지 않는다. deterministic `scenario=error`는 아예 server prefetch하지 않아 이 path의 정상
+진단 수단으로 사용하지 않고, unexpected pending rejection test에서만 redaction/handling을 강제로
+검증한다.
+
 metadata와 body는 각각 fresh QueryClient를 가진다. persistent server cache, module singleton, React
 `cache()` 또는 request-scoped custom cache를 추가하지 않는다. 같은 request의 identical native fetch
 URL/options dedupe 가능성은 production document evidence에서 관찰하되 call-count로 단정하지 않는다.
@@ -1610,22 +1657,31 @@ production code 전에 다음 tests를 추가/수정하고 각 red가 missing/wr
 1. `src/shared/config/SiteMetadata.test.ts`: root title default/template, description, metadataBase, absolute
    canonical/fallback OG, robots와 parent OG shallow-merge spread를 검증한다.
 2. `src/views/home/model/HomeMetadata.test.ts`: normal/empty banner mapping, absolute image/URL, fresh client,
-   same home key/options, `ApiClientError`/service-call `TypeError`의 `{}`, `SyntaxError`/`ZodError`/programming
-   `TypeError` rethrow를 Given/When/Then 별 test로 검증한다.
+   same home key/options, same-root absolute full title, narrow loader injection,
+   `ApiClientError`/`ProductServerFetchError`의 `{}`, `SyntaxError`/`ZodError`/raw programming `TypeError` rethrow를
+   Given/When/Then 별 test로 검증한다.
 3. `src/views/product-list/model/ProductListMetadata.test.ts`: q-first/category/default/page-2 title,
    category/sort descriptions, normal, explicit totalCount-zero, page-2 empty with positive totalCount, first image/
-   fallback image, normalized canonical without scenario, expected failures와 unexpected rethrow를 검증한다.
+   fallback image, root-template title, normalized canonical without scenario/pageSize, narrow loader, expected
+   failures와 unexpected rethrow를 검증한다.
 4. `ProductQueryKeyFactory.test.ts`, browser/server service/repository tests: home/product key와 URL/options/
-   staleTime parity, scenario identity, signal absence, home native error/schema identity와 metadata/body마다 fresh
-   QueryClient를 검증한다.
-5. `dehydratePendingQueries.test.ts`: success와 pending은 포함하고 error는 제외하며 Error value/stack을
-   serialized state에 넣지 않는지 검증한다.
-6. `src/app/products/loading.test.tsx`: one main/one h1, labeled result region, exactly 12 skeleton slots,
+   staleTime parity, scenario identity, signal absence, exact fetch-invocation `ProductServerFetchError.cause`, raw
+   programming `TypeError`/native HTTP/schema identity와 metadata/body마다 fresh QueryClient를 검증한다.
+5. `ProductListRouteParams.test.ts`와 route/client integration tests: scalar와 repeated arrays는 first value가
+   같고, `pageSize=24` 또는 repeated pageSize도 forced 12이며, server/client request/key/fetch URL이 같고
+   canonical에는 pageSize/scenario가 없으며 successful hydration initial browser request가 중복되지 않음을
+   검증한다.
+6. `dehydratePendingQueries.test.ts`: pending success는 promise를 포함해 resolve하고, unexpected pending
+   rejection은 original error/stack 없이 redacted rejection으로 observer가 처리하며 unhandled rejection과
+   hydration warning이 없고 client policy로 이어지는지 검증한다. 별도 settled error는 query/state.error가
+   완전히 제외되는지 검증한다. error scenario prefetch skip도 Home/Products route composition에서 검증한다.
+7. `src/app/products/loading.test.tsx`: one main/one h1, labeled result region, exactly 12 skeleton slots,
    filter/home-link reserved geometry, no form control/focusable/fake control/duplicate heading을 검증한다.
-7. `src/app/page.test.tsx`: default Home export가 synchronous이고 static main/h1/description과 local fallback을
+8. `src/app/page.test.tsx`: default Home export가 synchronous이고 static main/h1/description과 local fallback을
    async hydration child 밖에 즉시 반환하는지 검증한다.
-8. import-boundary test는 client-marked graph에서 `ProductServerRepository`, `ProductServerService`,
-   `getAppOrigin`, metadata models와 `server-only` module이 reachable하지 않음을 검증한다.
+9. import-boundary reachability test는 client-marked graph에서 `ProductServerRepository`,
+   `ProductServerService`, `ProductServerFetchError`, `getAppOrigin`, metadata models와 `server-only` module이
+   reachable하지 않고 metadata models도 concrete server modules/getter를 value-import하지 않음을 검증한다.
 
 focused tests 뒤 `pnpm test`, `pnpm lint`, `pnpm typecheck`,
 `APP_ORIGIN=http://127.0.0.1:3000 pnpm build`, `pnpm format:check`와 changed-file LSP diagnostics를 통과해야
@@ -1646,14 +1702,19 @@ clean committed source SHA에서 build와 runtime 모두 같은 explicit non-dep
 2. normal/empty/error documents에서 title, description, canonical, OG title/description/url/image/
    siteName/locale/type와 robots를 parse한다. expected query failure는 root inheritance, malformed-success
    probe는 rethrow/document failure여야 한다. unreachable `APP_ORIGIN`은 temporary production lifecycle에서
-   native fetch `TypeError` expected branch와 `{}` inheritance를 확인하며 origin validation fallback으로
-   바꾸지 않는다.
+   exact fetch invocation의 `ProductServerFetchError` expected branch, preserved cause와 `{}` inheritance를
+   확인한다. raw `TypeError`를 metadata fallback으로 바꾸거나 origin validation fallback을 추가하지 않는다.
 3. JavaScript-enabled production Chrome로 같은 URLs를 열고 final `document.head`를 serialize한다. streamed
    metadata의 final location/content, head duplication 없음과 raw initial HTML 차이를 기록하되 initial
    document에 없던 tag를 있었다고 주장하지 않는다.
-4. `curl --output /dev/null --write-out`으로 exact URL의 `time_starttransfer`/`time_total`을 normal UA와
-   `facebookexternalhit/1.1` 각각 여러 번 기록한다. Next 16 metadata streaming과 HTML-limited bot 동작을
-   직접 비교하며 `htmlLimitedBots`, route group 또는 config override를 추가하지 않는다.
+4. timing은 같은 clean source SHA, 같은 production build와 하나의 fresh PID에서 exact URL 하나를 고정해
+   normal UA 3회와 `facebookexternalhit/1.1` 3회를 `normal → facebook → normal → facebook → normal →
+facebook` 순서로 번갈아 실행한다. 각 curl은 exact `Cache-Control: no-cache, no-store, max-age=0`와
+   `Pragma: no-cache` request headers를 명시하고 `time_starttransfer`, `time_total`, HTTP status와 expected
+   head marker 존재를 한 row에 기록한다. server가 반환한 `Cache-Control`, `Age`, `Vary`도 존재하는 그대로
+   보존하되 임의의 cache bypass query를 추가하지 않는다. 여섯 run은 threshold나 개선 판정 없이 Next 16
+   metadata streaming/HTML-limited bot 차이를 observational하게만 분류하며 localhost timing을 deployment
+   성능으로 주장하지 않는다. `htmlLimitedBots`, route group 또는 config override를 추가하지 않는다.
 5. instrumented injected service tests와 production request ledger에서 metadata/body의 normalized request,
    query key, staleTime, absolute URL와 exact `{ method: 'GET' }`, own signal false를 기록한다. 동일 native
    URL/options가 관찰돼도 actual Route Handler count는 주장하지 않는다.
@@ -1662,16 +1723,20 @@ clean committed source SHA에서 build와 runtime 모두 같은 explicit non-dep
    browser count로 대신하지 않는다. 실제 Route Handler counter는 Todo 15 disposable instrumentation으로
    미루고 제출 source/branch에 남기지 않는다.
 7. console error/warning, React hydration warning, unhandled rejection, query retry/recovery, visible IDs와
-   key/URL 일치를 저장한다. expected failed pending query가 dehydrated state/Error serialization에 남지 않고
-   browser 기존 정책으로 복구되는지 확인한다.
+   key/URL 일치를 저장한다. normal/slow/empty pending success, forced unexpected pending rejection의 redacted
+   handling과 settled error exclusion을 따로 관찰한다. deterministic error scenario는 server prefetch가 없고
+   browser 기존 policy로 진입하는지 확인한다.
 8. Home shell/fallback과 Products loading에서 main/h1/result labels, focusable count, 12 slots와 desktop/tablet/
    mobile bounds를 캡처한다. skeleton-to-content no-recent-input CLS를 raw layout-shift entries와 numeric CLS로
    기록한다.
 
-각 recipe는 exact URL, source SHA, build ID, PID, UA, viewport, cache state, request IDs, captured timestamp,
-hash와 process/port cleanup receipt를 가진다. evidence validator는 wrong SHA/URL/options/key, missing raw HTML,
-extra browser request, hydration warning, malformed metadata, missing terminal event, dirty tree와 live PID/port를
-fail-closed로 거부한다.
+각 recipe는 exact URL, source SHA, build ID, PID, UA, viewport, request/response cache headers, request IDs,
+captured timestamp, hash와 process/port cleanup receipt를 가진다. lifecycle은 시작 전 port 3000 free, fresh
+launcher/listener PID와 readiness, 여섯 timing run 동안 PID/build identity 유지, 종료 후 두 PID 부재와 port
+release를 기록한다. cleanup이 실패하면 timing set 전체를 invalid로 하고 새 PID에서 3+3을 다시 수집한다.
+evidence validator는 wrong SHA/URL/options/key/order/run count, reused/wrong PID, missing raw HTML/head marker,
+extra browser request, hydration warning/unhandled rejection, unredacted pending error, malformed metadata,
+missing terminal event, dirty tree와 live PID/port를 fail-closed로 거부한다.
 
 ### Mandatory current-SHA Home trace revalidation
 
@@ -1685,20 +1750,30 @@ desktop/mobile protocol에서 다음을 모두 다시 연결한다.
 - hydration duplicate browser `/api/home` request count와 final visible banner
 - Todo 8 responsive candidate의 desktop/mobile quality/bytes 결정과 Todo 9 preload/priority/eager 거부 근거
 
-revalidation이 Todo 8/9의 optional decision을 stale/invalid로 만들면 Todo 13을 KEEP하고 Todo 14로 넘어가지
-않는다. 원인을 분리한 별도 minimal **FIX** 또는 **REVERT** source commit을 만들고 affected document,
-hydration, Home trace를 같은 protocol로 재측정한 뒤에만 Todo 14를 시작한다.
+fresh trace에서 Todo 13 source가 shell/fallback/Hero insertion/discovery/priority/candidate bytes/CLS/duplicate
+API regression을 일으켰으면 Todo 13은 **KEEP할 수 없다**. Todo 13 자체를 별도 minimal **FIX** 또는
+**REVERT**하고 affected document, hydration과 Home trace를 같은 protocol로 재측정해 통과한 뒤에만 KEEP을
+판정한다.
+
+Todo 13 계약 자체는 모두 통과했지만 fresh trace가 Todo 13과 인과관계 없는 새 optional Hero optimization
+기회를 발견한 경우 Todo 13은 **KEEP할 수 있다**. 단 Todo 14는 즉시 시작하지 않고, 그 optimization의
+가설, source scope, 보존 조건, threshold와 KEEP/FIX/REJECT를 별도 pre-source experiment로 먼저 선언한다.
+해당 실험을 같은 current baseline에서 측정해 keep 또는 reject로 닫은 뒤에만 Todo 14를 시작한다. 이전 Todo
+8/9 decision이 stale하다는 이유만으로 Todo 13 regression과 independent opportunity를 섞지 않는다.
 
 ### KEEP, FIX, REVERT와 stop rule
 
 - **KEEP**: exact metadata outputs/shallow merge/failure identity, strict origin, shared key/request/options,
-  fresh clients, pending+success-only dehydration, non-blocking Home shell, Products loading geometry, zero initial
-  duplicate browser API request on successful hydration, no hydration warning, all tests/gates와 production
-  document/timing/current-SHA trace contracts를 만족한다.
+  shared route adapter/forced pageSize, fresh clients, exact pending promise redaction/settled-error exclusion,
+  deterministic error-prefetch skip, non-blocking Home shell, Products loading geometry, zero initial duplicate
+  browser API request on successful hydration, no unhandled rejection/hydration warning, all tests/gates와
+  production document/timing/current-SHA trace contracts를 만족하고 Todo 13-caused Hero regression이 없어야
+  한다.
 - **FIX 후 affected recipes 재실행**: root OG field loss, relative OG URL, canonical/scenario drift, broad
-  TypeError swallow, malformed success suppression, duplicated key/home URL, client graph server import, awaited
-  body prefetch, Home async shell/root loading, error dehydration, browser duplicate request, fake loading controls,
-  skeleton/CLS or Todo 8/9 trace regression 중 하나라도 있으면 KEEP하지 않는다.
+  TypeError swallow, fetch error cause loss, malformed success suppression, repeated-param/pageSize server-client
+  drift, duplicated key/home URL, client graph server import, awaited body prefetch, error-scenario server prefetch,
+  unredacted/unhandled pending rejection, Home async shell/root loading, browser duplicate request, fake loading
+  controls, skeleton/CLS 또는 Todo 13-caused Hero regression 중 하나라도 있으면 KEEP하지 않는다.
 - **REVERT**: 최소 correction 뒤에도 metadata correctness/failure inheritance, shell/hydration, import boundary,
   duplicate-request, geometry/CLS, current Hero quality/discovery 또는 build/function gate를 충족하지 못하면 Todo
   13 source candidate 전체를 별도 revert하고 Todo 12 KEEP source 계약으로 돌아간다. failure evidence는
@@ -1821,23 +1896,24 @@ Basic 완료 후 아래 네 조건을 모두 충족할 때만 진입한다.
 
 ## 결정 로그
 
-| 시각                     | source SHA | 관찰한 사실                                                                                                                                                | 가설                                                                                                                                                    | 반증 방법                                                                                                                   | 가장 작은 실험                                        | 사전 threshold                                                         | 결과      | keep/revert/reject와 이유                                              |
-| ------------------------ | ---------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------- | ---------------------------------------------------------------------- | --------- | ---------------------------------------------------------------------- |
-| 2026-08-04T15:11:59Z     | `e2e608b`  | slow query가 shell/Hero insertion을 막고, late discovery 뒤 7.55MB transfer가 별도 병목이다.                                                               | shell boundary 분리로 API 전 semantic shell을 노출할 수 있다.                                                                                           | same-run filmstrip/trace에서 API 전 shell, bounds, shifts와 회귀를 확인한다.                                                | semantic shell + fixed-geometry local fallback만 변경 | semantic contract 전부 통과; timing 분류는 6711.6814/7251.28685ms      | locked    | source change 전 locked                                                |
-| 2026-08-05T13:15:43Z     | `ca2b6a7`  | API 전 shell, viewport별 동일 bounds, Hero replacement shift 0, LCP median 6913.341ms를 관찰했다.                                                          | semantic shell 계약은 충족하고 LCP 변화는 noise 안일 것이다.                                                                                            | tests·production browser·5회 JSON·독립 visual review로 회귀와 threshold를 확인했다.                                         | 변경 추가 없음; candidate를 그대로 판정               | semantic contract pass; 6913.341ms는 inconclusive band                 | pass      | keep; timing inconclusive                                              |
-| 2026-08-05T14:30:22Z     | `ca2b6a7`  | raw 3840×2160 JPEG가 desktop DPR1 target보다 area 12.098299× 크고 7,545,525 bytes를 전송한다.                                                              | accurate sizes의 Next Image가 width/DPR 적합 candidate와 실질적 byte 감소를 만든다.                                                                     | actual optimizer URL·width·DPR·bytes와 geometry/crop/quality/CLS/a11y/function을 측정한다.                                  | raw Hero `<img>`만 `fill`+accurate `sizes`로 교체     | right-sized candidate+material byte reduction+모든 보존 계약 통과      | locked    | source result 아님; 구현·After pending                                 |
-| 2026-08-05T15:33:40Z     | `f4167e9`  | desktop `w=1200`은 pass지만 mobile `w=384` 16:9 raster가 4:5 box에서 확대돼 detail이 저하됐고 reviewer 2개가 REVISE했다.                                   | mobile object-cover source size를 반영하면 byte 절감과 보존 계약을 함께 만족할 수 있다.                                                                 | mobile native coverage와 직접 visual review를 clean fix SHA에서 반복한다.                                                   | mobile `sizes` branch만 교정                          | candidate·bytes pass여도 quality fail이면 FIX                          | fail      | **FIX**; timing이 아니라 mobile 품질 회귀 때문                         |
-| 2026-08-05T16:33:23Z     | `cee8cf7`  | desktop `w=1200`, mobile `w=750`이 DPR1을 cover하고 material byte reduction, geometry·quality·semantics·CLS·function gate를 통과했다.                      | corrected sizes가 locked responsive-delivery 계약을 충족한다.                                                                                           | 5회 JSON, Network/native raster, trace, tracked screenshots와 conflicting review resolution을 교차 확인했다.                | 변경 추가 없음; fixed candidate 판정                  | candidate+bytes+보존 계약 pass; timing은 range rule로 별도 분류        | pass      | **KEEP**; FCP inconclusive, LCP directional improvement, CLS no change |
-| 2026-08-05T17:18:21Z     | `cee8cf7`  | resource-load-delay median `1648.630ms`는 dominant지만 pending `526.5ms`에 Hero가 없고 request는 attachment 최초 확인 전에 시작했다.                       | already-attached Hero의 late discovery가 증명될 때만 priority hint가 delay를 줄일 수 있다.                                                              | exact insertion과 request start 사이의 실제 wait를 fresh current-SHA trace로 관찰해야 한다.                                 | source 실험 없음; current trace만 재평가              | attachment-before-request와 측정 가능한 discovery wait 증명            | closed    | **GATE CLOSED**; priority/preload/eager candidate와 source commit 없음 |
-| 2026-08-05T18:16:23Z     | `e318b92`  | 세 superseded request는 CDP abort, final `12991.399`만 200이며 URL/key/GET/IDs와 post-wait `p17,p20,p19`가 일치했다.                                       | browser queryFn의 consumed signal이 superseded transport를 중단하고 latest-result integrity를 유지한다.                                                 | raw CDP, browser report, tests/gates와 독립 verifier로 abort/no-error/no-stale 및 scope를 교차 확인했다.                    | source `345e13f`의 browser-only signal overlay        | 3 abort+final 200+정합성+no error/stale; server count 추론 금지        | pass      | **KEEP**; browser transport only, Todo 11-13/Basic After는 Pending     |
-| 2026-08-05T18:38:08Z     | `b123b91`  | cold pending은 text-only이고 key transition/error에서 grid·count를 잃으며 last real-success key가 없다. Todo 10 cancellation은 동작한다.                   | identity placeholder와 cache-key-only retention으로 여섯 상태를 구분하면서 current-key retry를 유지할 수 있다.                                          | QueryObserver transitions와 reset된 여섯 exact production recipes에서 URL/key/GET/IDs/cancel/recovery를 확인한다.           | source 실험 전 decision checkpoint만 기록             | retained grid/count/page+current retry+no stale/CLS/a11y/build 회귀    | Pending   | pre-source lock 완료; Todo 11 구현·production 결과는 **Pending**       |
-| 2026-08-05T18:58:30Z     | `c0fd99f`  | verifier는 global 5xx throw, retry count, server scenario snapshot, private browser telemetry, tablet/CLS와 page-2 semantics 미결정을 확인했다.            | list-only error override와 same-client seam, evidence ownership, exact geometry/cardinality를 잠그면 구현 추측을 제거할 수 있다.                        | focused policy/seam/QueryObserver tests와 same-document production recipes의 observable evidence를 분리해 검증한다.         | RFC protocol correction only                          | 500=2 GET/logical fetch; no reload; shift entries=0; CLS<=0.01         | Pending   | blockers를 protocol에 반영; source·test·production result는 Pending    |
-| 2026-08-05T22:29:21.479Z | `9a93f21`  | 여섯 desktop recipe가 exact URL/GET/IDs/retry/cancel/recovery, CLS 0, AX/keyboard/visual 계약을 충족했고 initial validator가 accepted/no failures였다.     | identity placeholder와 cache-key-only retention이 여섯 상태를 local response copy 없이 보존한다.                                                        | QueryObserver/integration tests, raw recipe/CDP/process/AX payload, final gate와 independent verifier를 교차 확인했다.      | Todo 11 source chain과 canonical evidence만 판정      | 23 files/187 tests; reviews PASS; follow-up evidence correction 필요   | corrected | KEEP 유지; Todo 12/13/BasicAfter는 Pending                             |
-| 2026-08-05T23:18:16.773Z | `9a93f21`  | R1 wording/hash를 교정하고 R2-R6 tablet/mobile 10개 group과 R5 local provenance를 더해 166 payload validator가 accepted/no failures였다.                   | same source/build의 supplemental capture가 viewport별 CLS와 recipe 계약을 직접 보강한다.                                                                | responsive index, CDP/layout/process groups, correction memo와 independent verifier를 교차 확인했다.                        | source 변경 없음; evidence correction only            | no-recent 0/CLS 0; 10/10 responsive accepted                           | pass      | **KEEP confirmed**; Todo 12/13/BasicAfter는 Pending                    |
-| 2026-08-05T23:42:42Z     | `1c2a0f1`  | request normalization과 wire encoding이 repository에 흩어져 있고 APP_ORIGIN boundary가 없으며 QueryClient factory가 client module 안에 있다.               | canonical request/origin/descriptor와 per-call client 계약을 먼저 잠그면 Todo 13이 URL, signal 또는 cache lifetime을 재정의하지 않는다.                 | red-first focused tests, production browser smoke와 bounded typed driver로 exact parity와 isolation을 반증한다.             | RFC decision checkpoint only                          | exact URL/key/GET; no server own signal; abort/client/origin/gates     | Pending   | source 결과 아님; Todo 12 구현 전 lock, Todo 13은 blocked              |
-| 2026-08-05T23:53:36Z     | `394d2ad`  | Oracle은 function-level server-only, browser/server import graph, native error semantics, normalization과 driver 경계를 implementation blocker로 판정했다. | parser/getter와 browser/server service를 module로 분리하고 native/input contracts를 exact하게 좁히면 checkpoint가 구현 가능해진다.                      | corrected RFC를 같은 blocker 목록과 대조하고 source 없이 format/docs scope를 검증한다.                                      | RFC blocker correction only                           | Oracle `ses_02baf8f8cffe3N4QDKPfEzOeSI` blocker 전부 반영              | Pending   | source 결과 아님; corrected checkpoint 재검증 전 Todo 12/13 blocked    |
-| 2026-08-06T00:58:47.030Z | `4a54e50`  | canonical request/origin/browser-server descriptor/native errors/per-call clients가 25-payload evidence와 current source에서 일치했다.                     | 분리된 trust/transport/cache lifetime 경계가 Todo 11 browser 동작을 보존하면서 Todo 13의 단일 server request seam을 제공한다.                           | focused/full gates, actual typed driver, raw CDP terminals, fail-closed validator와 independent verifier를 교차 확인했다.   | Todo 12 source chain과 sealed evidence만 판정         | 95 focused/227 full; build `hAZ_keSgirWHxBHrbNqvK`; verifier CONFIRMED | pass      | **KEEP**; metadata consumption/memoization/Todo 13/BasicAfter Pending  |
-| 2026-08-06T01:23:02Z     | `0532aba`  | Todo 12는 KEEP이지만 root/page metadata, shared home key, pending dehydration, non-blocking route shell과 hydration production evidence는 아직 없다.       | exact metadata/failure/shallow-merge와 shared server query identity를 pre-source로 잠그면 Todo 13이 shell·client graph·Todo 8/9 결정을 침범하지 않는다. | red-first focused tests, raw document/final head/timing, browser duplicate count와 fresh current-SHA Home trace로 반증한다. | RFC decision checkpoint only                          | source/test/result/call-count claim 없음; Todo 15 count 별도           | Pending   | source 구현 전 lock; Todo 14/BasicAfter는 blocked                      |
+| 시각                     | source SHA | 관찰한 사실                                                                                                                                                                          | 가설                                                                                                                                                    | 반증 방법                                                                                                                        | 가장 작은 실험                                        | 사전 threshold                                                         | 결과      | keep/revert/reject와 이유                                              |
+| ------------------------ | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------- | ---------------------------------------------------------------------- | --------- | ---------------------------------------------------------------------- |
+| 2026-08-04T15:11:59Z     | `e2e608b`  | slow query가 shell/Hero insertion을 막고, late discovery 뒤 7.55MB transfer가 별도 병목이다.                                                                                         | shell boundary 분리로 API 전 semantic shell을 노출할 수 있다.                                                                                           | same-run filmstrip/trace에서 API 전 shell, bounds, shifts와 회귀를 확인한다.                                                     | semantic shell + fixed-geometry local fallback만 변경 | semantic contract 전부 통과; timing 분류는 6711.6814/7251.28685ms      | locked    | source change 전 locked                                                |
+| 2026-08-05T13:15:43Z     | `ca2b6a7`  | API 전 shell, viewport별 동일 bounds, Hero replacement shift 0, LCP median 6913.341ms를 관찰했다.                                                                                    | semantic shell 계약은 충족하고 LCP 변화는 noise 안일 것이다.                                                                                            | tests·production browser·5회 JSON·독립 visual review로 회귀와 threshold를 확인했다.                                              | 변경 추가 없음; candidate를 그대로 판정               | semantic contract pass; 6913.341ms는 inconclusive band                 | pass      | keep; timing inconclusive                                              |
+| 2026-08-05T14:30:22Z     | `ca2b6a7`  | raw 3840×2160 JPEG가 desktop DPR1 target보다 area 12.098299× 크고 7,545,525 bytes를 전송한다.                                                                                        | accurate sizes의 Next Image가 width/DPR 적합 candidate와 실질적 byte 감소를 만든다.                                                                     | actual optimizer URL·width·DPR·bytes와 geometry/crop/quality/CLS/a11y/function을 측정한다.                                       | raw Hero `<img>`만 `fill`+accurate `sizes`로 교체     | right-sized candidate+material byte reduction+모든 보존 계약 통과      | locked    | source result 아님; 구현·After pending                                 |
+| 2026-08-05T15:33:40Z     | `f4167e9`  | desktop `w=1200`은 pass지만 mobile `w=384` 16:9 raster가 4:5 box에서 확대돼 detail이 저하됐고 reviewer 2개가 REVISE했다.                                                             | mobile object-cover source size를 반영하면 byte 절감과 보존 계약을 함께 만족할 수 있다.                                                                 | mobile native coverage와 직접 visual review를 clean fix SHA에서 반복한다.                                                        | mobile `sizes` branch만 교정                          | candidate·bytes pass여도 quality fail이면 FIX                          | fail      | **FIX**; timing이 아니라 mobile 품질 회귀 때문                         |
+| 2026-08-05T16:33:23Z     | `cee8cf7`  | desktop `w=1200`, mobile `w=750`이 DPR1을 cover하고 material byte reduction, geometry·quality·semantics·CLS·function gate를 통과했다.                                                | corrected sizes가 locked responsive-delivery 계약을 충족한다.                                                                                           | 5회 JSON, Network/native raster, trace, tracked screenshots와 conflicting review resolution을 교차 확인했다.                     | 변경 추가 없음; fixed candidate 판정                  | candidate+bytes+보존 계약 pass; timing은 range rule로 별도 분류        | pass      | **KEEP**; FCP inconclusive, LCP directional improvement, CLS no change |
+| 2026-08-05T17:18:21Z     | `cee8cf7`  | resource-load-delay median `1648.630ms`는 dominant지만 pending `526.5ms`에 Hero가 없고 request는 attachment 최초 확인 전에 시작했다.                                                 | already-attached Hero의 late discovery가 증명될 때만 priority hint가 delay를 줄일 수 있다.                                                              | exact insertion과 request start 사이의 실제 wait를 fresh current-SHA trace로 관찰해야 한다.                                      | source 실험 없음; current trace만 재평가              | attachment-before-request와 측정 가능한 discovery wait 증명            | closed    | **GATE CLOSED**; priority/preload/eager candidate와 source commit 없음 |
+| 2026-08-05T18:16:23Z     | `e318b92`  | 세 superseded request는 CDP abort, final `12991.399`만 200이며 URL/key/GET/IDs와 post-wait `p17,p20,p19`가 일치했다.                                                                 | browser queryFn의 consumed signal이 superseded transport를 중단하고 latest-result integrity를 유지한다.                                                 | raw CDP, browser report, tests/gates와 독립 verifier로 abort/no-error/no-stale 및 scope를 교차 확인했다.                         | source `345e13f`의 browser-only signal overlay        | 3 abort+final 200+정합성+no error/stale; server count 추론 금지        | pass      | **KEEP**; browser transport only, Todo 11-13/Basic After는 Pending     |
+| 2026-08-05T18:38:08Z     | `b123b91`  | cold pending은 text-only이고 key transition/error에서 grid·count를 잃으며 last real-success key가 없다. Todo 10 cancellation은 동작한다.                                             | identity placeholder와 cache-key-only retention으로 여섯 상태를 구분하면서 current-key retry를 유지할 수 있다.                                          | QueryObserver transitions와 reset된 여섯 exact production recipes에서 URL/key/GET/IDs/cancel/recovery를 확인한다.                | source 실험 전 decision checkpoint만 기록             | retained grid/count/page+current retry+no stale/CLS/a11y/build 회귀    | Pending   | pre-source lock 완료; Todo 11 구현·production 결과는 **Pending**       |
+| 2026-08-05T18:58:30Z     | `c0fd99f`  | verifier는 global 5xx throw, retry count, server scenario snapshot, private browser telemetry, tablet/CLS와 page-2 semantics 미결정을 확인했다.                                      | list-only error override와 same-client seam, evidence ownership, exact geometry/cardinality를 잠그면 구현 추측을 제거할 수 있다.                        | focused policy/seam/QueryObserver tests와 same-document production recipes의 observable evidence를 분리해 검증한다.              | RFC protocol correction only                          | 500=2 GET/logical fetch; no reload; shift entries=0; CLS<=0.01         | Pending   | blockers를 protocol에 반영; source·test·production result는 Pending    |
+| 2026-08-05T22:29:21.479Z | `9a93f21`  | 여섯 desktop recipe가 exact URL/GET/IDs/retry/cancel/recovery, CLS 0, AX/keyboard/visual 계약을 충족했고 initial validator가 accepted/no failures였다.                               | identity placeholder와 cache-key-only retention이 여섯 상태를 local response copy 없이 보존한다.                                                        | QueryObserver/integration tests, raw recipe/CDP/process/AX payload, final gate와 independent verifier를 교차 확인했다.           | Todo 11 source chain과 canonical evidence만 판정      | 23 files/187 tests; reviews PASS; follow-up evidence correction 필요   | corrected | KEEP 유지; Todo 12/13/BasicAfter는 Pending                             |
+| 2026-08-05T23:18:16.773Z | `9a93f21`  | R1 wording/hash를 교정하고 R2-R6 tablet/mobile 10개 group과 R5 local provenance를 더해 166 payload validator가 accepted/no failures였다.                                             | same source/build의 supplemental capture가 viewport별 CLS와 recipe 계약을 직접 보강한다.                                                                | responsive index, CDP/layout/process groups, correction memo와 independent verifier를 교차 확인했다.                             | source 변경 없음; evidence correction only            | no-recent 0/CLS 0; 10/10 responsive accepted                           | pass      | **KEEP confirmed**; Todo 12/13/BasicAfter는 Pending                    |
+| 2026-08-05T23:42:42Z     | `1c2a0f1`  | request normalization과 wire encoding이 repository에 흩어져 있고 APP_ORIGIN boundary가 없으며 QueryClient factory가 client module 안에 있다.                                         | canonical request/origin/descriptor와 per-call client 계약을 먼저 잠그면 Todo 13이 URL, signal 또는 cache lifetime을 재정의하지 않는다.                 | red-first focused tests, production browser smoke와 bounded typed driver로 exact parity와 isolation을 반증한다.                  | RFC decision checkpoint only                          | exact URL/key/GET; no server own signal; abort/client/origin/gates     | Pending   | source 결과 아님; Todo 12 구현 전 lock, Todo 13은 blocked              |
+| 2026-08-05T23:53:36Z     | `394d2ad`  | Oracle은 function-level server-only, browser/server import graph, native error semantics, normalization과 driver 경계를 implementation blocker로 판정했다.                           | parser/getter와 browser/server service를 module로 분리하고 native/input contracts를 exact하게 좁히면 checkpoint가 구현 가능해진다.                      | corrected RFC를 같은 blocker 목록과 대조하고 source 없이 format/docs scope를 검증한다.                                           | RFC blocker correction only                           | Oracle `ses_02baf8f8cffe3N4QDKPfEzOeSI` blocker 전부 반영              | Pending   | source 결과 아님; corrected checkpoint 재검증 전 Todo 12/13 blocked    |
+| 2026-08-06T00:58:47.030Z | `4a54e50`  | canonical request/origin/browser-server descriptor/native errors/per-call clients가 25-payload evidence와 current source에서 일치했다.                                               | 분리된 trust/transport/cache lifetime 경계가 Todo 11 browser 동작을 보존하면서 Todo 13의 단일 server request seam을 제공한다.                           | focused/full gates, actual typed driver, raw CDP terminals, fail-closed validator와 independent verifier를 교차 확인했다.        | Todo 12 source chain과 sealed evidence만 판정         | 95 focused/227 full; build `hAZ_keSgirWHxBHrbNqvK`; verifier CONFIRMED | pass      | **KEEP**; metadata consumption/memoization/Todo 13/BasicAfter Pending  |
+| 2026-08-06T01:23:02Z     | `0532aba`  | Todo 12는 KEEP이지만 root/page metadata, shared home key, pending dehydration, non-blocking route shell과 hydration production evidence는 아직 없다.                                 | exact metadata/failure/shallow-merge와 shared server query identity를 pre-source로 잠그면 Todo 13이 shell·client graph·Todo 8/9 결정을 침범하지 않는다. | red-first focused tests, raw document/final head/timing, browser duplicate count와 fresh current-SHA Home trace로 반증한다.      | RFC decision checkpoint only                          | source/test/result/call-count claim 없음; Todo 15 count 별도           | Pending   | source 구현 전 lock; Todo 14/BasicAfter는 blocked                      |
+| 2026-08-06T01:43:13Z     | `180077e`  | Oracle은 same-segment Home title, pending rejection, repeated params/pageSize, broad TypeError, concrete metadata dependencies, timing order와 Hero KEEP 문구를 blockers로 판정했다. | absolute Home title, shared route adapter, typed fetch error, narrow loaders, exact redaction과 alternating 3+3 timing으로 구현 해석을 제거한다.        | focused route/dehydrate/error/import tests와 deterministic production document/timing/current-SHA trace로 각 blocker를 반증한다. | RFC Oracle correction only                            | `ses_02b53e3ccffeJu7OXzZUKab0Bo`; source/test/result claim 없음        | Pending   | corrected pre-source lock; Todo 14/BasicAfter는 blocked                |
 
 ## AI 활용
 
