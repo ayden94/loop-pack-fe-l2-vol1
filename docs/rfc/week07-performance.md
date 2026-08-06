@@ -1455,14 +1455,18 @@ Readonly<{ method: 'GET' }> }>`다. `Options`는 Ky의 type-only import이고 se
 자체는 metadata, hydration, production 결과 또는 성능 개선을 주장하지 않는다. 구현은 이 절의 file/API,
 출력, 실패, shell, loading, test와 evidence 계약을 먼저 red로 잠근 뒤 시작한다.
 
+이 docs-only correction은 error class의 runtime/import boundary만 명확히 한다. Todo 13의 나머지 설계,
+evidence, KEEP/FIX/REVERT, scope와 Todo 14 stop rule은 변경하지 않으며 모두 계속 **Pending**이다.
+
 ### File/API와 의존 방향
 
 | 파일                                                   | 고정 API와 책임                                                                                                                                                                                                                                                                                        |
 | ------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `src/shared/config/SiteMetadata.ts`                    | pure `createSiteMetadata(origin: AppOrigin): Metadata`, `createPageOpenGraph(parentOpenGraph: Metadata['openGraph'], input: PageOpenGraphInput): NonNullable<Metadata['openGraph']>`, `SITE_METADATA` 상수를 export한다. validated `AppOrigin`만 받고 fetch, env, `server-only`, client import가 없다. |
+| `src/shared/api/ApiClientError.ts`                     | 기존 standalone transport-neutral runtime `ApiClientError` class를 그대로 유지한다. metadata expected-failure `instanceof` 분류에 직접 value-import할 수 있으며 product server module로 이동하거나 service/repository dependency를 추가하지 않는다.                                                    |
 | `src/entities/product/model/ProductQueryKeyFactory.ts` | pure `ProductQueryKeyFactory.home(diagnosticScenario)`와 `.productList(request)`를 export한다. browser/server service가 모두 이 파일을 직접 import하며 `ProductService.queryKeyFactory`와 `ProductListRequestModel.queryKey`의 중복 key ownership은 제거한다.                                          |
 | `src/entities/product/model/ProductListRouteParams.ts` | `ProductListRouteParams.toRequest(input: ProductListRouteInput): ProductListRequest`와 `.canonicalSearchParams(request): URLSearchParams`를 export한다. Next record와 `URLSearchParams.get` shape를 한 adapter가 처리하고 route와 client view가 같이 쓴다.                                             |
-| `src/entities/product/api/ProductServerFetchError.ts`  | native fetch invocation rejection만 감싸는 typed `ProductServerFetchError`를 export한다. `name`과 readonly `cause: TypeError`를 보존하며 HTTP/schema/programming error에는 사용하지 않는다.                                                                                                            |
+| `src/entities/product/api/ProductServerFetchError.ts`  | standalone dependency-light runtime `ProductServerFetchError` class만 export한다. fetch/service/repository/env/client import 없이 `name`과 readonly native `TypeError` cause를 보존하며 exact fetch invocation wrapper와 metadata `instanceof` 분류가 이 값만 공유한다.                                |
 | `src/entities/product/api/ProductServerRepository.ts`  | 기존 native product-list path에 `getHome(diagnosticScenario, origin): Promise<HomeResponse>`를 추가한다. absolute `api/home` URL, optional valid `scenario`, exact `{ method: 'GET' }`, own `signal` 없음과 기존 HTTP/schema identity를 공유하고 fetch call만 typed transport error로 변환한다.        |
 | `src/entities/product/api/ProductServerService.ts`     | `getHome(diagnosticScenario, origin)` query options를 추가한다. key는 `ProductQueryKeyFactory.home`, `staleTime: 60_000`, signal-free queryFn이며 browser `ProductService.getHome`과 동일하다.                                                                                                         |
 | `src/views/home/model/HomeMetadata.ts`                 | `buildHomeMetadata(input: HomeMetadataInput, dependencies: HomeMetadataDependencies): Promise<Metadata>`를 export한다. dependencies는 fresh client factory와 narrow injected `loadHome` callback뿐이며 server service/getter를 import하지 않는다.                                                      |
@@ -1480,10 +1484,13 @@ Readonly<{ method: 'GET' }> }>`다. `Options`는 Ky의 type-only import이고 se
 `loadHome(client: QueryClient, scenario: DiagnosticScenario, origin: AppOrigin): Promise<HomeResponse>`,
 `ProductListMetadataDependencies`는 같은 client factory와
 `loadProductList(client: QueryClient, request: ProductListRequest, origin: AppOrigin): Promise<ProductListResponse>`
-만 가진다. metadata model의 entity imports는 `import type`뿐이며 concrete `ProductServerService`,
-`ProductServerRepository`, `getAppOrigin`, `process.env`, global fetch, browser service와 client view를 import하지
-않는다. route module이 `getAppOrigin()`, fresh factory와 canonical server service를 callback에 조립하고 model
-tests는 narrow fakes를 주입한다.
+만 가진다. metadata model은 expected-failure `instanceof` 분류를 위해 standalone runtime
+`ApiClientError`와 `ProductServerFetchError`를 정확히 두 개의 허용된 value import로 사용한다. entity
+`HomeResponse`, `ProductListResponse`, `ProductListRequest`, `DiagnosticScenario`, `AppOrigin`과 QueryClient
+contract는 모두 `import type`이다. concrete `ProductServerService`, `ProductServerRepository`, `getAppOrigin`,
+`process.env`, global fetch, browser service/repository와 client view/module의 value import는 계속 금지한다.
+route module이 `getAppOrigin()`, fresh factory와 canonical server service를 callback에 조립하고 model tests는
+narrow fakes를 주입한다.
 
 Home native descriptor는 `new URL('api/home', `${origin}/`)`에 valid scenario만 추가한다. browser
 repository의 기존 `api/home` 요청과 pathname/search가 같아야 한다. product path는 Todo 12의
@@ -1587,7 +1594,8 @@ injected loader invocation만 감싼다. production route callback 내부가 can
 `client.fetchQuery(...)`를 호출한다.
 
 - `ApiClientError`와 exact native invocation에서 변환된 `ProductServerFetchError`만 expected query failure로
-  보고 `{}`를 반환한다.
+  보고 `{}`를 반환한다. 두 class는 각각 standalone `shared/api`와 dependency-light `entities/product/api`
+  runtime value이며 metadata model이 `instanceof`를 위해 직접 value-import하는 유일한 예외다.
 - malformed successful JSON의 `SyntaxError`, schema-invalid success의 `ZodError`, parent/metadata mapping/
   key/options/client factory/loader 내부의 programming `TypeError`와 unknown error는 rethrow한다.
 - function 전체를 broad catch하지 않고 raw `TypeError`는 위치와 무관하게 metadata expected failure로
@@ -1679,9 +1687,13 @@ production code 전에 다음 tests를 추가/수정하고 각 red가 missing/wr
    filter/home-link reserved geometry, no form control/focusable/fake control/duplicate heading을 검증한다.
 8. `src/app/page.test.tsx`: default Home export가 synchronous이고 static main/h1/description과 local fallback을
    async hydration child 밖에 즉시 반환하는지 검증한다.
-9. import-boundary reachability test는 client-marked graph에서 `ProductServerRepository`,
-   `ProductServerService`, `ProductServerFetchError`, `getAppOrigin`, metadata models와 `server-only` module이
-   reachable하지 않고 metadata models도 concrete server modules/getter를 value-import하지 않음을 검증한다.
+9. import-boundary reachability test는 metadata models의 runtime imports로 standalone `ApiClientError`와
+   dependency-light `ProductServerFetchError` 두 class를 허용한다. client-marked graph도 이 두 standalone error
+   class value에는 도달할 수 있다. 두 error module에서 fetch/service/repository/env/client module이 reachable하지
+   않음을 먼저 증명하고, metadata models와 client-marked graph가 `ProductServerRepository`,
+   `ProductServerService`, `getAppOrigin`, `server-only`, environment 또는 다른 server/client implementation
+   module을 역으로 끌어오지 않음을 검증한다. response/request/scenario/origin entity contracts가 type-only인지도
+   source/import graph로 잠근다.
 
 focused tests 뒤 `pnpm test`, `pnpm lint`, `pnpm typecheck`,
 `APP_ORIGIN=http://127.0.0.1:3000 pnpm build`, `pnpm format:check`와 changed-file LSP diagnostics를 통과해야
