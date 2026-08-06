@@ -62,7 +62,7 @@
 | Todo 11 result commit SHA         | `d2f0bea19b21f4d9bb7475ba78235d085d45ba04` | clean     | 최초 Todo 11 결과 docs-only commit                      | corrected     |
 | Todo 11 evidence correction SHA   | Pending                                    | Pending   | expanded evidence를 기록하는 이 docs-only commit 후     | pending       |
 | Todo 12 final source SHA          | `4a54e5077fcb3fe7d62aecd0e38a118e6667f7f5` | clean     | request/origin/server fetch/QueryClient 구현 후         | current; KEEP |
-| Todo 12 result commit SHA         | Pending                                    | clean     | Todo 12 결과를 기록하는 이 docs-only commit 후          | pending       |
+| Todo 12 result commit SHA         | `03445cd2336803ab68c35383c9ee951706e657dc` | clean     | 2026-08-06T01:05:49Z; final evidence와 KEEP 기록        | current; KEEP |
 | BasicAfterSHA                     | Pending                                    | Pending   | 최종 source 검증·커밋 후                                | pending       |
 | Advanced Before/After SHA         | Pending                                    | Pending   | Advanced A 진입 시                                      | pending       |
 | 최종 evidence 문서 커밋 SHA       | Pending                                    | Pending   | RFC와 근거 확정 후                                      | pending       |
@@ -1174,23 +1174,23 @@ Full chain은
 
 ### Result chronology
 
-| UTC                      | SHA       | 결과                                                                |
-| ------------------------ | --------- | ------------------------------------------------------------------- |
-| 2026-08-06T00:12:58Z     | `6a37a71` | strict pure `AppOrigin` parser와 server-only env getter 추가        |
-| 2026-08-06T00:13:09Z     | `50418f0` | canonical normalized `ProductListRequest`와 descriptor factory 추가 |
-| 2026-08-06T00:13:21Z     | `acef7e5` | typed API client error를 transport-neutral module로 분리            |
-| 2026-08-06T00:13:34Z     | `17043a0` | browser repository가 canonical relative descriptor와 signal을 소비  |
-| 2026-08-06T00:13:45Z     | `822cc74` | browser query key를 canonical request identity로 통합               |
-| 2026-08-06T00:13:56Z     | `2b7470c` | view boundary에서 외부 input을 한 번만 normalize                    |
-| 2026-08-06T00:14:06Z     | `e9d330b` | signal-free native server repository와 exact error semantics 추가   |
-| 2026-08-06T00:14:33Z     | `3c42ed1` | browser와 key/staleTime이 같은 pure server query service 추가       |
-| 2026-08-06T00:14:43Z     | `ac2d02d` | module singleton 없는 per-call `getQueryClient()` 추가              |
-| 2026-08-06T00:19:56Z     | `4a54e50` | provider는 mounted lifetime 동안 한 QueryClient를 유지              |
-| 2026-08-06T00:36:09.669Z | `4a54e50` | collection-level red를 zero assertions로 봉인                       |
-| 2026-08-06T00:39:45.364Z | `4a54e50` | final check 28 files/227 tests와 build ID를 봉인                    |
-| 2026-08-06T00:42:57.889Z | `4a54e50` | browser CDP cancellation/final response ledger를 봉인               |
-| 2026-08-06T00:47:41.222Z | `4a54e50` | fail-closed validator probes PASS                                   |
-| 2026-08-06T00:48:11.513Z | `4a54e50` | 25 retained files와 self-excluded manifest를 최종 봉인              |
+| UTC                      | SHA       | 결과                                                                 |
+| ------------------------ | --------- | -------------------------------------------------------------------- |
+| 2026-08-06T00:12:58Z     | `6a37a71` | strict pure `AppOrigin` parser와 server-only env getter 추가         |
+| 2026-08-06T00:13:09Z     | `50418f0` | canonical normalized `ProductListRequest`와 descriptor factory 추가  |
+| 2026-08-06T00:13:21Z     | `acef7e5` | typed API client error를 transport-neutral module로 분리             |
+| 2026-08-06T00:13:34Z     | `17043a0` | browser repository가 canonical relative descriptor와 signal을 소비   |
+| 2026-08-06T00:13:45Z     | `822cc74` | browser query key를 canonical request identity로 통합                |
+| 2026-08-06T00:13:56Z     | `2b7470c` | view boundary에서 외부 input을 한 번만 normalize                     |
+| 2026-08-06T00:14:06Z     | `e9d330b` | signal-free native server repository와 exact error semantics 추가    |
+| 2026-08-06T00:14:33Z     | `3c42ed1` | browser와 key/staleTime이 같은 pure server query service 추가        |
+| 2026-08-06T00:14:43Z     | `ac2d02d` | module singleton 없는 per-call `getQueryClient()` 추가               |
+| 2026-08-06T00:19:56Z     | `4a54e50` | source가 `useState(getQueryClient)`로 mounted lifetime client를 유지 |
+| 2026-08-06T00:36:09.669Z | `4a54e50` | collection-level red를 zero assertions로 봉인                        |
+| 2026-08-06T00:39:45.364Z | `4a54e50` | final check 28 files/227 tests와 build ID를 봉인                     |
+| 2026-08-06T00:42:57.889Z | `4a54e50` | browser CDP cancellation/final response ledger를 봉인                |
+| 2026-08-06T00:47:41.222Z | `4a54e50` | fail-closed validator probes PASS                                    |
+| 2026-08-06T00:48:11.513Z | `4a54e50` | 25 retained files와 self-excluded manifest를 최종 봉인               |
 
 ### FSD 배치와 공개 타입
 
@@ -1313,8 +1313,9 @@ Readonly<{ method: 'GET' }> }>`다. `Options`는 Ky의 type-only import이고 se
 - `getQueryClient()`는 module cache나 singleton을 사용하지 않고 **호출마다** 새 `QueryClient`를
   반환한다. `getQueryClient() !== getQueryClient()`와 각 instance의 default query options deep
   equality를 테스트한다. 한 client의 cache write가 다른 client에 보이지 않아야 한다.
-- `Providers`는 `const [queryClient] = useState(getQueryClient)`로 **mounted provider당 한 retained client**를
-  유지한다. pure initializer는 development Strict Mode에서 한 번보다 많이 호출될 수 있으므로
+- `Providers` source는 `const [queryClient] = useState(getQueryClient)`로 **mounted provider당 한 retained
+  client**를 유지한다. 이는 source inspection으로 확인하며 provider rerender identity test 결과로
+  주장하지 않는다. pure initializer는 development Strict Mode에서 한 번보다 많이 호출될 수 있으므로
   initializer invocation count를 browser identity 계약으로 삼지 않는다. server에서는
   `getQueryClient()`의 모든 호출이 서로 다른 instance를 반환하며 module-level instance를 만들지 않는다.
   Todo 12에서는 server consumer가 없으므로 per-request reuse helper나 React `cache()`를 추가하지 않는다.
@@ -1509,21 +1510,21 @@ Browser Network만으로 서버 호출 횟수를 판정하지 않는다.
 
 ## 회귀 검증
 
-| 범주                 | 확인 시나리오                                                 | 결과                                                                    | evidence ID                           | 상태            |
-| -------------------- | ------------------------------------------------------------- | ----------------------------------------------------------------------- | ------------------------------------- | --------------- |
-| Home semantic shell  | Header, 하나의 h1, 설명, Hero                                 | Todo 8 final에서도 통과                                                 | T7-TR/T8-F-BR/T8-F-IMG1-T8-F-IMG2     | current         |
-| Products states      | loading, refresh, empty, error, retry, cancellation           | 여섯 recipe와 QueryObserver 계약 통과                                   | T11-R1-T11-R6/T11-IMG08-T11-IMG13     | current         |
-| Todo 10 cancellation | superseded abort, latest result, no error/stale overwrite     | 3 abort; final 200와 p17,p20,p19 유지                                   | T10-CDP/T10-BR                        | current-partial |
-| URL restoration      | 검색·카테고리·정렬·페이지, 뒤로·앞으로                        | same-document query continuity 통과; 전체 뒤로·앞으로는 Pending         | T11-R2/T11-R5                         | current-partial |
-| Commerce state       | cart, wishlist, Header count                                  | Pending                                                                 | Pending                               | pending         |
-| Hydration            | hydration warning과 초기 HTML                                 | Todo 8 final warning 없음                                               | T8-F-BR/T8-F-TR                       | current-partial |
-| CLS                  | Hero fallback과 product list 교체                             | Hero 5/5 `0`; products R1-R6 no-recent 0/CLS 0                          | T8-F-LH1-T8-F-LH5/T11-R1-T11-R6       | current-partial |
-| Accessibility        | landmark, heading, link, alt, focus                           | Hero 계약과 product AX/31-control keyboard 통과; human VoiceOver 미실행 | T8-F-BR/T11-A11Y/T11-REV-A            | current-partial |
-| Responsive           | desktop `1365 × 768`, tablet `768 × 1024`, mobile `375 × 812` | Hero와 product 5/3/2 geometry 통과                                      | T8-F-BR/T11-R1/T11-REV-C              | current-partial |
-| Image quality        | 시각적 역할, crop, 주요 피사체, 문구                          | f416 REVISE 후 cee8 review PASS                                         | T8-R-AUD/T8-F-REV/T8-F-IMG1-T8-F-IMG2 | current-partial |
-| Server request       | normalized key/GET, origin, signal ownership, native errors   | driver/CDP/tests에서 canonical browser/server boundary 통과             | T12-DOUT/T12-CDP/T12-FRAW             | current         |
-| QueryClient          | per-call server clients, retained mounted provider            | distinct/default/cache isolation과 provider identity test 통과          | T12-DOUT/T12-FRAW                     | current         |
-| FSD                  | 의존 방향, direct-file import, client/server slice 경계       | server-only getter 격리와 entity direct-file import 유지                | source/tests/T12-LSP                  | current         |
+| 범주                 | 확인 시나리오                                                 | 결과                                                                                                           | evidence ID                           | 상태            |
+| -------------------- | ------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- | ------------------------------------- | --------------- |
+| Home semantic shell  | Header, 하나의 h1, 설명, Hero                                 | Todo 8 final에서도 통과                                                                                        | T7-TR/T8-F-BR/T8-F-IMG1-T8-F-IMG2     | current         |
+| Products states      | loading, refresh, empty, error, retry, cancellation           | 여섯 recipe와 QueryObserver 계약 통과                                                                          | T11-R1-T11-R6/T11-IMG08-T11-IMG13     | current         |
+| Todo 10 cancellation | superseded abort, latest result, no error/stale overwrite     | 3 abort; final 200와 p17,p20,p19 유지                                                                          | T10-CDP/T10-BR                        | current-partial |
+| URL restoration      | 검색·카테고리·정렬·페이지, 뒤로·앞으로                        | same-document query continuity 통과; 전체 뒤로·앞으로는 Pending                                                | T11-R2/T11-R5                         | current-partial |
+| Commerce state       | cart, wishlist, Header count                                  | Pending                                                                                                        | Pending                               | pending         |
+| Hydration            | hydration warning과 초기 HTML                                 | Todo 8 final warning 없음                                                                                      | T8-F-BR/T8-F-TR                       | current-partial |
+| CLS                  | Hero fallback과 product list 교체                             | Hero 5/5 `0`; products R1-R6 no-recent 0/CLS 0                                                                 | T8-F-LH1-T8-F-LH5/T11-R1-T11-R6       | current-partial |
+| Accessibility        | landmark, heading, link, alt, focus                           | Hero 계약과 product AX/31-control keyboard 통과; human VoiceOver 미실행                                        | T8-F-BR/T11-A11Y/T11-REV-A            | current-partial |
+| Responsive           | desktop `1365 × 768`, tablet `768 × 1024`, mobile `375 × 812` | Hero와 product 5/3/2 geometry 통과                                                                             | T8-F-BR/T11-R1/T11-REV-C              | current-partial |
+| Image quality        | 시각적 역할, crop, 주요 피사체, 문구                          | f416 REVISE 후 cee8 review PASS                                                                                | T8-R-AUD/T8-F-REV/T8-F-IMG1-T8-F-IMG2 | current-partial |
+| Server request       | normalized key/GET, origin, signal ownership, native errors   | driver/CDP/tests에서 canonical browser/server boundary 통과                                                    | T12-DOUT/T12-CDP/T12-FRAW             | current         |
+| QueryClient          | per-call server clients, retained mounted provider            | tests+driver는 distinct/default/cache isolation; source inspection은 `useState(getQueryClient)` retention 확인 | T12-DOUT/T12-FRAW/source              | current         |
+| FSD                  | 의존 방향, direct-file import, client/server slice 경계       | server-only getter 격리와 entity direct-file import 유지                                                       | source/tests/T12-LSP                  | current         |
 
 ## Advanced A 진입 게이트
 
@@ -1647,7 +1648,8 @@ Basic 완료 후 아래 네 조건을 모두 충족할 때만 진입한다.
   `npx --yes tsx` driver와 StrictMode client wording을 source 구현 전에 교정했다.
 - Todo 12 final source `4a54e50`은 normalized readonly request에서 exact key와 browser relative/server
   absolute signal-free GET을 만들고 strict origin, native error/schema path와 per-call QueryClient를
-  구현했다. provider는 mounted lifetime client를 유지하며 server singleton은 없다.
+  구현했다. source inspection에서 `useState(getQueryClient)`가 mounted lifetime client를 유지하며 server
+  singleton은 없다. provider rerender identity test를 근거로 삼지 않는다.
 - focused 95/full 227 tests, format/lint/typecheck/build/check/LSP, actual typed driver, browser CDP와
   25-payload manifest/fail-closed validator를 봉인했다. independent verifier가 `CONFIRMED`해 Todo 12를
   **KEEP**했다. metadata/body consumption과 memoization/server count는 관찰하지 않았다.
