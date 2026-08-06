@@ -1,8 +1,12 @@
 import type { ReactNode } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 
-import Home from './page'
+import { ProductServerService } from '@/entities/product/api/ProductServerService'
+
+vi.mock('server-only', () => ({}))
+
+import Home, { HomeHydration } from './page'
 
 function renderSynchronous(element: ReactNode | Promise<ReactNode>) {
   if (element instanceof Promise) {
@@ -31,5 +35,15 @@ describe('Home page semantic shell', () => {
     expect(markup).toContain('[@media(max-width:640px)]:[aspect-ratio:4/5]')
     expect(markup).not.toContain('<h2')
     expect(markup).not.toContain('/images/week-07/hero-original.jpg')
+  })
+
+  it('skips deterministic error scenario server prefetch', async () => {
+    const getHome = vi.spyOn(ProductServerService.prototype, 'getHome')
+
+    await HomeHydration({
+      searchParams: Promise.resolve({ scenario: 'error' }),
+    })
+
+    expect(getHome).not.toHaveBeenCalled()
   })
 })

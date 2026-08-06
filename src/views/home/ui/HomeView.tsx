@@ -7,13 +7,9 @@ import {
 import { SuspenseQuery } from '@suspensive/react-query'
 import { useQueryErrorResetBoundary } from '@tanstack/react-query'
 import Link from 'next/link'
-import { use } from 'react'
 
 import { productEntity } from '@/entities/product/api/ProductService'
-import {
-  type DiagnosticScenario,
-  parseDiagnosticScenario,
-} from '@/entities/product/model/DiagnosticScenario'
+import { type DiagnosticScenario } from '@/entities/product/model/DiagnosticScenario'
 import type { Category } from '@/entities/product/model/types'
 import { HeroSection } from '@/examples/week-07-performance/HeroSection'
 import { InlineQueryError } from '@/shared/ui/InlineQueryError'
@@ -39,12 +35,6 @@ type HomeViewProps = {
   readonly diagnosticScenario: DiagnosticScenario
 }
 
-type HomeSearchParamsProps = {
-  readonly searchParams: Promise<{
-    readonly scenario?: string | Array<string>
-  }>
-}
-
 function HomeQueryErrorFallback({ error, reset }: ErrorBoundaryFallbackProps) {
   return (
     <InlineQueryError
@@ -66,12 +56,6 @@ export function HomeHeroFallback() {
       홈 데이터를 불러오는 중…
     </div>
   )
-}
-
-export function HomeSearchParams({ searchParams }: HomeSearchParamsProps) {
-  const { scenario } = use(searchParams)
-
-  return <HomeView diagnosticScenario={parseDiagnosticScenario(scenario)} />
 }
 
 export function HomeView({ diagnosticScenario }: HomeViewProps) {
