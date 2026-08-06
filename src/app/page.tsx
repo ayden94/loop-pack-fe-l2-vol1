@@ -74,7 +74,7 @@ export default function Home({ searchParams }: HomePageProps) {
         </p>
       </header>
 
-      <Suspense fallback={<HomeHeroFallback />}>
+      <Suspense clientOnly fallback={<HomeHeroFallback />}>
         <HomeHydration searchParams={searchParams} />
       </Suspense>
     </main>

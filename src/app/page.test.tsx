@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react'
+import { Children, isValidElement, type ReactNode } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { describe, expect, it, vi } from 'vitest'
 
@@ -14,6 +14,21 @@ function renderSynchronous(element: ReactNode | Promise<ReactNode>) {
   }
 
   return renderToStaticMarkup(element)
+}
+
+function hasClientOnlyBoundary(node: ReactNode): boolean {
+  if (
+    !isValidElement<{
+      readonly clientOnly?: boolean
+      readonly children?: ReactNode
+    }>(node)
+  ) {
+    return false
+  }
+  if (node.props.clientOnly === true) {
+    return true
+  }
+  return Children.toArray(node.props.children).some(hasClientOnlyBoundary)
 }
 
 describe('Home page semantic shell', () => {
@@ -45,5 +60,11 @@ describe('Home page semantic shell', () => {
     })
 
     expect(getHome).not.toHaveBeenCalled()
+  })
+
+  it('keeps the browser home repository out of server rendering', () => {
+    const homePage = Home({ searchParams: Promise.resolve({}) })
+
+    expect(hasClientOnlyBoundary(homePage)).toBe(true)
   })
 })
