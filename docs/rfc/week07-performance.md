@@ -22,8 +22,11 @@
   non-blocking prefetch/hydration, semantic loading shell과 current-SHA Hero 재검증을 완료했다. 최종
   repair-wave build `Ye_LK9AOWlPxT_v14dfz9`, 96-entry manifest와 독립 reviewer PASS를 근거로
   **KEEP**했다. Todo 8 **KEEP**과 Todo 9 **GATE CLOSED**도 유지한다.
-- 대기: Todo 14 clean BasicAfterSHA를 확정한 뒤 Todo 15의 final After, disposable Route Handler
-  call-count와 전체 회귀 evidence를 수집한다.
+- 현재: Todo 14가 확정한 clean BasicAfterSHA `d1278d0778492f13d2a70c064432df64e6b238f5`에서
+  Todo 15 final After, document/timing, disposable Route Handler call-count와 전체 회귀 evidence를
+  수집했다. final build `Cpe6odTds91l9-w7IWHfG`, 276-entry seal, 16/16 mutation rejection과
+  세 reviewer PASS를 근거로 Basic evidence를 완료했다. Todo 16 Advanced A와 Todo 17 final RFC는
+  아직 시작하지 않았다.
 
 ## 범위와 불변 조건
 
@@ -53,25 +56,25 @@
 
 ## SHA와 체크포인트
 
-| 역할                              | SHA                                        | 작업 트리 | 기록 시점                                               | 상태          |
-| --------------------------------- | ------------------------------------------ | --------- | ------------------------------------------------------- | ------------- |
-| StartSHA                          | `4e53e545863f5ad184137f58569cc0942d405a64` | clean     | Week 07 작업 시작 전                                    | current       |
-| 프로토콜 문서 체크포인트          | `d3da682`                                  | clean     | RFC 프로토콜 커밋 후                                    | current       |
-| BeforeSHA                         | `e2e608b3c46e1003b44c1919b10906f78f1dc64b` | clean     | baseline Hero 통합 커밋 후                              | current       |
-| Todo 7 final source SHA           | `ca2b6a7a461f7a0edbe28585d6a3640c6e2780fd` | clean     | semantic shell candidate 후                             | current       |
-| Todo 8 rejected source SHA        | `f4167e9afebb9f2ae93b0d09e158767e2b951a80` | clean     | initial responsive candidate                            | rejected; FIX |
-| Todo 8 final source SHA           | `cee8cf7bf1d283048925f49d97fc8ab056f1aa2c` | clean     | mobile candidate fix 후                                 | current; KEEP |
-| Todo 10 final source/measured SHA | `e318b924c4776616054b57e47c58da563982271b` | clean     | source `345e13f`와 README correction 후 production 측정 | current; KEEP |
-| Todo 11 final measured source SHA | `9a93f21b4b0bd0f322f1accaae0319b702de4aa3` | clean     | 여섯 상태 구현·test 완료 후 production 측정             | current; KEEP |
-| Todo 11 screenshot docs HEAD      | `4432264f8877e1ee825b5a377b62a6b8582e0601` | clean     | tracked screenshot 08-13 canonicalization 후            | current       |
-| Todo 11 result commit SHA         | `d2f0bea19b21f4d9bb7475ba78235d085d45ba04` | clean     | 최초 Todo 11 결과 docs-only commit                      | corrected     |
-| Todo 11 evidence correction SHA   | Pending                                    | Pending   | expanded evidence를 기록하는 이 docs-only commit 후     | pending       |
-| Todo 12 final source SHA          | `4a54e5077fcb3fe7d62aecd0e38a118e6667f7f5` | clean     | request/origin/server fetch/QueryClient 구현 후         | current; KEEP |
-| Todo 12 result commit SHA         | `03445cd2336803ab68c35383c9ee951706e657dc` | clean     | 2026-08-06T01:05:49Z; final evidence와 KEEP 기록        | current; KEEP |
-| Todo 13 final source SHA          | `d1278d0778492f13d2a70c064432df64e6b238f5` | clean     | metadata/hydration 구현과 regression fix 후             | current; KEEP |
-| BasicAfterSHA                     | Pending                                    | Pending   | 최종 source 검증·커밋 후                                | pending       |
-| Advanced Before/After SHA         | Pending                                    | Pending   | Advanced A 진입 시                                      | pending       |
-| 최종 evidence 문서 커밋 SHA       | Pending                                    | Pending   | RFC와 근거 확정 후                                      | pending       |
+| 역할                              | SHA                                        | 작업 트리 | 기록 시점                                                  | 상태          |
+| --------------------------------- | ------------------------------------------ | --------- | ---------------------------------------------------------- | ------------- |
+| StartSHA                          | `4e53e545863f5ad184137f58569cc0942d405a64` | clean     | Week 07 작업 시작 전                                       | current       |
+| 프로토콜 문서 체크포인트          | `d3da682`                                  | clean     | RFC 프로토콜 커밋 후                                       | current       |
+| BeforeSHA                         | `e2e608b3c46e1003b44c1919b10906f78f1dc64b` | clean     | baseline Hero 통합 커밋 후                                 | current       |
+| Todo 7 final source SHA           | `ca2b6a7a461f7a0edbe28585d6a3640c6e2780fd` | clean     | semantic shell candidate 후                                | current       |
+| Todo 8 rejected source SHA        | `f4167e9afebb9f2ae93b0d09e158767e2b951a80` | clean     | initial responsive candidate                               | rejected; FIX |
+| Todo 8 final source SHA           | `cee8cf7bf1d283048925f49d97fc8ab056f1aa2c` | clean     | mobile candidate fix 후                                    | current; KEEP |
+| Todo 10 final source/measured SHA | `e318b924c4776616054b57e47c58da563982271b` | clean     | source `345e13f`와 README correction 후 production 측정    | current; KEEP |
+| Todo 11 final measured source SHA | `9a93f21b4b0bd0f322f1accaae0319b702de4aa3` | clean     | 여섯 상태 구현·test 완료 후 production 측정                | current; KEEP |
+| Todo 11 screenshot docs HEAD      | `4432264f8877e1ee825b5a377b62a6b8582e0601` | clean     | tracked screenshot 08-13 canonicalization 후               | current       |
+| Todo 11 result commit SHA         | `d2f0bea19b21f4d9bb7475ba78235d085d45ba04` | clean     | 최초 Todo 11 결과 docs-only commit                         | corrected     |
+| Todo 11 evidence correction SHA   | Pending                                    | Pending   | expanded evidence를 기록하는 이 docs-only commit 후        | pending       |
+| Todo 12 final source SHA          | `4a54e5077fcb3fe7d62aecd0e38a118e6667f7f5` | clean     | request/origin/server fetch/QueryClient 구현 후            | current; KEEP |
+| Todo 12 result commit SHA         | `03445cd2336803ab68c35383c9ee951706e657dc` | clean     | 2026-08-06T01:05:49Z; final evidence와 KEEP 기록           | current; KEEP |
+| Todo 13 final source SHA          | `d1278d0778492f13d2a70c064432df64e6b238f5` | clean     | metadata/hydration 구현과 regression fix 후                | current; KEEP |
+| BasicAfterSHA                     | `d1278d0778492f13d2a70c064432df64e6b238f5` | clean     | Todo 14 source freeze; Todo 15 전체 evidence의 측정 source | current       |
+| Advanced Before/After SHA         | Pending                                    | Pending   | Advanced A 진입 시                                         | pending       |
+| 최종 evidence 문서 커밋 SHA       | Pending                                    | Pending   | RFC와 근거 확정 후                                         | pending       |
 
 ## 환경
 
@@ -105,6 +108,8 @@
 | Todo 13 source gate     | `APP_ORIGIN=http://127.0.0.1:3000 pnpm check`     | exit 0; 37 files, 260 tests; lint, typecheck, build 통과                                         | current          |
 | Todo 13 evidence wave   | source `d1278d0`; normal document/timing build    | build `3gXe5pbW9qrssloiYS-7D`; launcher `39159`, listener `39182`; 종료 후 부재                  | historical-valid |
 | Todo 13 repair wave     | final accepted trace/loading/validator build      | build `Ye_LK9AOWlPxT_v14dfz9`; PIDs `57899/57916`, recapture `76203/76223`; 모두 종료, port free | current          |
+| Todo 15 final build     | BasicAfterSHA final evidence                      | build `Cpe6odTds91l9-w7IWHfG`; Lighthouse 13.3.0 5회와 final regression                          | current          |
+| Todo 15 final seal      | `todo15/todo15-final-manifest.json`               | 276 entries / 155219 bytes; validator PASS; 16/16 mutation rejection                             | current          |
 
 현재 실행 환경에는 `nvm`이 없으므로 `.nvmrc`의 `24.17.0` 대신 `package.json`의
 지원 범위(`>=22.12.0`)에 포함되는 `v24.9.0`을 사용한다. Before와 After에서 같은
@@ -134,19 +139,19 @@ production lifecycle 확인에서 시작 전 포트 3000은 비어 있었다. �
 
 ### Lighthouse
 
-| 설정                   | 고정값 또는 확인 방법                          |
-| ---------------------- | ---------------------------------------------- |
-| Mode                   | Navigation                                     |
-| Device                 | Desktop                                        |
-| Categories             | Performance only                               |
-| 측정 횟수              | Before 5회, After 5회                          |
-| authoritative settings | 각 export JSON의 `configSettings`              |
-| formFactor             | Pending                                        |
-| screenEmulation        | width/height/deviceScaleFactor를 JSON에서 기록 |
-| throttlingMethod       | JSON에서 기록                                  |
-| CPU/network parameters | JSON에서 기록                                  |
-| benchmarkIndex         | 각 run에서 기록                                |
-| 결과                   | FCP/LCP는 ms, CLS는 단위 없는 raw 값으로 기록  |
+| 설정                   | 고정값 또는 확인 방법                            |
+| ---------------------- | ------------------------------------------------ |
+| Mode                   | Navigation                                       |
+| Device                 | Desktop                                          |
+| Categories             | Performance only                                 |
+| 측정 횟수              | Before 5회, After 5회                            |
+| authoritative settings | 각 export JSON의 `configSettings`                |
+| formFactor             | `desktop`; five final After exports match Before |
+| screenEmulation        | width/height/deviceScaleFactor를 JSON에서 기록   |
+| throttlingMethod       | JSON에서 기록                                    |
+| CPU/network parameters | JSON에서 기록                                    |
+| benchmarkIndex         | 각 run에서 기록                                  |
+| 결과                   | FCP/LCP는 ms, CLS는 단위 없는 raw 값으로 기록    |
 
 Device Toolbar 값은 Lighthouse export JSON과 일치한다고 확인되지 않는 한 Lighthouse
 설정으로 주장하지 않는다.
@@ -169,10 +174,10 @@ Chrome UI의 라벨이 다르면 임의로 같은 설정이라고 가정하지 �
 
 ### Cold와 warm 정의
 
-| 용어 | 정의    | 실제 절차 |
-| ---- | ------- | --------- |
-| cold | Pending | Pending   |
-| warm | Pending | Pending   |
+| 용어 | 정의                                                                                | 실제 절차                                                                                              |
+| ---- | ----------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| cold | fresh production process/profile 또는 명시적 cache/site-data reset 뒤 첫 navigation | Lighthouse 5회와 initial loading/error/empty recipe는 각 run의 clean navigation/reset 조건을 기록한다. |
+| warm | 같은 production process/profile에서 성공 cache를 만든 뒤 same-document interaction  | refresh/error/history/cart-wishlist recipe는 시작 성공 key와 action 순서를 기록한다.                   |
 
 ### 무효 측정 규칙
 
@@ -357,6 +362,30 @@ T13-PROBE의 missing, empty, corrupt, stale SHA, dirty clone, wrong build, missi
 count/columns, failed reviewer, extra unmanifested file, live listener와 timeout/hung 12개 mutation은 모두
 nonzero exit와 intended failure를 기록했다. temporary root와 probe listener PID `81810`은 제거됐고,
 capture PIDs `57899/57916`, Home recapture PIDs `76203/76223`도 모두 부재하며 port 3000은 비어 있다.
+
+### Todo 15 final Basic evidence identity
+
+evidence root는
+`.local/week07-performance-evidence/d1278d0778492f13d2a70c064432df64e6b238f5/todo15/`다.
+final manifest `todo15-final-manifest.json`은 self-excluded seal이며 SHA-256
+`c1281b07facb4ffd075d8e92356bffc29a770fdc2776b7837595e1826e15ae3e`, `155219` bytes,
+276 entries다. `node scripts/validate-todo15-final-manifest.cjs`는 `pass: true`, errors 0을
+반환했고 `todo15-final-manifest-probe.json`의 missing/extra/hash/bytes/source/build/screenshot/
+Lighthouse/console/call-count/instrumentation/lint/reviewer/process/dirty-source/Todo16 16개 mutation을
+모두 거부했다. final build는 `Cpe6odTds91l9-w7IWHfG`이며 seal은 source
+`d1278d0778492f13d2a70c064432df64e6b238f5`와 pre-evidence docs HEAD
+`53daeadd4334de81041db0b8181539a830836674`에 결속된다.
+
+| ID        | tracked path                                                                 | sealed source path                                         | SHA-256                                                            |  bytes | dimensions  | 용도                               |
+| --------- | ---------------------------------------------------------------------------- | ---------------------------------------------------------- | ------------------------------------------------------------------ | -----: | ----------- | ---------------------------------- |
+| T15-IMG14 | `docs/images/week07-performance/14-basic-after-home-mobile.png`              | `regression/screenshots/home-mobile.png`                   | `8986284ad6b2db763ed06028ed6a433d432b32c6acc07565d10d70dc1efc0060` | 521365 | `375×2828`  | final Home mobile responsive state |
+| T15-IMG15 | `docs/images/week07-performance/15-basic-after-products-loading-desktop.png` | `regression/screenshots/products-slow-desktop-loading.png` | `18863be7ee257a0adff820956a7931d91e8825a1dee366bde979fb632ebc8df8` |  31772 | `1365×1445` | 12-card/5-column route loading     |
+| T15-IMG16 | `docs/images/week07-performance/16-basic-after-keyboard-focus.png`           | `regression/screenshots/keyboard-focus.png`                | `3a79e48a377cfd20c60986894d3ec86f1a144197fc4eb9bc7eaad8571c276c88` | 563703 | `1365×1447` | keyboard focus and activation      |
+| T15-IMG17 | `docs/images/week07-performance/17-basic-after-persistence.png`              | `regression/screenshots/persistence-after-reload.png`      | `afa4fc80b3433c5ee78255ed011629c1bf1ff226549be8fa2951bba8d1d75094` | 563409 | `1365×1447` | cart/wishlist state after reload   |
+
+네 PNG는 sealed source에서 byte-for-byte 복사했다. 나머지 19개 final regression PNG는 local seal에
+남기고, tracked set은 Home responsive, route loading, keyboard, persistence의 결정적 화면만 선별한다.
+기존 01-13은 덮어쓰지 않았다.
 
 ## Before
 
@@ -1415,16 +1444,16 @@ Readonly<{ method: 'GET' }> }>`다. `Options`는 Ky의 type-only import이고 se
   `HydrationBoundary`, loading shell, Open Graph, metadata failure policy와 server call-count 계측은 이
   checkpoint에서 명시적으로 제외한다. global `BasicAfterSHA`와 After 측정도 계속 Pending이다.
 
-| 계약                                                                    | 자동 검증                          | driver·브라우저·서버 관찰                                       | 결과    | 상태    |
-| ----------------------------------------------------------------------- | ---------------------------------- | --------------------------------------------------------------- | ------- | ------- |
-| normalized factory가 exact key와 deterministic GET을 만든다             | focused 95 tests                   | driver normalized output/search와 actual absolute GET 일치      | 일치    | current |
-| browser request는 same-origin relative descriptor이며 signal을 소비한다 | focused 95 tests                   | CDP first 2 canceled, final 200 + `loadingFinished`             | 일치    | current |
-| server descriptor는 validated origin의 absolute GET이며 signal이 없다   | focused 95 tests                   | driver actual GET; `serverOwnSignal:false`                      | 일치    | current |
-| scenario가 key와 실제 GET에 함께 반영된다                               | full 227 tests 중 contract tests   | CDP final request query에 `scenario=slow`                       | 일치    | current |
-| `getQueryClient()`는 호출마다 새 인스턴스다                             | identity/default/cache isolation   | driver `distinctClients:true`; 두 client identity 분리          | 일치    | current |
-| metadata/body descriptor 후보는 같은 absolute URL/options다             | repeated descriptor deep equality  | driver `repeatedDescriptorEqual:true`; 실제 consumer는 없음     | 제한적  | current |
-| metadata/body가 factory 응답을 실제 소비한다                            | Todo 13 focused/source gates       | production document/body ledger에서 shared factory 소비         | 일치    | current |
-| 같은 render/request native fetch memoization                            | Todo 15 disposable instrumentation | Todo 13은 identical URL/options만 관찰; invocation count 미측정 | Pending | pending |
+| 계약                                                                    | 자동 검증                          | driver·브라우저·서버 관찰                                                 | 결과                      | 상태    |
+| ----------------------------------------------------------------------- | ---------------------------------- | ------------------------------------------------------------------------- | ------------------------- | ------- |
+| normalized factory가 exact key와 deterministic GET을 만든다             | focused 95 tests                   | driver normalized output/search와 actual absolute GET 일치                | 일치                      | current |
+| browser request는 same-origin relative descriptor이며 signal을 소비한다 | focused 95 tests                   | CDP first 2 canceled, final 200 + `loadingFinished`                       | 일치                      | current |
+| server descriptor는 validated origin의 absolute GET이며 signal이 없다   | focused 95 tests                   | driver actual GET; `serverOwnSignal:false`                                | 일치                      | current |
+| scenario가 key와 실제 GET에 함께 반영된다                               | full 227 tests 중 contract tests   | CDP final request query에 `scenario=slow`                                 | 일치                      | current |
+| `getQueryClient()`는 호출마다 새 인스턴스다                             | identity/default/cache isolation   | driver `distinctClients:true`; 두 client identity 분리                    | 일치                      | current |
+| metadata/body descriptor 후보는 같은 absolute URL/options다             | repeated descriptor deep equality  | driver `repeatedDescriptorEqual:true`; 실제 consumer는 없음               | 제한적                    | current |
+| metadata/body가 factory 응답을 실제 소비한다                            | Todo 13 focused/source gates       | production document/body ledger에서 shared factory 소비                   | 일치                      | current |
+| 같은 render/request native fetch memoization                            | Todo 15 disposable instrumentation | hard slow navigation에서 slow 1회와 별도 normal link-prefetch 1회, 총 2회 | 관찰 완료; 감소 주장 없음 | current |
 
 ### Final implementation과 evidence
 
@@ -1916,93 +1945,123 @@ source gate 37 files/260 tests, format/lint/typecheck/build, current-SHA documen
 
 ### 문서 시나리오
 
-| 문서            | URL·조건                        | title                                           | description                 | Open Graph                     | 초기 h1·설명·링크            | 최종 URL                                            | evidence ID                                      | 결과 |
-| --------------- | ------------------------------- | ----------------------------------------------- | --------------------------- | ------------------------------ | ---------------------------- | --------------------------------------------------- | ------------------------------------------------ | ---- |
-| Home normal     | `/`                             | `매일 새롭게 발견하는 취향 \| Loopers Commerce` | banner description          | banner image + common fields   | semantic shell과 fallback    | `http://127.0.0.1:3000`                             | `raw/home-normal.html`                           | pass |
-| Products normal | `/products`                     | `상품 목록 \| Loopers Commerce`                 | normalized list description | first product + common fields  | streamed loading/final shell | `http://127.0.0.1:3000/products?sort=latest&page=1` | `raw/products-normal.html`                       | pass |
-| Products empty  | `?q=__week07_no_match__`        | `상품 목록 \| Loopers Commerce`                 | URL 조건과 0개 결과 설명    | fallback image + common fields | streamed loading/final shell | normalized q/sort/page canonical                    | `raw/products-empty.html`                        | pass |
-| Query failure   | Home/Products `?scenario=error` | root `Loopers Commerce` 상속                    | root description 상속       | root common fields 상속        | inline error; boundary 없음  | root canonical 상속                                 | `raw/home-error.html`; `raw/products-error.html` | pass |
+| 문서               | URL·조건                    | title                                                 | description·OG image                   | canonical·robots                                                 | 초기 구조                         | evidence ID                         | 결과 |
+| ------------------ | --------------------------- | ----------------------------------------------------- | -------------------------------------- | ---------------------------------------------------------------- | --------------------------------- | ----------------------------------- | ---- |
+| Home normal/slow   | `/`, `/?scenario=slow`      | `매일 새롭게 발견하는 취향 \| Loopers Commerce`       | banner 설명; `/images/products/p6.jpg` | `http://127.0.0.1:3000`; `index, follow`                         | main/h1/설명/category href links  | `documents/home-{normal,slow}.html` | pass |
+| Home query failure | `/?scenario=error`          | root `Loopers Commerce`                               | root 설명; root Hero image             | root canonical; `index, follow`                                  | semantic shell; inline retry      | `documents/home-error.html`         | pass |
+| Products normal    | `/products`                 | `상품 목록 \| Loopers Commerce`                       | 전체 30개 최신순; first product image  | `/products?sort=latest&page=1`; `index, follow`                  | main/h1/filters/result region     | `documents/products-normal.html`    | pass |
+| Products q         | `?q=stanley`                | `“stanley” 검색 결과 \| Loopers Commerce`             | 검색 결과 3개; first result image      | q/sort/page normalized; `index, follow`                          | streamed loading/final shell      | `documents/products-q.html`         | pass |
+| Products category  | `?category=home`            | `홈 상품 \| Loopers Commerce`                         | 홈 상품 6개 최신순; first result image | category/sort/page normalized; `index, follow`                   | streamed loading/final shell      | `documents/products-category.html`  | pass |
+| Products sort      | `?sort=popular`             | `상품 목록 \| Loopers Commerce`                       | 전체 30개 인기순; first result image   | sort/page normalized; `index, follow`                            | streamed loading/final shell      | `documents/products-sort.html`      | pass |
+| Products page 2    | `?page=2`                   | `상품 목록 - 2페이지 \| Loopers Commerce`             | 전체 30개 최신순; first result image   | sort/page normalized; `index, follow`                            | streamed loading/final shell      | `documents/products-page2.html`     | pass |
+| Products empty     | `?q=__week07_no_match__`    | `“__week07_no_match__” 검색 결과 \| Loopers Commerce` | 검색 결과 0개; common fallback image   | q/sort/page normalized; `index, follow`                          | loading markers, main/h1          | `documents/products-empty.html`     | pass |
+| Products failure   | `?scenario=error`           | root `Loopers Commerce`                               | root 설명과 common OG 상속             | root canonical; `index, follow`                                  | shell; inline error/retry         | `documents/products-error.html`     | pass |
+| Unreachable origin | build/runtime `127.0.0.1:9` | Home/Products 모두 root `Loopers Commerce`            | root 설명과 common OG 상속             | `http://127.0.0.1:9`; `index, follow`; 배포 증거로 사용하지 않음 | Home shell/Products loading shell | `documents/unreachable-*.html`      | pass |
 
 ### Metadata 보장과 관찰
 
-| 항목                             | 문서화된 보장·설계                             | 직접 관찰                                             | evidence ID              | 판정 |
-| -------------------------------- | ---------------------------------------------- | ----------------------------------------------------- | ------------------------ | ---- |
-| root/page metadata shallow merge | page fields와 root common fields를 명시 합성   | `siteName`, `locale`, `type` 유지                     | `evidence-summary.json`  | pass |
-| 공통 OG field 유지               | `Loopers Commerce`, `ko_KR`, `website`         | normal/empty/failure final head에서 유지              | `evidence-summary.json`  | pass |
-| URL 정규화와 query factory 공유  | q/category/sort/page 순서; signal-free GET     | canonical은 scenario/pageSize 제외, request는 12 유지 | source/production ledger | pass |
-| 정상 empty와 query failure 구분  | empty는 page metadata, expected failure는 `{}` | empty fallback image; failure root inheritance        | raw document set         | pass |
-| 기본 색인 가능 상태              | noindex를 추가하지 않음                        | 모든 문서 `index, follow`                             | `evidence-summary.json`  | pass |
+| 항목                             | 문서화된 보장·설계                              | Todo 15 직접 관찰                                                       | evidence ID                      | 판정 |
+| -------------------------------- | ----------------------------------------------- | ----------------------------------------------------------------------- | -------------------------------- | ---- |
+| root/page metadata shallow merge | page fields와 root common fields를 명시 합성    | 모든 성공 head에서 `siteName=Loopers Commerce`, `ko_KR`, `website` 유지 | `summary.json` document set      | pass |
+| URL 정규화와 query factory 공유  | q/category/sort/page 순서; signal-free GET      | canonical은 scenario/pageSize 제외, request는 forced pageSize 12 유지   | documents/browser report         | pass |
+| 정상 empty와 query failure 구분  | empty는 page metadata, expected failure는 `{}`  | empty는 0개 설명+fallback image; failure/unreachable은 root 상속        | document set                     | pass |
+| 기본 색인 가능 상태              | noindex를 추가하지 않음                         | Home/Products normal, empty, failure, unreachable 모두 `index, follow`  | document/browser report          | pass |
+| hydration/refetch                | pending dehydration 후 같은 query identity 사용 | 정상 Home/Products browser API 0; explicit error flow initial+retry 2   | `regression/browser-report.json` | pass |
+
+unreachable-origin lifecycle은 normal process 종료와 port release 후 build/runtime 모두
+`APP_ORIGIN=http://127.0.0.1:9`로 실행해 문서를 수집하고 다시 종료했다. 이후 normal origin으로
+재빌드해 final build `Cpe6odTds91l9-w7IWHfG`를 복구하고 `/`와 `/api/home` health check를 통과했다.
+failure 문서의 localhost URL은 로컬 failure-path 증거일 뿐 배포 URL 증거가 아니다.
 
 ### 응답 시점
 
-| URL               | User-Agent                | time_starttransfer | time_total  | source SHA | PID   | evidence ID               |
-| ----------------- | ------------------------- | ------------------ | ----------- | ---------- | ----- | ------------------------- |
-| `/?scenario=slow` | normal                    | `0.005530s`        | `1.508164s` | `d1278d0`  | 39182 | `timing/01-normal.json`   |
-| `/?scenario=slow` | `facebookexternalhit/1.1` | `1.509294s`        | `1.509653s` | `d1278d0`  | 39182 | `timing/02-facebook.json` |
-| `/?scenario=slow` | normal                    | `0.008483s`        | `1.512150s` | `d1278d0`  | 39182 | `timing/03-normal.json`   |
-| `/?scenario=slow` | `facebookexternalhit/1.1` | `1.508453s`        | `1.508797s` | `d1278d0`  | 39182 | `timing/04-facebook.json` |
-| `/?scenario=slow` | normal                    | `0.006166s`        | `1.508795s` | `d1278d0`  | 39182 | `timing/05-normal.json`   |
-| `/?scenario=slow` | `facebookexternalhit/1.1` | `1.516274s`        | `1.516623s` | `d1278d0`  | 39182 | `timing/06-facebook.json` |
+| 순서 | URL               | User-Agent                | time_starttransfer |  time_total | source/build                        | evidence ID               |
+| ---: | ----------------- | ------------------------- | -----------------: | ----------: | ----------------------------------- | ------------------------- |
+|    1 | `/?scenario=slow` | normal                    |        `0.004630s` | `1.507852s` | `d1278d0` / `Cpe6odTds91l9-w7IWHfG` | `timing/01-normal.json`   |
+|    2 | `/?scenario=slow` | `facebookexternalhit/1.1` |        `1.508227s` | `1.508597s` | same                                | `timing/02-facebook.json` |
+|    3 | `/?scenario=slow` | normal                    |        `0.004762s` | `1.507559s` | same                                | `timing/03-normal.json`   |
+|    4 | `/?scenario=slow` | `facebookexternalhit/1.1` |        `1.508801s` | `1.509181s` | same                                | `timing/04-facebook.json` |
+|    5 | `/?scenario=slow` | normal                    |        `0.004846s` | `1.507505s` | same                                | `timing/05-normal.json`   |
+|    6 | `/?scenario=slow` | `facebookexternalhit/1.1` |        `1.508177s` | `1.508485s` | same                                | `timing/06-facebook.json` |
 
-normal UA는 shell을 약 5.5-8.5ms에 먼저 전달하고 total은 slow data 약 1.51초를 포함했다. HTML-limited
-bot은 metadata가 준비된 약 1.51초에 첫 byte를 받았다. 이는 동일 로컬 build/PID의 observational 차이이며
+normal UA는 shell을 약 4.6-4.8ms에 먼저 전달하고 total은 slow data 약 1.51초를 포함했다. HTML-limited
+bot은 metadata가 준비된 약 1.508-1.509초에 첫 byte를 받았다. 이는 동일 로컬 build/PID의 observational 차이이며
 deployment 성능이나 개선 수치로 사용하지 않는다.
 
 ### 서버 호출 계수
 
-| 측정 branch/SHA | 시작 counter | 행동    | Route Handler 횟수 | Network 상관관계 | 계측 제거·미병합 확인 | evidence ID |
-| --------------- | ------------ | ------- | ------------------ | ---------------- | --------------------- | ----------- |
-| Pending         | Pending      | Pending | Pending            | Pending          | Pending               | Pending     |
+| 측정 branch/SHA                                       | 시작 counter | 행동                                                                    | Route Handler 횟수                                                 | Network/로그 상관관계                                         | 계측 제거·미병합 확인                            | evidence ID                                   |
+| ----------------------------------------------------- | -----------: | ----------------------------------------------------------------------- | ------------------------------------------------------------------ | ------------------------------------------------------------- | ------------------------------------------------ | --------------------------------------------- |
+| disposable `4a7f5667871a3bf25390921b1aed93462f187bd1` |            0 | cache-disabled Chrome에서 hard `/products?scenario=slow` navigation 1회 | slow invocation 1 + 별도 normal `/products` link-prefetch 1 = 총 2 | server marker URL/timestamp 2개와 CDP Network 요청을 대응시킴 | branch/worktree/counter 제거; HEAD ancestor 아님 | instrumentation logs/network/cleanup receipts |
 
-Browser Network만으로 서버 호출 횟수를 판정하지 않는다. 실제 Route Handler counter는 Todo 15의
-disposable instrumentation으로 미뤘으며 Todo 13에서는 이 표를 채우거나 call-count 개선을 주장하지 않는다.
+hard slow navigation 하나가 slow Route Handler invocation 하나를 만들었고, 같은 navigation에서 별도의
+normal link-prefetch invocation 하나가 추가됐다. 따라서 총계는 **2**이며 browser-only 관찰이나 "한 번 호출"
+주장으로 축약하지 않는다. 이 결과는 native fetch가 서버 호출을 줄였다는 개선 주장도 아니다. disposable
+commit은 submission branch에 병합되지 않았고 branch/worktree와 instrumentation source는 제거됐다.
 
 ## After
 
 ### Lighthouse raw 값
 
-| Run | FCP (ms) | LCP (ms) | CLS     | LCP element/candidate | config parity | evidence ID | 유효 여부·사유 |
-| --- | -------- | -------- | ------- | --------------------- | ------------- | ----------- | -------------- |
-| 1   | Pending  | Pending  | Pending | Pending               | Pending       | Pending     | Pending        |
-| 2   | Pending  | Pending  | Pending | Pending               | Pending       | Pending     | Pending        |
-| 3   | Pending  | Pending  | Pending | Pending               | Pending       | Pending     | Pending        |
-| 4   | Pending  | Pending  | Pending | Pending               | Pending       | Pending     | Pending        |
-| 5   | Pending  | Pending  | Pending | Pending               | Pending       | Pending     | Pending        |
+| Run | FCP (ms) | LCP (ms) | CLS | LCP element/candidate                                | benchmarkIndex | config parity | evidence ID                          | 유효 여부·사유 |
+| --- | -------: | -------: | --: | ---------------------------------------------------- | -------------: | ------------- | ------------------------------------ | -------------- |
+| 1   |  209.442 |  738.884 |   0 | `body > main.mx-auto > section.relative > img.block` |         2461.5 | match         | `lighthouse/after-run-1.report.json` | valid          |
+| 2   |  208.818 |  673.227 |   0 | same                                                 |         2560.5 | match         | `lighthouse/after-run-2.report.json` | valid          |
+| 3   |  208.198 |  764.594 |   0 | same                                                 |           3013 | match         | `lighthouse/after-run-3.report.json` | valid          |
+| 4   |  207.568 |  691.352 |   0 | same                                                 |           2813 | match         | `lighthouse/after-run-4.report.json` | valid          |
+| 5   |  208.782 |  693.173 |   0 | same                                                 |           2551 | match         | `lighthouse/after-run-5.report.json` | valid          |
 
-| 지표 | median  | min     | max     | range   |
-| ---- | ------- | ------- | ------- | ------- |
-| FCP  | Pending | Pending | Pending | Pending |
-| LCP  | Pending | Pending | Pending | Pending |
-| CLS  | Pending | Pending | Pending | Pending |
+| 지표 |  median |     min |     max |  range |
+| ---- | ------: | ------: | ------: | -----: |
+| FCP  | 208.782 | 207.568 | 209.442 |  1.874 |
+| LCP  | 693.173 | 673.227 | 764.594 | 91.367 |
+| CLS  |       0 |       0 |       0 |      0 |
+
+다섯 export는 Lighthouse `13.3.0`, exact URL `http://127.0.0.1:3000/?scenario=slow`,
+Navigation/Desktop/Performance-only와 Before `configSettings` parity를 모두 충족했다. guest/CLI 중복,
+config mismatch와 final accepted set 이전 attempt는 통계에서 제외했고 final five만 사용했다.
 
 ### Before/After 비교
 
-| 항목                | Before  | After   | 차이    | Before range 초과 여부 | 판정·인과관계 | evidence ID |
-| ------------------- | ------- | ------- | ------- | ---------------------- | ------------- | ----------- |
-| FCP median          | Pending | Pending | Pending | Pending                | Pending       | Pending     |
-| LCP median          | Pending | Pending | Pending | Pending                | Pending       | Pending     |
-| CLS median          | Pending | Pending | Pending | Pending                | Pending       | Pending     |
-| LCP longest phase   | Pending | Pending | Pending | 해당 없음              | Pending       | Pending     |
-| Hero request start  | Pending | Pending | Pending | 해당 없음              | Pending       | Pending     |
-| Hero transfer bytes | Pending | Pending | Pending | 해당 없음              | Pending       | Pending     |
+| 항목                          | Before                                  | After                                            | Before - After        | Before range 초과 여부         | 판정·인과관계                                                                 | evidence ID               |
+| ----------------------------- | --------------------------------------- | ------------------------------------------------ | --------------------- | ------------------------------ | ----------------------------------------------------------------------------- | ------------------------- |
+| FCP median                    | `237.7291ms`, range `76.8557`           | `208.782ms`, range `1.874`                       | `28.9471ms` lower     | 아니오                         | **inconclusive**; 개선 방향이지만 Before noise 안                             | Before/After LH summaries |
+| LCP median                    | `6981.484125ms`, range `269.802725`     | `693.173ms`, range `91.367`                      | `6288.311125ms` lower | 예                             | **directional improvement**; responsive candidate byte 감소와 연결            | Before/After LH summaries |
+| CLS median                    | `0`, range `0`                          | `0`, range `0`                                   | `0`                   | 변화 없음                      | no change                                                                     | Before/After LH summaries |
+| observed longest phase        | resource load delay median `1738.374ms` | resource load delay median `1521.214ms`          | `217.160ms` lower     | 통계 판정에 직접 사용하지 않음 | observed phase와 simulated LCP를 합치지 않음                                  | LH phase rows             |
+| supporting Hero request start | navigation 후 `4656.848ms`              | current-SHA desktop `1635.4ms`                   | 별도 supporting run   | 해당 없음                      | API-gated insertion 뒤 약 12.9ms에 시작; already-attached discovery wait 없음 | B-HTR/T13-HDTR            |
+| Hero transfer bytes           | raw JPEG transfer `7,545,525`           | desktop `80,836`, mobile `32,294` resource bytes | material reduction    | 해당 없음                      | Todo 8 **KEEP**; geometry/crop/quality 유지                                   | B-HHAR/T13 traces/reviews |
 
 ## 회귀 검증
 
-| 범주                 | 확인 시나리오                                                 | 결과                                                                                                           | evidence ID                           | 상태            |
-| -------------------- | ------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- | ------------------------------------- | --------------- |
-| Home semantic shell  | Header, 하나의 h1, 설명, Hero                                 | Todo 13 raw document와 active DOM에서 shell 선행, main/h1 1/1                                                  | T13 raw/repair trace                  | current         |
-| Products states      | loading, refresh, empty, error, retry, cancellation           | 여섯 recipe와 QueryObserver 계약 통과                                                                          | T11-R1-T11-R6/T11-IMG08-T11-IMG13     | current         |
-| Todo 10 cancellation | superseded abort, latest result, no error/stale overwrite     | 3 abort; final 200와 p17,p20,p19 유지                                                                          | T10-CDP/T10-BR                        | current-partial |
-| URL restoration      | 검색·카테고리·정렬·페이지, 뒤로·앞으로                        | same-document query continuity 통과; 전체 뒤로·앞으로는 Pending                                                | T11-R2/T11-R5                         | current-partial |
-| Commerce state       | cart, wishlist, Header count                                  | Pending                                                                                                        | Pending                               | pending         |
-| Hydration            | hydration warning과 초기 HTML                                 | successful route browser API 0, warning/page error 0; deterministic error는 client 2 requests                  | T13 summary/repair trace              | current         |
-| CLS                  | Hero fallback과 product list 교체                             | Todo 13 fresh Hero desktop/mobile 0; actual route loading desktop/tablet/mobile 0                              | T13-HDTR/T13-HMTR/T13-LD-T13-LM       | current         |
-| Accessibility        | landmark, heading, link, alt, focus                           | Hero 계약과 product AX/31-control keyboard 통과; human VoiceOver 미실행                                        | T8-F-BR/T11-A11Y/T11-REV-A            | current-partial |
-| Responsive           | desktop `1365 × 768`, tablet `768 × 1024`, mobile `375 × 812` | Hero와 product 5/3/2 geometry 통과                                                                             | T8-F-BR/T11-R1/T11-REV-C              | current-partial |
-| Image quality        | 시각적 역할, crop, 주요 피사체, 문구                          | f416 REVISE 후 cee8 review PASS                                                                                | T8-R-AUD/T8-F-REV/T8-F-IMG1-T8-F-IMG2 | current-partial |
-| Server request       | normalized key/GET, origin, signal ownership, native errors   | driver/CDP/tests에서 canonical browser/server boundary 통과                                                    | T12-DOUT/T12-CDP/T12-FRAW             | current         |
-| QueryClient          | per-call server clients, retained mounted provider            | tests+driver는 distinct/default/cache isolation; source inspection은 `useState(getQueryClient)` retention 확인 | T12-DOUT/T12-FRAW/source              | current         |
-| FSD                  | 의존 방향, direct-file import, client/server slice 경계       | server-only getter 격리와 entity direct-file import 유지                                                       | source/tests/T12-LSP                  | current         |
+| 범주                  | 확인 시나리오                                                 | Todo 15 final 결과                                                                                                                      | evidence ID                                | 상태           |
+| --------------------- | ------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------ | -------------- |
+| Home documents/DOM    | normal/slow/error, Header, main, h1, 설명, Hero               | document metadata와 shell, active main/h1 1/1; desktop/tablet/mobile 5/3/2 product columns; final lazy images resolve                   | documents/browser report/T15-IMG14         | pass           |
+| Products states       | loading, refresh, empty, initial/refresh error, retry         | 12 skeleton→12 cards, empty 0, retained 12-card refresh error, initial retry request count +1, route boundary 없음                      | browser report/screenshots/T15-IMG15       | pass           |
+| Cancellation          | rapid exact URL sequence, superseded transport, latest result | final URL은 q/category/sort/page/scenario와 일치; 27 `ERR_ABORTED`는 cancellation으로 분리, 다른 failed request 0, stale overwrite 없음 | browser report/console classification      | pass           |
+| URL restoration       | 검색·카테고리·정렬·페이지, 뒤로·앞으로                        | q→category→sort URL, back에서 category URL, forward에서 sort URL 복원; final page 2 slow URL과 화면 일치                                | browser report/history PNGs                | pass           |
+| Commerce state        | keyboard, cart, wishlist, Header, route, reload               | keyboard activation 후 wishlist/cart 1/1; Home 이동과 reload 뒤에도 1/1 및 product action 상태 유지                                     | browser report/T15-IMG16/T15-IMG17         | pass           |
+| Hydration/refetch     | successful initial hydration, explicit error/retry            | 정상 Home/Products browser API 0; hydration warning 0; expected error diagnostics만 있고 page error 0; retry는 current key를 1회 재요청 | browser report/console classification      | pass           |
+| CLS                   | Home, Products loading/settled, interactions                  | Lighthouse CLS 0; no-recent-input observer maximum `0.00007156102631302224`, locked `<=0.01` threshold 이내                             | browser report/Lighthouse summary          | pass           |
+| Accessibility         | landmark, heading, region, href, alt, keyboard focus          | keyboard/focus와 AX contract PASS. human VoiceOver는 실행하지 않았고 unnamed Home regions는 nonblocking debt                            | browser report/reviewer sessions/T15-IMG16 | pass with debt |
+| Responsive            | `1365×900`, `768×1024`, `375×812`                             | Home/Products 5/3/2 columns; Products slow loading과 settled 모두 12개, lazy images final resolve                                       | 23 PNGs/browser report                     | pass           |
+| Image/CJK quality     | Hero crop/role, Korean wrapping                               | reviewers PASS; Todo 13 이전부터 있던 mobile Hero Korean wrap은 nonblocking debt이며 수정 완료로 주장하지 않음                          | reviewer receipts/T15-IMG14                | pass with debt |
+| Console/page errors   | 14 scenarios와 cancellation                                   | expected `scenario=error` HTTP 500/typed `ApiClientError` 5 entries만 분류; unexpected console/page error 0                             | console classification + probe             | pass           |
+| FSD/quality           | upward imports, barrels, lint, typecheck                      | lower-layer/feature upward import 0; 허용된 internal index 2개; authoritative `pnpm lint` exit 0, sealed typecheck exit 0               | regression receipts                        | pass           |
+| Cleanup/source freeze | process, ports, profiles, source/package/config               | recorded PIDs dead, ports 3000/9222 free, profiles/helper absent; `d1278d0..HEAD` source/package/config diff empty                      | cleanup receipts/final-source-diff         | pass           |
+
+functional/visual reviewer `ses_02a6d9728ffexbefVwV6CAokBe`, CJK/accessibility reviewer
+`ses_02a78cfdaffeek5cMXx4KDJDaJ`와 direct visual gate
+`ses_02a7b99c8ffesA2wnsVjaLJL3O`는 모두 PASS다. CJK/accessibility PASS의 nonblocking debt는
+human VoiceOver 미검증, pre-existing mobile Hero wrap, unnamed Home regions다.
+
+![Todo 15 final Home mobile](../images/week07-performance/14-basic-after-home-mobile.png)
+
+![Todo 15 Products loading desktop](../images/week07-performance/15-basic-after-products-loading-desktop.png)
+
+![Todo 15 keyboard focus](../images/week07-performance/16-basic-after-keyboard-focus.png)
+
+![Todo 15 persisted commerce state](../images/week07-performance/17-basic-after-persistence.png)
 
 ## Advanced A 진입 게이트
 
@@ -2021,25 +2080,26 @@ Basic 완료 후 아래 네 조건을 모두 충족할 때만 진입한다.
 
 ## 결정 로그
 
-| 시각                     | source SHA | 관찰한 사실                                                                                                                                                                          | 가설                                                                                                                                                    | 반증 방법                                                                                                                             | 가장 작은 실험                                        | 사전 threshold                                                                 | 결과      | keep/revert/reject와 이유                                              |
-| ------------------------ | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------- | ------------------------------------------------------------------------------ | --------- | ---------------------------------------------------------------------- |
-| 2026-08-04T15:11:59Z     | `e2e608b`  | slow query가 shell/Hero insertion을 막고, late discovery 뒤 7.55MB transfer가 별도 병목이다.                                                                                         | shell boundary 분리로 API 전 semantic shell을 노출할 수 있다.                                                                                           | same-run filmstrip/trace에서 API 전 shell, bounds, shifts와 회귀를 확인한다.                                                          | semantic shell + fixed-geometry local fallback만 변경 | semantic contract 전부 통과; timing 분류는 6711.6814/7251.28685ms              | locked    | source change 전 locked                                                |
-| 2026-08-05T13:15:43Z     | `ca2b6a7`  | API 전 shell, viewport별 동일 bounds, Hero replacement shift 0, LCP median 6913.341ms를 관찰했다.                                                                                    | semantic shell 계약은 충족하고 LCP 변화는 noise 안일 것이다.                                                                                            | tests·production browser·5회 JSON·독립 visual review로 회귀와 threshold를 확인했다.                                                   | 변경 추가 없음; candidate를 그대로 판정               | semantic contract pass; 6913.341ms는 inconclusive band                         | pass      | keep; timing inconclusive                                              |
-| 2026-08-05T14:30:22Z     | `ca2b6a7`  | raw 3840×2160 JPEG가 desktop DPR1 target보다 area 12.098299× 크고 7,545,525 bytes를 전송한다.                                                                                        | accurate sizes의 Next Image가 width/DPR 적합 candidate와 실질적 byte 감소를 만든다.                                                                     | actual optimizer URL·width·DPR·bytes와 geometry/crop/quality/CLS/a11y/function을 측정한다.                                            | raw Hero `<img>`만 `fill`+accurate `sizes`로 교체     | right-sized candidate+material byte reduction+모든 보존 계약 통과              | locked    | source result 아님; 구현·After pending                                 |
-| 2026-08-05T15:33:40Z     | `f4167e9`  | desktop `w=1200`은 pass지만 mobile `w=384` 16:9 raster가 4:5 box에서 확대돼 detail이 저하됐고 reviewer 2개가 REVISE했다.                                                             | mobile object-cover source size를 반영하면 byte 절감과 보존 계약을 함께 만족할 수 있다.                                                                 | mobile native coverage와 직접 visual review를 clean fix SHA에서 반복한다.                                                             | mobile `sizes` branch만 교정                          | candidate·bytes pass여도 quality fail이면 FIX                                  | fail      | **FIX**; timing이 아니라 mobile 품질 회귀 때문                         |
-| 2026-08-05T16:33:23Z     | `cee8cf7`  | desktop `w=1200`, mobile `w=750`이 DPR1을 cover하고 material byte reduction, geometry·quality·semantics·CLS·function gate를 통과했다.                                                | corrected sizes가 locked responsive-delivery 계약을 충족한다.                                                                                           | 5회 JSON, Network/native raster, trace, tracked screenshots와 conflicting review resolution을 교차 확인했다.                          | 변경 추가 없음; fixed candidate 판정                  | candidate+bytes+보존 계약 pass; timing은 range rule로 별도 분류                | pass      | **KEEP**; FCP inconclusive, LCP directional improvement, CLS no change |
-| 2026-08-05T17:18:21Z     | `cee8cf7`  | resource-load-delay median `1648.630ms`는 dominant지만 pending `526.5ms`에 Hero가 없고 request는 attachment 최초 확인 전에 시작했다.                                                 | already-attached Hero의 late discovery가 증명될 때만 priority hint가 delay를 줄일 수 있다.                                                              | exact insertion과 request start 사이의 실제 wait를 fresh current-SHA trace로 관찰해야 한다.                                           | source 실험 없음; current trace만 재평가              | attachment-before-request와 측정 가능한 discovery wait 증명                    | closed    | **GATE CLOSED**; priority/preload/eager candidate와 source commit 없음 |
-| 2026-08-05T18:16:23Z     | `e318b92`  | 세 superseded request는 CDP abort, final `12991.399`만 200이며 URL/key/GET/IDs와 post-wait `p17,p20,p19`가 일치했다.                                                                 | browser queryFn의 consumed signal이 superseded transport를 중단하고 latest-result integrity를 유지한다.                                                 | raw CDP, browser report, tests/gates와 독립 verifier로 abort/no-error/no-stale 및 scope를 교차 확인했다.                              | source `345e13f`의 browser-only signal overlay        | 3 abort+final 200+정합성+no error/stale; server count 추론 금지                | pass      | **KEEP**; browser transport only, Todo 11-13/Basic After는 Pending     |
-| 2026-08-05T18:38:08Z     | `b123b91`  | cold pending은 text-only이고 key transition/error에서 grid·count를 잃으며 last real-success key가 없다. Todo 10 cancellation은 동작한다.                                             | identity placeholder와 cache-key-only retention으로 여섯 상태를 구분하면서 current-key retry를 유지할 수 있다.                                          | QueryObserver transitions와 reset된 여섯 exact production recipes에서 URL/key/GET/IDs/cancel/recovery를 확인한다.                     | source 실험 전 decision checkpoint만 기록             | retained grid/count/page+current retry+no stale/CLS/a11y/build 회귀            | Pending   | pre-source lock 완료; Todo 11 구현·production 결과는 **Pending**       |
-| 2026-08-05T18:58:30Z     | `c0fd99f`  | verifier는 global 5xx throw, retry count, server scenario snapshot, private browser telemetry, tablet/CLS와 page-2 semantics 미결정을 확인했다.                                      | list-only error override와 same-client seam, evidence ownership, exact geometry/cardinality를 잠그면 구현 추측을 제거할 수 있다.                        | focused policy/seam/QueryObserver tests와 same-document production recipes의 observable evidence를 분리해 검증한다.                   | RFC protocol correction only                          | 500=2 GET/logical fetch; no reload; shift entries=0; CLS<=0.01                 | Pending   | blockers를 protocol에 반영; source·test·production result는 Pending    |
-| 2026-08-05T22:29:21.479Z | `9a93f21`  | 여섯 desktop recipe가 exact URL/GET/IDs/retry/cancel/recovery, CLS 0, AX/keyboard/visual 계약을 충족했고 initial validator가 accepted/no failures였다.                               | identity placeholder와 cache-key-only retention이 여섯 상태를 local response copy 없이 보존한다.                                                        | QueryObserver/integration tests, raw recipe/CDP/process/AX payload, final gate와 independent verifier를 교차 확인했다.                | Todo 11 source chain과 canonical evidence만 판정      | 23 files/187 tests; reviews PASS; follow-up evidence correction 필요           | corrected | KEEP 유지; Todo 12/13/BasicAfter는 Pending                             |
-| 2026-08-05T23:18:16.773Z | `9a93f21`  | R1 wording/hash를 교정하고 R2-R6 tablet/mobile 10개 group과 R5 local provenance를 더해 166 payload validator가 accepted/no failures였다.                                             | same source/build의 supplemental capture가 viewport별 CLS와 recipe 계약을 직접 보강한다.                                                                | responsive index, CDP/layout/process groups, correction memo와 independent verifier를 교차 확인했다.                                  | source 변경 없음; evidence correction only            | no-recent 0/CLS 0; 10/10 responsive accepted                                   | pass      | **KEEP confirmed**; Todo 12/13/BasicAfter는 Pending                    |
-| 2026-08-05T23:42:42Z     | `1c2a0f1`  | request normalization과 wire encoding이 repository에 흩어져 있고 APP_ORIGIN boundary가 없으며 QueryClient factory가 client module 안에 있다.                                         | canonical request/origin/descriptor와 per-call client 계약을 먼저 잠그면 Todo 13이 URL, signal 또는 cache lifetime을 재정의하지 않는다.                 | red-first focused tests, production browser smoke와 bounded typed driver로 exact parity와 isolation을 반증한다.                       | RFC decision checkpoint only                          | exact URL/key/GET; no server own signal; abort/client/origin/gates             | Pending   | source 결과 아님; Todo 12 구현 전 lock, Todo 13은 blocked              |
-| 2026-08-05T23:53:36Z     | `394d2ad`  | Oracle은 function-level server-only, browser/server import graph, native error semantics, normalization과 driver 경계를 implementation blocker로 판정했다.                           | parser/getter와 browser/server service를 module로 분리하고 native/input contracts를 exact하게 좁히면 checkpoint가 구현 가능해진다.                      | corrected RFC를 같은 blocker 목록과 대조하고 source 없이 format/docs scope를 검증한다.                                                | RFC blocker correction only                           | Oracle `ses_02baf8f8cffe3N4QDKPfEzOeSI` blocker 전부 반영                      | Pending   | source 결과 아님; corrected checkpoint 재검증 전 Todo 12/13 blocked    |
-| 2026-08-06T00:58:47.030Z | `4a54e50`  | canonical request/origin/browser-server descriptor/native errors/per-call clients가 25-payload evidence와 current source에서 일치했다.                                               | 분리된 trust/transport/cache lifetime 경계가 Todo 11 browser 동작을 보존하면서 Todo 13의 단일 server request seam을 제공한다.                           | focused/full gates, actual typed driver, raw CDP terminals, fail-closed validator와 independent verifier를 교차 확인했다.             | Todo 12 source chain과 sealed evidence만 판정         | 95 focused/227 full; build `hAZ_keSgirWHxBHrbNqvK`; verifier CONFIRMED         | pass      | **KEEP**; metadata consumption/memoization/Todo 13/BasicAfter Pending  |
-| 2026-08-06T01:23:02Z     | `0532aba`  | Todo 12는 KEEP이지만 root/page metadata, shared home key, pending dehydration, non-blocking route shell과 hydration production evidence는 아직 없다.                                 | exact metadata/failure/shallow-merge와 shared server query identity를 pre-source로 잠그면 Todo 13이 shell·client graph·Todo 8/9 결정을 침범하지 않는다. | red-first focused tests, raw document/final head/timing, browser duplicate count와 fresh current-SHA Home trace로 반증한다.           | RFC decision checkpoint only                          | source/test/result/call-count claim 없음; Todo 15 count 별도                   | Pending   | source 구현 전 lock; Todo 14/BasicAfter는 blocked                      |
-| 2026-08-06T01:43:13Z     | `180077e`  | Oracle은 same-segment Home title, pending rejection, repeated params/pageSize, broad TypeError, concrete metadata dependencies, timing order와 Hero KEEP 문구를 blockers로 판정했다. | absolute Home title, shared route adapter, typed fetch error, narrow loaders, exact redaction과 alternating 3+3 timing으로 구현 해석을 제거한다.        | focused route/dehydrate/error/import tests와 deterministic production document/timing/current-SHA trace로 각 blocker를 반증한다.      | RFC Oracle correction only                            | `ses_02b53e3ccffeJu7OXzZUKab0Bo`; source/test/result claim 없음                | Pending   | corrected pre-source lock; Todo 14/BasicAfter는 blocked                |
-| 2026-08-06T03:45:42.813Z | `d1278d0`  | metadata/document/hydration/loading과 fresh Hero trace가 locked contract를 충족하고 96-entry manifest와 12 mutation probes가 fail-closed validator를 통과했다.                       | non-blocking prefetch/hydration과 explicit metadata builders가 initial shell, canonical request와 retained Hero 결정을 보존한다.                        | source gate, alternating 3+3 timing, raw documents, active DOM, repair trace/loading, reviewers와 independent oracle를 교차 확인했다. | Todo 13 source/evidence closure only                  | 37 files/260 tests; final build `Ye_LK9AOWlPxT_v14dfz9`; validator/review PASS | pass      | **KEEP**; Todo 8 KEEP/Todo 9 GATE CLOSED 유지, Todo 15 count Pending   |
+| 시각                     | source SHA | 관찰한 사실                                                                                                                                                                          | 가설                                                                                                                                                    | 반증 방법                                                                                                                             | 가장 작은 실험                                        | 사전 threshold                                                                 | 결과      | keep/revert/reject와 이유                                                 |
+| ------------------------ | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------- | ------------------------------------------------------------------------------ | --------- | ------------------------------------------------------------------------- |
+| 2026-08-04T15:11:59Z     | `e2e608b`  | slow query가 shell/Hero insertion을 막고, late discovery 뒤 7.55MB transfer가 별도 병목이다.                                                                                         | shell boundary 분리로 API 전 semantic shell을 노출할 수 있다.                                                                                           | same-run filmstrip/trace에서 API 전 shell, bounds, shifts와 회귀를 확인한다.                                                          | semantic shell + fixed-geometry local fallback만 변경 | semantic contract 전부 통과; timing 분류는 6711.6814/7251.28685ms              | locked    | source change 전 locked                                                   |
+| 2026-08-05T13:15:43Z     | `ca2b6a7`  | API 전 shell, viewport별 동일 bounds, Hero replacement shift 0, LCP median 6913.341ms를 관찰했다.                                                                                    | semantic shell 계약은 충족하고 LCP 변화는 noise 안일 것이다.                                                                                            | tests·production browser·5회 JSON·독립 visual review로 회귀와 threshold를 확인했다.                                                   | 변경 추가 없음; candidate를 그대로 판정               | semantic contract pass; 6913.341ms는 inconclusive band                         | pass      | keep; timing inconclusive                                                 |
+| 2026-08-05T14:30:22Z     | `ca2b6a7`  | raw 3840×2160 JPEG가 desktop DPR1 target보다 area 12.098299× 크고 7,545,525 bytes를 전송한다.                                                                                        | accurate sizes의 Next Image가 width/DPR 적합 candidate와 실질적 byte 감소를 만든다.                                                                     | actual optimizer URL·width·DPR·bytes와 geometry/crop/quality/CLS/a11y/function을 측정한다.                                            | raw Hero `<img>`만 `fill`+accurate `sizes`로 교체     | right-sized candidate+material byte reduction+모든 보존 계약 통과              | locked    | source result 아님; 구현·After pending                                    |
+| 2026-08-05T15:33:40Z     | `f4167e9`  | desktop `w=1200`은 pass지만 mobile `w=384` 16:9 raster가 4:5 box에서 확대돼 detail이 저하됐고 reviewer 2개가 REVISE했다.                                                             | mobile object-cover source size를 반영하면 byte 절감과 보존 계약을 함께 만족할 수 있다.                                                                 | mobile native coverage와 직접 visual review를 clean fix SHA에서 반복한다.                                                             | mobile `sizes` branch만 교정                          | candidate·bytes pass여도 quality fail이면 FIX                                  | fail      | **FIX**; timing이 아니라 mobile 품질 회귀 때문                            |
+| 2026-08-05T16:33:23Z     | `cee8cf7`  | desktop `w=1200`, mobile `w=750`이 DPR1을 cover하고 material byte reduction, geometry·quality·semantics·CLS·function gate를 통과했다.                                                | corrected sizes가 locked responsive-delivery 계약을 충족한다.                                                                                           | 5회 JSON, Network/native raster, trace, tracked screenshots와 conflicting review resolution을 교차 확인했다.                          | 변경 추가 없음; fixed candidate 판정                  | candidate+bytes+보존 계약 pass; timing은 range rule로 별도 분류                | pass      | **KEEP**; FCP inconclusive, LCP directional improvement, CLS no change    |
+| 2026-08-05T17:18:21Z     | `cee8cf7`  | resource-load-delay median `1648.630ms`는 dominant지만 pending `526.5ms`에 Hero가 없고 request는 attachment 최초 확인 전에 시작했다.                                                 | already-attached Hero의 late discovery가 증명될 때만 priority hint가 delay를 줄일 수 있다.                                                              | exact insertion과 request start 사이의 실제 wait를 fresh current-SHA trace로 관찰해야 한다.                                           | source 실험 없음; current trace만 재평가              | attachment-before-request와 측정 가능한 discovery wait 증명                    | closed    | **GATE CLOSED**; priority/preload/eager candidate와 source commit 없음    |
+| 2026-08-05T18:16:23Z     | `e318b92`  | 세 superseded request는 CDP abort, final `12991.399`만 200이며 URL/key/GET/IDs와 post-wait `p17,p20,p19`가 일치했다.                                                                 | browser queryFn의 consumed signal이 superseded transport를 중단하고 latest-result integrity를 유지한다.                                                 | raw CDP, browser report, tests/gates와 독립 verifier로 abort/no-error/no-stale 및 scope를 교차 확인했다.                              | source `345e13f`의 browser-only signal overlay        | 3 abort+final 200+정합성+no error/stale; server count 추론 금지                | pass      | **KEEP**; browser transport only, Todo 11-13/Basic After는 Pending        |
+| 2026-08-05T18:38:08Z     | `b123b91`  | cold pending은 text-only이고 key transition/error에서 grid·count를 잃으며 last real-success key가 없다. Todo 10 cancellation은 동작한다.                                             | identity placeholder와 cache-key-only retention으로 여섯 상태를 구분하면서 current-key retry를 유지할 수 있다.                                          | QueryObserver transitions와 reset된 여섯 exact production recipes에서 URL/key/GET/IDs/cancel/recovery를 확인한다.                     | source 실험 전 decision checkpoint만 기록             | retained grid/count/page+current retry+no stale/CLS/a11y/build 회귀            | Pending   | pre-source lock 완료; Todo 11 구현·production 결과는 **Pending**          |
+| 2026-08-05T18:58:30Z     | `c0fd99f`  | verifier는 global 5xx throw, retry count, server scenario snapshot, private browser telemetry, tablet/CLS와 page-2 semantics 미결정을 확인했다.                                      | list-only error override와 same-client seam, evidence ownership, exact geometry/cardinality를 잠그면 구현 추측을 제거할 수 있다.                        | focused policy/seam/QueryObserver tests와 same-document production recipes의 observable evidence를 분리해 검증한다.                   | RFC protocol correction only                          | 500=2 GET/logical fetch; no reload; shift entries=0; CLS<=0.01                 | Pending   | blockers를 protocol에 반영; source·test·production result는 Pending       |
+| 2026-08-05T22:29:21.479Z | `9a93f21`  | 여섯 desktop recipe가 exact URL/GET/IDs/retry/cancel/recovery, CLS 0, AX/keyboard/visual 계약을 충족했고 initial validator가 accepted/no failures였다.                               | identity placeholder와 cache-key-only retention이 여섯 상태를 local response copy 없이 보존한다.                                                        | QueryObserver/integration tests, raw recipe/CDP/process/AX payload, final gate와 independent verifier를 교차 확인했다.                | Todo 11 source chain과 canonical evidence만 판정      | 23 files/187 tests; reviews PASS; follow-up evidence correction 필요           | corrected | KEEP 유지; Todo 12/13/BasicAfter는 Pending                                |
+| 2026-08-05T23:18:16.773Z | `9a93f21`  | R1 wording/hash를 교정하고 R2-R6 tablet/mobile 10개 group과 R5 local provenance를 더해 166 payload validator가 accepted/no failures였다.                                             | same source/build의 supplemental capture가 viewport별 CLS와 recipe 계약을 직접 보강한다.                                                                | responsive index, CDP/layout/process groups, correction memo와 independent verifier를 교차 확인했다.                                  | source 변경 없음; evidence correction only            | no-recent 0/CLS 0; 10/10 responsive accepted                                   | pass      | **KEEP confirmed**; Todo 12/13/BasicAfter는 Pending                       |
+| 2026-08-05T23:42:42Z     | `1c2a0f1`  | request normalization과 wire encoding이 repository에 흩어져 있고 APP_ORIGIN boundary가 없으며 QueryClient factory가 client module 안에 있다.                                         | canonical request/origin/descriptor와 per-call client 계약을 먼저 잠그면 Todo 13이 URL, signal 또는 cache lifetime을 재정의하지 않는다.                 | red-first focused tests, production browser smoke와 bounded typed driver로 exact parity와 isolation을 반증한다.                       | RFC decision checkpoint only                          | exact URL/key/GET; no server own signal; abort/client/origin/gates             | Pending   | source 결과 아님; Todo 12 구현 전 lock, Todo 13은 blocked                 |
+| 2026-08-05T23:53:36Z     | `394d2ad`  | Oracle은 function-level server-only, browser/server import graph, native error semantics, normalization과 driver 경계를 implementation blocker로 판정했다.                           | parser/getter와 browser/server service를 module로 분리하고 native/input contracts를 exact하게 좁히면 checkpoint가 구현 가능해진다.                      | corrected RFC를 같은 blocker 목록과 대조하고 source 없이 format/docs scope를 검증한다.                                                | RFC blocker correction only                           | Oracle `ses_02baf8f8cffe3N4QDKPfEzOeSI` blocker 전부 반영                      | Pending   | source 결과 아님; corrected checkpoint 재검증 전 Todo 12/13 blocked       |
+| 2026-08-06T00:58:47.030Z | `4a54e50`  | canonical request/origin/browser-server descriptor/native errors/per-call clients가 25-payload evidence와 current source에서 일치했다.                                               | 분리된 trust/transport/cache lifetime 경계가 Todo 11 browser 동작을 보존하면서 Todo 13의 단일 server request seam을 제공한다.                           | focused/full gates, actual typed driver, raw CDP terminals, fail-closed validator와 independent verifier를 교차 확인했다.             | Todo 12 source chain과 sealed evidence만 판정         | 95 focused/227 full; build `hAZ_keSgirWHxBHrbNqvK`; verifier CONFIRMED         | pass      | **KEEP**; metadata consumption/memoization/Todo 13/BasicAfter Pending     |
+| 2026-08-06T01:23:02Z     | `0532aba`  | Todo 12는 KEEP이지만 root/page metadata, shared home key, pending dehydration, non-blocking route shell과 hydration production evidence는 아직 없다.                                 | exact metadata/failure/shallow-merge와 shared server query identity를 pre-source로 잠그면 Todo 13이 shell·client graph·Todo 8/9 결정을 침범하지 않는다. | red-first focused tests, raw document/final head/timing, browser duplicate count와 fresh current-SHA Home trace로 반증한다.           | RFC decision checkpoint only                          | source/test/result/call-count claim 없음; Todo 15 count 별도                   | Pending   | source 구현 전 lock; Todo 14/BasicAfter는 blocked                         |
+| 2026-08-06T01:43:13Z     | `180077e`  | Oracle은 same-segment Home title, pending rejection, repeated params/pageSize, broad TypeError, concrete metadata dependencies, timing order와 Hero KEEP 문구를 blockers로 판정했다. | absolute Home title, shared route adapter, typed fetch error, narrow loaders, exact redaction과 alternating 3+3 timing으로 구현 해석을 제거한다.        | focused route/dehydrate/error/import tests와 deterministic production document/timing/current-SHA trace로 각 blocker를 반증한다.      | RFC Oracle correction only                            | `ses_02b53e3ccffeJu7OXzZUKab0Bo`; source/test/result claim 없음                | Pending   | corrected pre-source lock; Todo 14/BasicAfter는 blocked                   |
+| 2026-08-06T03:45:42.813Z | `d1278d0`  | metadata/document/hydration/loading과 fresh Hero trace가 locked contract를 충족하고 96-entry manifest와 12 mutation probes가 fail-closed validator를 통과했다.                       | non-blocking prefetch/hydration과 explicit metadata builders가 initial shell, canonical request와 retained Hero 결정을 보존한다.                        | source gate, alternating 3+3 timing, raw documents, active DOM, repair trace/loading, reviewers와 independent oracle를 교차 확인했다. | Todo 13 source/evidence closure only                  | 37 files/260 tests; final build `Ye_LK9AOWlPxT_v14dfz9`; validator/review PASS | pass      | **KEEP**; Todo 8 KEEP/Todo 9 GATE CLOSED 유지, Todo 15 count Pending      |
+| 2026-08-06T05:50:11.843Z | `d1278d0`  | final After 5회, documents/UA timing, 서버 counter와 23-PNG regression이 source 변경 없이 완료됐다.                                                                                  | Todo 8/9/13 결정을 유지한 frozen source가 Basic 성능·metadata·state·접근성 계약을 함께 보존한다.                                                        | raw Lighthouse, documents, server logs/CDP, browser report, cleanup, 3 reviewer와 276-entry fail-closed seal을 교차 확인했다.         | source 변경 없음; Basic evidence만 기록               | build `Cpe6odTds91l9-w7IWHfG`; validator PASS; 16/16 rejection                 | pass      | **Todo 15 complete**; Todo 16 Advanced A와 Todo 17 finalization은 Pending |
 
 ## AI 활용
 
@@ -2066,6 +2126,10 @@ Basic 완료 후 아래 네 조건을 모두 충족할 때만 진입한다.
 - Todo 13에서는 AI가 metadata/hydration tests, production raw document와 alternating timing, active DOM/API
   ledger, actual loading capture, current-SHA Hero trace, 96-entry manifest와 mutation probes를 수집했다. final
   reviewers와 independent oracle의 PASS 뒤에만 KEEP을 기록했고 Route Handler invocation count는 주장하지 않는다.
+- Todo 15에서는 AI가 frozen source의 Lighthouse 13.3.0 final five, document/UA timing, disposable server
+  counter, production regression/AX/keyboard/CLS payload, hash manifest와 cleanup을 수집했다. Browser Network만으로
+  call count를 추론하지 않고 server marker와 CDP를 대응시켰으며, 세 reviewer PASS와 16/16 fail-closed probe 뒤에
+  Basic evidence만 기록했다. human VoiceOver와 pre-existing visual debt는 완료로 표현하지 않는다.
 - `f4167e9`의 두 REVISE와 `cee8cf7` strict-diff REVISE를 성공 근거에서 제거하지 않았고,
   직접 pixel 검토 receipt와 locked threshold로 각각 FIX 및 method-mismatch resolution을 기록했다.
 - 직접 검토 기준: 과제 checklist, raw artifact, production 재현, 테스트와 회귀 결과.
@@ -2143,14 +2207,23 @@ Basic 완료 후 아래 네 조건을 모두 충족할 때만 진입한다.
 - final repair-wave build `Ye_LK9AOWlPxT_v14dfz9`에서 actual route loading 5/3/2 columns와 CLS 0, fresh
   desktop/mobile Hero candidate/geometry/CLS/API 0, Todo 8 KEEP과 Todo 9 GATE CLOSED를 재확인했다. 96-entry
   manifest, 12 mutation probes, two final reviewers와 independent oracle가 PASS해 Todo 13을 **KEEP**했다.
+- Todo 14가 clean BasicAfterSHA를 `d1278d0778492f13d2a70c064432df64e6b238f5`로 확정했고 Todo 15 evidence는
+  이 source와 final build `Cpe6odTds91l9-w7IWHfG`만 사용했다. current HEAD까지 source/package/config diff는
+  비어 있다.
+- Todo 15 Lighthouse 13.3.0 final five는 FCP `208.782ms`(Before range 안, inconclusive), LCP
+  `693.173ms`(Before range 초과 directional improvement), CLS `0`이다. normal/empty/failure/unreachable
+  documents, alternating UA timing, full state/URL/viewport/keyboard/CLS regression을 완료했다.
+- disposable instrumentation은 hard slow navigation의 slow invocation 1개와 normal link-prefetch invocation
+  1개, 총 2개를 server log/CDP로 확인했다. commit `4a7f566`은 unmerged이며 branch/worktree/counter가 제거됐다.
+- final seal은 276 entries/155219 bytes, validator PASS, 16/16 mutation rejection이다. functional/visual,
+  CJK/accessibility, direct visual reviewer가 PASS했고 final processes/ports/profiles cleanup도 통과했다.
 
 ### Pending
 
-- Todo 15 disposable instrumentation의 실제 Route Handler call-count 관찰과 계측 제거
-- clean BasicAfterSHA와 After Lighthouse 5회
-- 기능·접근성·반응형·FSD 회귀 검증
 - Advanced A 진입 여부 판정
-- 최종 assignment checklist와 artifact manifest 감사
+- Todo 17 final assignment checklist와 전체 artifact manifest 감사
+- human VoiceOver 수동 검증, pre-existing mobile Hero Korean wrap, unnamed Home regions는 Todo 15
+  nonblocking debt이며 Todo 15에서 수정 완료로 주장하지 않는다.
 
 ## 과제 체크리스트
 
@@ -2159,15 +2232,15 @@ Basic 완료 후 아래 네 조건을 모두 충족할 때만 진입한다.
 
 ### 0단계 / Before
 
-- [ ] production build에서 같은 조건으로 Before와 After를 측정했는가
-- [ ] Before와 After의 SHA를 각각 기록하고, SHA를 제외한 측정 조건을 같게 두었는가
-- [ ] FCP·LCP·CLS의 5회 raw 값과 중앙값·최솟값·최댓값을 남겼는가
-- [ ] URL, 행동, viewport, throttling, 브라우저·Lighthouse 버전, load 조건과 별도
+- [x] production build에서 같은 조건으로 Before와 After를 측정했는가
+- [x] Before와 After의 SHA를 각각 기록하고, SHA를 제외한 측정 조건을 같게 두었는가
+- [x] FCP·LCP·CLS의 5회 raw 값과 중앙값·최솟값·최댓값을 남겼는가
+- [x] URL, 행동, viewport, throttling, 브라우저·Lighthouse 버전, load 조건과 별도
       브라우저 프로필을 같게 두었는가
 - [x] LCP element, waterfall, filmstrip을 함께 확인했는가
 - [x] DevTools에서 Layout Shifts와 document·API·image의 URL·전송 크기·요청 시작
       시점을 확인했는가
-- [ ] 측정 흔들림보다 큰 변화인지 설명할 수 있는가
+- [x] 측정 흔들림보다 큰 변화인지 설명할 수 있는가
 
 ### 1단계 / Hero LCP
 
@@ -2208,7 +2281,7 @@ Basic 완료 후 아래 네 조건을 모두 충족할 때만 진입한다.
 - [x] 서버 `getQueryClient()` 호출마다 새 인스턴스가 만들어지고, 같은 render/request의
       동일 native fetch URL·options만 memoization 대상임을 설명했는가
 - [x] 모든 페이지가 기본 색인 가능 상태를 유지하는가
-- [ ] Browser Network만으로 Route Handler 횟수를 판정하지 않고, 서버 측 계수로 확인한
+- [x] Browser Network만으로 Route Handler 횟수를 판정하지 않고, 서버 측 계수로 확인한
       뒤 계측을 되돌렸는가
 - [x] normal·정상 empty·metadata query failure의 document 증거를 남겼는가
 - [x] `APP_ORIGIN`을 build와 runtime에 같은 값으로 두고, localhost Open Graph URL을
@@ -2216,15 +2289,15 @@ Basic 완료 후 아래 네 조건을 모두 충족할 때만 진입한다.
 - [x] 일반 document 요청과 `facebookexternalhit` 요청의 metadata 응답 시점을
       비교했는가
 
-Route Handler 횟수 checklist는 Todo 15 disposable instrumentation에서만 완료한다. Todo 13은 Browser
-Network의 hydration duplicate-request count와 native metadata/body URL/options identity까지만 판정한다.
+Route Handler 횟수는 Todo 15 disposable instrumentation의 server marker와 CDP Network를 대응시켜
+완료했다. slow 1개와 normal link-prefetch 1개를 분리했고 총 2개이며, 계측 commit은 미병합·제거됐다.
 
 ### 4단계 / After와 회귀
 
-- [ ] 같은 조건의 5회 raw 값·중앙값·범위로 Before와 After를 비교했는가
-- [ ] 검색·카테고리·정렬·페이지와 뒤로 가기·앞으로 가기가 같은 화면을 복원하는가
-- [ ] 장바구니·위시리스트·Header 개수, 로딩·에러·빈 상태·재시도가 유지되는가
-- [ ] FSD 의존 방향과 슬라이스 Public API를 우회하지 않았는가
+- [x] 같은 조건의 5회 raw 값·중앙값·범위로 Before와 After를 비교했는가
+- [x] 검색·카테고리·정렬·페이지와 뒤로 가기·앞으로 가기가 같은 화면을 복원하는가
+- [x] 장바구니·위시리스트·Header 개수, 로딩·에러·빈 상태·재시도가 유지되는가
+- [x] FSD 의존 방향과 슬라이스 Public API를 우회하지 않았는가
 - [x] 효과가 없거나 악화된 결과도 남겼는가
 
 ### Advanced A를 선택한 경우에만
