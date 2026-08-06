@@ -6,10 +6,8 @@ import {
 import { describe, expect, it } from 'vitest'
 
 import { ProductService } from '@/entities/product/api/ProductService'
-import type {
-  ProductListQuery,
-  ProductListResponse,
-} from '@/entities/product/model/types'
+import type { ProductListRequest } from '@/entities/product/model/ProductListRequest'
+import type { ProductListResponse } from '@/entities/product/model/types'
 
 import { ProductListStatePolicy } from './ProductListStatePolicy'
 
@@ -30,7 +28,7 @@ const firstPageQuery = {
   sort: 'latest',
   page: 1,
   pageSize: 12,
-} as const satisfies ProductListQuery
+} as const satisfies ProductListRequest
 const firstPage = {
   products: [],
   categories: [],
@@ -40,7 +38,7 @@ const firstPage = {
 } satisfies ProductListResponse
 
 function errorOptions(
-  query: ProductListQuery,
+  query: ProductListRequest,
   queryFn: () => Promise<ProductListResponse>,
 ): QueryObserverOptions<
   ProductListResponse,
@@ -50,7 +48,7 @@ function errorOptions(
   ProductListKey
 > {
   return {
-    queryKey: ProductService.queryKeyFactory.product.list(query, {}),
+    queryKey: ProductService.queryKeyFactory.product.list(query),
     queryFn,
     placeholderData: (previousData) => previousData,
     retry: 1,
@@ -75,13 +73,10 @@ function waitForError(observer: ProductListObserver) {
 describe('ProductListStatePolicy error transitions', () => {
   it('retains cached success and retries the current key', async () => {
     const queryClient = new QueryClient()
-    const firstKey = ProductService.queryKeyFactory.product.list(
-      firstPageQuery,
-      {},
-    )
+    const firstKey = ProductService.queryKeyFactory.product.list(firstPageQuery)
     queryClient.setQueryData(firstKey, firstPage)
     const errorQuery = { ...firstPageQuery, q: 'stanley' }
-    const errorKey = ProductService.queryKeyFactory.product.list(errorQuery, {})
+    const errorKey = ProductService.queryKeyFactory.product.list(errorQuery)
     let attempts = 0
     const observer = new QueryObserver<
       ProductListResponse,
@@ -115,10 +110,8 @@ describe('ProductListStatePolicy error transitions', () => {
 
   it('keeps a cold error data-free after two attempts', async () => {
     const queryClient = new QueryClient()
-    const currentKey = ProductService.queryKeyFactory.product.list(
-      firstPageQuery,
-      { scenario: 'error' },
-    )
+    const errorRequest = { ...firstPageQuery, scenario: 'error' as const }
+    const currentKey = ProductService.queryKeyFactory.product.list(errorRequest)
     let attempts = 0
     const observer = new QueryObserver<
       ProductListResponse,
@@ -127,7 +120,7 @@ describe('ProductListStatePolicy error transitions', () => {
       ProductListResponse,
       ProductListKey
     >(queryClient, {
-      ...errorOptions(firstPageQuery, () => {
+      ...errorOptions(errorRequest, () => {
         attempts += 1
         return Promise.reject(new Error('상품 목록 요청 실패'))
       }),

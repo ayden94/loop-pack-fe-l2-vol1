@@ -15,14 +15,6 @@ export type Category = z.infer<typeof categoryResponseSchema>
 
 export type ProductSort = 'latest' | 'popular' | 'price-asc' | 'price-desc'
 
-export type ProductListQuery = {
-  q?: string
-  category?: CategoryId | 'all'
-  sort?: ProductSort
-  page?: number
-  pageSize?: number
-}
-
 export type Product = z.infer<typeof productSchema>
 
 export type HomeResponse = z.infer<typeof homeResponseSchema>

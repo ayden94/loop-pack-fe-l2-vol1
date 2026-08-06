@@ -1,7 +1,10 @@
 import { queryOptions } from '@tanstack/react-query'
 
 import type { DiagnosticScenario } from '@/entities/product/model/DiagnosticScenario'
-import type { ProductListQuery } from '@/entities/product/model/types'
+import {
+  type ProductListRequest,
+  ProductListRequestModel,
+} from '@/entities/product/model/ProductListRequest'
 
 import { ProductRepository } from './ProductRepository'
 
@@ -20,13 +23,8 @@ export class ProductService {
       all() {
         return ['products'] as const
       },
-      list(query: ProductListQuery, diagnosticScenario: DiagnosticScenario) {
-        return [
-          ...ProductService.queryKeyFactory.product.all(),
-          'list',
-          query,
-          diagnosticScenario,
-        ] as const
+      list(request: ProductListRequest) {
+        return ProductListRequestModel.queryKey(request)
       },
     },
   }
@@ -39,34 +37,13 @@ export class ProductService {
     })
   }
 
-  getProductList(
-    query: ProductListQuery,
-    diagnosticScenario: DiagnosticScenario,
-  ) {
+  getProductList(request: ProductListRequest) {
     return queryOptions({
-      queryKey: ProductService.queryKeyFactory.product.list(
-        query,
-        diagnosticScenario,
-      ),
-      queryFn: ({ signal }) =>
-        this.repository.getProductList(query, diagnosticScenario, signal),
+      queryKey: ProductService.queryKeyFactory.product.list(request),
+      queryFn: ({ signal }) => this.repository.getProductList(request, signal),
       placeholderData: (previousData) => previousData,
       staleTime: 30_000,
       throwOnError: false,
-    })
-  }
-
-  getServerProductList(
-    query: ProductListQuery,
-    diagnosticScenario: DiagnosticScenario,
-  ) {
-    return queryOptions({
-      queryKey: ProductService.queryKeyFactory.product.list(
-        query,
-        diagnosticScenario,
-      ),
-      queryFn: () => this.repository.getProductList(query, diagnosticScenario),
-      staleTime: 30_000,
     })
   }
 }

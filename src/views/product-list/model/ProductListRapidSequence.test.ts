@@ -6,10 +6,8 @@ import {
 import { describe, expect, it } from 'vitest'
 
 import { ProductService } from '@/entities/product/api/ProductService'
-import type {
-  ProductListQuery,
-  ProductListResponse,
-} from '@/entities/product/model/types'
+import type { ProductListRequest } from '@/entities/product/model/ProductListRequest'
+import type { ProductListResponse } from '@/entities/product/model/types'
 
 import { ProductListStatePolicy } from './ProductListStatePolicy'
 
@@ -27,7 +25,7 @@ const baseQuery = {
   sort: 'latest',
   page: 1,
   pageSize: 12,
-} as const satisfies ProductListQuery
+} as const satisfies ProductListRequest
 const finalResponse = {
   products: [],
   categories: [],
@@ -45,7 +43,7 @@ function createDeferred(): DeferredResponse {
 }
 
 function queryOptions(
-  query: ProductListQuery,
+  query: ProductListRequest,
   deferred: DeferredResponse,
   canceledQueries: Array<string>,
 ): QueryObserverOptions<
@@ -56,7 +54,7 @@ function queryOptions(
   ProductListKey
 > {
   return {
-    queryKey: ProductService.queryKeyFactory.product.list(query, {}),
+    queryKey: ProductService.queryKeyFactory.product.list(query),
     queryFn: ({ signal }) => {
       signal.addEventListener('abort', () => {
         canceledQueries.push(JSON.stringify(query))
@@ -92,7 +90,7 @@ describe('rapid product key sequence', () => {
         sort: 'price-asc' as const,
         page: 2,
       },
-    ] satisfies ReadonlyArray<ProductListQuery>
+    ] satisfies ReadonlyArray<ProductListRequest>
     const firstDeferred = createDeferred()
     deferredByQuery.set(JSON.stringify(baseQuery), firstDeferred)
     const observer = new QueryObserver<
@@ -128,7 +126,7 @@ describe('rapid product key sequence', () => {
     finalDeferred.resolve(finalResponse)
 
     await finalResultPromise
-    const finalKey = ProductService.queryKeyFactory.product.list(finalQuery, {})
+    const finalKey = ProductService.queryKeyFactory.product.list(finalQuery)
     const state = ProductListStatePolicy.resolve({
       query: observer.getCurrentResult(),
       currentKey: finalKey,
