@@ -5,15 +5,13 @@ import {
 } from '@tanstack/react-query'
 import { describe, expect, it } from 'vitest'
 
-import { ProductService } from '@/entities/product/api/ProductService'
 import type { ProductListRequest } from '@/entities/product/model/ProductListRequest'
+import { ProductQueryKeyFactory } from '@/entities/product/model/ProductQueryKeyFactory'
 import type { ProductListResponse } from '@/entities/product/model/types'
 
 import { ProductListStatePolicy } from './ProductListStatePolicy'
 
-type ProductListKey = ReturnType<
-  typeof ProductService.queryKeyFactory.product.list
->
+type ProductListKey = ReturnType<typeof ProductQueryKeyFactory.productList>
 type DeferredResponse = {
   readonly promise: Promise<ProductListResponse>
   readonly resolve: (response: ProductListResponse) => void
@@ -54,7 +52,7 @@ function queryOptions(
   ProductListKey
 > {
   return {
-    queryKey: ProductService.queryKeyFactory.product.list(query),
+    queryKey: ProductQueryKeyFactory.productList(query),
     queryFn: ({ signal }) => {
       signal.addEventListener('abort', () => {
         canceledQueries.push(JSON.stringify(query))
@@ -126,7 +124,7 @@ describe('rapid product key sequence', () => {
     finalDeferred.resolve(finalResponse)
 
     await finalResultPromise
-    const finalKey = ProductService.queryKeyFactory.product.list(finalQuery)
+    const finalKey = ProductQueryKeyFactory.productList(finalQuery)
     const state = ProductListStatePolicy.resolve({
       query: observer.getCurrentResult(),
       currentKey: finalKey,

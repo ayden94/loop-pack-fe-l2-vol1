@@ -1,10 +1,8 @@
 import { queryOptions } from '@tanstack/react-query'
 
 import type { DiagnosticScenario } from '@/entities/product/model/DiagnosticScenario'
-import {
-  type ProductListRequest,
-  ProductListRequestModel,
-} from '@/entities/product/model/ProductListRequest'
+import { type ProductListRequest } from '@/entities/product/model/ProductListRequest'
+import { ProductQueryKeyFactory } from '@/entities/product/model/ProductQueryKeyFactory'
 
 import { ProductRepository } from './ProductRepository'
 
@@ -13,25 +11,9 @@ export class ProductService {
     private readonly repository: ProductRepository = new ProductRepository(),
   ) {}
 
-  static queryKeyFactory = {
-    home: {
-      all(diagnosticScenario: DiagnosticScenario) {
-        return ['home', diagnosticScenario] as const
-      },
-    },
-    product: {
-      all() {
-        return ['products'] as const
-      },
-      list(request: ProductListRequest) {
-        return ProductListRequestModel.queryKey(request)
-      },
-    },
-  }
-
   getHome(diagnosticScenario: DiagnosticScenario) {
     return queryOptions({
-      queryKey: ProductService.queryKeyFactory.home.all(diagnosticScenario),
+      queryKey: ProductQueryKeyFactory.home(diagnosticScenario),
       queryFn: () => this.repository.getHome(diagnosticScenario),
       staleTime: 60_000,
     })
@@ -39,7 +21,7 @@ export class ProductService {
 
   getProductList(request: ProductListRequest) {
     return queryOptions({
-      queryKey: ProductService.queryKeyFactory.product.list(request),
+      queryKey: ProductQueryKeyFactory.productList(request),
       queryFn: ({ signal }) => this.repository.getProductList(request, signal),
       placeholderData: (previousData) => previousData,
       staleTime: 30_000,

@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest'
 import { parseAppOrigin } from '@/shared/config/AppOrigin'
 
 import { ProductListRequestModel } from './ProductListRequest'
+import { ProductQueryKeyFactory } from './ProductQueryKeyFactory'
 
 const defaultRequest = {
   q: '',
@@ -91,13 +92,13 @@ describe('ProductListRequestModel identity and encoding', () => {
       scenario: 'empty',
     })
 
-    expect(ProductListRequestModel.queryKey(first)).toEqual([
+    expect(ProductQueryKeyFactory.productList(first)).toEqual([
       'products',
       'list',
       first,
     ])
-    expect(ProductListRequestModel.queryKey(first)).toEqual(
-      ProductListRequestModel.queryKey(second),
+    expect(ProductQueryKeyFactory.productList(first)).toEqual(
+      ProductQueryKeyFactory.productList(second),
     )
   })
 
@@ -109,10 +110,10 @@ describe('ProductListRequestModel identity and encoding', () => {
     ['pageSize', { pageSize: 24 }],
     ['scenario', { scenario: 'slow' }],
   ])('changes identity when %s changes', (_field, input) => {
-    const current = ProductListRequestModel.queryKey(
+    const current = ProductQueryKeyFactory.productList(
       ProductListRequestModel.normalize({}),
     )
-    const changed = ProductListRequestModel.queryKey(
+    const changed = ProductQueryKeyFactory.productList(
       ProductListRequestModel.normalize(input),
     )
 

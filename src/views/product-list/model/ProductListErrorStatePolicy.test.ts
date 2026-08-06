@@ -5,15 +5,13 @@ import {
 } from '@tanstack/react-query'
 import { describe, expect, it } from 'vitest'
 
-import { ProductService } from '@/entities/product/api/ProductService'
 import type { ProductListRequest } from '@/entities/product/model/ProductListRequest'
+import { ProductQueryKeyFactory } from '@/entities/product/model/ProductQueryKeyFactory'
 import type { ProductListResponse } from '@/entities/product/model/types'
 
 import { ProductListStatePolicy } from './ProductListStatePolicy'
 
-type ProductListKey = ReturnType<
-  typeof ProductService.queryKeyFactory.product.list
->
+type ProductListKey = ReturnType<typeof ProductQueryKeyFactory.productList>
 type ProductListObserver = QueryObserver<
   ProductListResponse,
   Error,
@@ -48,7 +46,7 @@ function errorOptions(
   ProductListKey
 > {
   return {
-    queryKey: ProductService.queryKeyFactory.product.list(query),
+    queryKey: ProductQueryKeyFactory.productList(query),
     queryFn,
     placeholderData: (previousData) => previousData,
     retry: 1,
@@ -73,10 +71,10 @@ function waitForError(observer: ProductListObserver) {
 describe('ProductListStatePolicy error transitions', () => {
   it('retains cached success and retries the current key', async () => {
     const queryClient = new QueryClient()
-    const firstKey = ProductService.queryKeyFactory.product.list(firstPageQuery)
+    const firstKey = ProductQueryKeyFactory.productList(firstPageQuery)
     queryClient.setQueryData(firstKey, firstPage)
     const errorQuery = { ...firstPageQuery, q: 'stanley' }
-    const errorKey = ProductService.queryKeyFactory.product.list(errorQuery)
+    const errorKey = ProductQueryKeyFactory.productList(errorQuery)
     let attempts = 0
     const observer = new QueryObserver<
       ProductListResponse,
@@ -111,7 +109,7 @@ describe('ProductListStatePolicy error transitions', () => {
   it('keeps a cold error data-free after two attempts', async () => {
     const queryClient = new QueryClient()
     const errorRequest = { ...firstPageQuery, scenario: 'error' as const }
-    const currentKey = ProductService.queryKeyFactory.product.list(errorRequest)
+    const currentKey = ProductQueryKeyFactory.productList(errorRequest)
     let attempts = 0
     const observer = new QueryObserver<
       ProductListResponse,

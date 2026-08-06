@@ -3,6 +3,7 @@ import { describe, expect, it, vi } from 'vitest'
 
 import type { DiagnosticScenario } from '@/entities/product/model/DiagnosticScenario'
 import { ProductListRequestModel } from '@/entities/product/model/ProductListRequest'
+import { ProductQueryKeyFactory } from '@/entities/product/model/ProductQueryKeyFactory'
 
 import { ProductRepository } from './ProductRepository'
 import { ProductService } from './ProductService'
@@ -19,14 +20,15 @@ describe('ProductService query keys', () => {
   it.each(scenarioCases)(
     'contains the home diagnostic scenario descriptor',
     (diagnosticScenario) => {
-      expect(
-        ProductService.queryKeyFactory.home.all(diagnosticScenario),
-      ).toEqual(['home', diagnosticScenario])
+      expect(ProductQueryKeyFactory.home(diagnosticScenario)).toEqual([
+        'home',
+        diagnosticScenario,
+      ])
     },
   )
 
   it('uses the canonical product request key', () => {
-    expect(ProductService.queryKeyFactory.product.list(baseRequest)).toEqual([
+    expect(ProductQueryKeyFactory.productList(baseRequest)).toEqual([
       'products',
       'list',
       baseRequest,

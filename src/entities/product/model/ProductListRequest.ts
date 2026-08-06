@@ -76,10 +76,6 @@ export class ProductListRequestModel {
     })
   }
 
-  static queryKey(request: ProductListRequest) {
-    return ['products', 'list', request] as const
-  }
-
   static searchParams(request: ProductListRequest): URLSearchParams {
     const searchParams = new URLSearchParams()
     if (request.q !== '') {

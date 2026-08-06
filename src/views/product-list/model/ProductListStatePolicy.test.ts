@@ -6,15 +6,13 @@ import {
 } from '@tanstack/react-query'
 import { describe, expect, it } from 'vitest'
 
-import { ProductService } from '@/entities/product/api/ProductService'
 import type { ProductListRequest } from '@/entities/product/model/ProductListRequest'
+import { ProductQueryKeyFactory } from '@/entities/product/model/ProductQueryKeyFactory'
 import type { ProductListResponse } from '@/entities/product/model/types'
 
 import { ProductListStatePolicy } from './ProductListStatePolicy'
 
-type ProductListKey = ReturnType<
-  typeof ProductService.queryKeyFactory.product.list
->
+type ProductListKey = ReturnType<typeof ProductQueryKeyFactory.productList>
 type ProductListObserver = QueryObserver<
   ProductListResponse,
   Error,
@@ -75,7 +73,7 @@ function queryOptions(
   ProductListKey
 > {
   return {
-    queryKey: ProductService.queryKeyFactory.product.list(query),
+    queryKey: ProductQueryKeyFactory.productList(query),
     queryFn: ({ signal }) => queryFn(signal),
     placeholderData: (previousData) => previousData,
     retry: 1,
@@ -88,8 +86,7 @@ describe('ProductListStatePolicy with QueryObserver', () => {
   it('shows cold pending without retained data', () => {
     const pending = createDeferred<ProductListResponse>()
     const queryClient = new QueryClient()
-    const currentKey =
-      ProductService.queryKeyFactory.product.list(firstPageQuery)
+    const currentKey = ProductQueryKeyFactory.productList(firstPageQuery)
     const observer = new QueryObserver<
       ProductListResponse,
       Error,
@@ -117,7 +114,7 @@ describe('ProductListStatePolicy with QueryObserver', () => {
   it('keeps placeholder data without updating successful key metadata', () => {
     const pending = createDeferred<ProductListResponse>()
     const queryClient = new QueryClient()
-    const firstKey = ProductService.queryKeyFactory.product.list(firstPageQuery)
+    const firstKey = ProductQueryKeyFactory.productList(firstPageQuery)
     queryClient.setQueryData(firstKey, firstPage)
     const observer = new QueryObserver<
       ProductListResponse,
@@ -130,8 +127,7 @@ describe('ProductListStatePolicy with QueryObserver', () => {
       queryOptions(firstPageQuery, () => Promise.resolve(firstPage)),
     )
     const secondPageQuery = { ...firstPageQuery, page: 2 }
-    const secondKey =
-      ProductService.queryKeyFactory.product.list(secondPageQuery)
+    const secondKey = ProductQueryKeyFactory.productList(secondPageQuery)
     const unsubscribe = observer.subscribe(() => undefined)
 
     observer.setOptions(queryOptions(secondPageQuery, () => pending.promise))
@@ -155,8 +151,7 @@ describe('ProductListStatePolicy with QueryObserver', () => {
 
   it('records successful empty data as the latest successful key', async () => {
     const queryClient = new QueryClient()
-    const currentKey =
-      ProductService.queryKeyFactory.product.list(firstPageQuery)
+    const currentKey = ProductQueryKeyFactory.productList(firstPageQuery)
     const observer = new QueryObserver<
       ProductListResponse,
       Error,

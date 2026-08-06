@@ -2,8 +2,8 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { describe, expect, it } from 'vitest'
 
-import { ProductService } from '@/entities/product/api/ProductService'
 import type { DiagnosticScenario } from '@/entities/product/model/DiagnosticScenario'
+import { ProductQueryKeyFactory } from '@/entities/product/model/ProductQueryKeyFactory'
 import type { HomeResponse } from '@/entities/product/model/types'
 
 import { HomeView } from './HomeView'
@@ -23,7 +23,7 @@ describe('HomeView successful data content', () => {
     }
     const queryClient = new QueryClient()
     queryClient.setQueryData(
-      ProductService.queryKeyFactory.home.all(diagnosticScenario),
+      ProductQueryKeyFactory.home(diagnosticScenario),
       homeResponse,
     )
 
