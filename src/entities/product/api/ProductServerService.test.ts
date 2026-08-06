@@ -12,6 +12,17 @@ const request = ProductListRequestModel.normalize({ scenario: 'slow' })
 const origin = parseAppOrigin('https://shop.example')
 
 describe('ProductServerService', () => {
+  it('matches the browser home key and stale time', () => {
+    const browser = new ProductService().getHome({ scenario: 'slow' })
+    const server = new ProductServerService().getHome(
+      { scenario: 'slow' },
+      origin,
+    )
+
+    expect(server.queryKey).toEqual(browser.queryKey)
+    expect(server.staleTime).toBe(60_000)
+  })
+
   it('uses the canonical key and stale time without browser presentation policy', () => {
     const browser = new ProductService().getProductList(request)
     const server = new ProductServerService().getProductList(request, origin)

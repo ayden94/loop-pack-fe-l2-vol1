@@ -5,6 +5,7 @@ import { ProductListRequestModel } from '@/entities/product/model/ProductListReq
 import { ApiClientError } from '@/shared/api/ApiClientError'
 import { parseAppOrigin } from '@/shared/config/AppOrigin'
 
+import { ProductServerFetchError } from './ProductServerFetchError'
 import { ProductServerRepository } from './ProductServerRepository'
 
 const origin = parseAppOrigin('https://shop.example')
@@ -70,15 +71,71 @@ describe('ProductServerRepository success boundary', () => {
     ).rejects.toBeInstanceOf(z.ZodError)
   })
 
-  it('passes through native fetch rejection identity', async () => {
+  it('wraps only native fetch TypeError with its original cause', async () => {
     const networkError = new TypeError('fetch failed')
     const fetch = vi.fn<typeof globalThis.fetch>(() =>
       Promise.reject(networkError),
     )
 
+    const error = await new ProductServerRepository(fetch)
+      .getProductList(request, origin)
+      .catch((reason: unknown) => reason)
+
+    expect(error).toBeInstanceOf(ProductServerFetchError)
+    expect(error).toMatchObject({
+      cause: networkError,
+      message: 'fetch failed',
+    })
+  })
+
+  it('passes through TypeError raised after the fetch invocation', async () => {
+    const programmingError = new TypeError('response programming error')
+    const response = Response.json(validResponse)
+    vi.spyOn(response, 'json').mockRejectedValue(programmingError)
+    const fetch = vi.fn<typeof globalThis.fetch>(() =>
+      Promise.resolve(response),
+    )
+
     await expect(
       new ProductServerRepository(fetch).getProductList(request, origin),
-    ).rejects.toBe(networkError)
+    ).rejects.toBe(programmingError)
+  })
+
+  it('passes through non-TypeError native fetch rejection identity', async () => {
+    const nativeError = new RangeError('unexpected native failure')
+    const fetch = vi.fn<typeof globalThis.fetch>(() =>
+      Promise.reject(nativeError),
+    )
+
+    await expect(
+      new ProductServerRepository(fetch).getProductList(request, origin),
+    ).rejects.toBe(nativeError)
+  })
+
+  it('loads home with an absolute signal-free native descriptor', async () => {
+    const homeResponse = {
+      banner: {
+        title: 'title',
+        description: 'description',
+        image: '/hero.jpg',
+      },
+      categories: [],
+      popularProducts: [],
+      newProducts: [],
+    }
+    const fetch = vi.fn<typeof globalThis.fetch>(() =>
+      Promise.resolve(Response.json(homeResponse)),
+    )
+
+    await expect(
+      new ProductServerRepository(fetch).getHome({ scenario: 'slow' }, origin),
+    ).resolves.toEqual(homeResponse)
+
+    expect(fetch).toHaveBeenCalledWith(
+      new URL('https://shop.example/api/home?scenario=slow'),
+      { method: 'GET' },
+    )
+    expect(Object.hasOwn(fetch.mock.calls[0]?.[1] ?? {}, 'signal')).toBe(false)
   })
 })
 
