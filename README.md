@@ -3,6 +3,29 @@
 Loopers 프론트엔드 과정(TypeScript · React · Next.js)의 과제 제출 & 피드백 레포입니다.
 4주차부터 이 레포가 **커머스 프로젝트(Next.js)** 본체가 됩니다.
 
+## 7주차 성능 개선 사례
+
+느린 Home API가 Hero의 DOM 삽입과 이미지 발견을 늦췄고, 원본 Hero는 `7,545,525 bytes`를 전송했습니다.
+
+적용 범위는 다음과 같습니다.
+
+- semantic shell로 API 응답 전에도 의미와 Hero 영역을 제공하고 최종 레이아웃의 geometry를 예약했습니다.
+- responsive Hero delivery로 전송량을 desktop `80,836 bytes`, mobile `32,294 bytes`로 줄였습니다.
+- 상품 목록의 여섯 상태와 대체 요청 취소 시 최신 URL·상태·결과의 무결성을 검증했습니다.
+- metadata, non-blocking prefetch/hydration과 초기 HTML 계약을 정리했습니다.
+
+| 지표 | Before          | After       | 판정                            |
+| ---- | --------------- | ----------- | ------------------------------- |
+| FCP  | `237.7291ms`    | `208.782ms` | Before 범위 내 변화로 결론 보류 |
+| LCP  | `6981.484125ms` | `693.173ms` | 개선 방향 확인                  |
+| CLS  | `0`             | `0`         | 변화 없음                       |
+
+회귀 검증은 기능, URL/state, responsive, 접근성, 시각 품질, hydration, CLS, FSD와 quality gate를 함께 다뤘습니다.
+
+`f4167e9`는 mobile 품질 문제로 rejected 처리했고, preload/priority gate는 source 실험 없이 닫았습니다. Advanced A는 median total `120ms < 200ms`여서 **NOT ENTERED**입니다.
+
+상세 근거: [전체 RFC](docs/rfc/week07-performance.md) · [Hero 실험](docs/rfc/week07-performance.md#hero-실험과-결정) · [After](docs/rfc/week07-performance.md#after) · [회귀 검증](docs/rfc/week07-performance.md#회귀-검증) · [Advanced gate](docs/rfc/week07-performance.md#advanced-a-진입-게이트)
+
 ## 시작하기
 
 필수 도구는 Node.js 24.17.0과 pnpm 10.15.1입니다. `.nvmrc`는 현재 권장 LTS를 고정하고, `package.json`의 Node.js 범위(`>=22.12.0`)는 지원 가능한 Node.js 22 이상을 허용합니다.

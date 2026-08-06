@@ -1,5 +1,36 @@
 # Week 07 성능 측정 RFC
 
+## 요약
+
+Before는 `e2e608b`, Basic After는 `d1278d0`에서 같은 프로토콜로 비교했다. FCP는 `237.7291ms`에서 `208.782ms`로 바뀌었으나 **Before 범위 내 변화로 결론 보류**, LCP는 `6981.484125ms`에서 `693.173ms`로 **개선 방향 확인**, CLS는 `0`에서 `0`으로 **변화 없음**으로 판정했다.
+
+느린 Home API 뒤에 삽입·발견되던 Hero를 위해 semantic shell과 예약 geometry를 두고 responsive delivery를 적용했다. Hero 전송량은 원본 `7,545,525 bytes`에서 desktop `80,836 bytes`, mobile `32,294 bytes`가 됐다. 상품 목록 여섯 상태와 cancellation integrity, metadata, non-blocking prefetch/hydration, 초기 HTML도 범위에 포함했다.
+
+기능, URL/state, responsive, 접근성, 시각 품질, hydration, CLS, FSD와 quality gate 회귀 검증은 통과했다. `f4167e9`는 mobile 품질 문제로 rejected 처리했고, preload/priority gate는 source 실험 없이 닫았다. Advanced A는 median total `120ms < 200ms`여서 **NOT ENTERED**이며 Advanced 최적화는 수행하지 않았다.
+
+## 목차
+
+- [기준선과 현재 상태](#기준선과-현재-상태)
+- [범위와 불변 조건](#범위와-불변-조건)
+- [SHA와 체크포인트](#sha와-체크포인트)
+- [환경](#환경)
+- [측정 프로토콜](#측정-프로토콜)
+- [Artifact manifest](#artifact-manifest)
+- [Before](#before)
+- [Hero 실험과 결정](#hero-실험과-결정)
+- [Todo 10 browser cancellation](#todo-10-browser-cancellation)
+- [Todo 11 상품 목록 여섯 상태](#todo-11-상품-목록-여섯-상태-pre-source-checkpoint)
+- [Todo 12 server request와 QueryClient](#todo-12-server-request와-queryclient)
+- [Todo 13 metadata/prefetch/hydration](#todo-13-metadataprefetchhydration-pre-source-checkpoint)
+- [Metadata와 초기 HTML](#metadata와-초기-html)
+- [After](#after)
+- [회귀 검증](#회귀-검증)
+- [Advanced A 진입 게이트](#advanced-a-진입-게이트)
+- [결정 로그](#결정-로그)
+- [AI 활용](#ai-활용)
+- [Current와 Pending](#current와-pending)
+- [과제 체크리스트](#과제-체크리스트)
+
 ## 기준선과 현재 상태
 
 - StartSHA: `4e53e545863f5ad184137f58569cc0942d405a64`
