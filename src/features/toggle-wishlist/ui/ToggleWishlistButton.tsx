@@ -1,5 +1,6 @@
 'use client'
 
+import { analyticsEvents } from '@/analytics/events'
 import {
   useWishlistStore,
   wishlistSelectors,
@@ -26,6 +27,12 @@ export function ToggleWishlistButton({
       aria-label={`${productName} 위시리스트`}
       onClick={() => {
         toggleWishlist(productId)
+        analyticsEvents.wishlistToggle({
+          productId,
+          isInWishlist: wishlistSelectors.isInWishlist(productId)(
+            useWishlistStore.getState(),
+          ),
+        })
       }}
       className="flex-1 rounded border border-(--color-border) px-3 py-2 text-xs text-(--color-text) hover:bg-(--color-surface-muted)"
     >

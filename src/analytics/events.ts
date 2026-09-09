@@ -19,6 +19,12 @@ export const analyticsEvents = {
   cartAdd: (properties: { readonly productId: string }) => {
     track('cart_add', properties)
   },
+  wishlistToggle: (properties: {
+    readonly productId: string
+    readonly isInWishlist: boolean
+  }) => {
+    track('wishlist_toggle', properties)
+  },
   loginStart: (properties: { readonly from: LoginEventSource }) => {
     track('login_start', properties)
   },
