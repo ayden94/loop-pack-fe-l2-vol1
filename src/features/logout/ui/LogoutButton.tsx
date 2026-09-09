@@ -6,6 +6,7 @@ import { useMemo } from 'react'
 
 import { AuthRepository } from '@/entities/auth/api/AuthRepository'
 import { useAuth } from '@/entities/auth/model/AuthProvider'
+import { useCartStore } from '@/entities/cart/model/CartStore'
 import { ApiClientError } from '@/shared/api/ApiClientError'
 
 export function LogoutButton() {
@@ -15,6 +16,7 @@ export function LogoutButton() {
   const logout = useMutation({
     mutationFn: () => repository.logout(),
     onSuccess: () => {
+      useCartStore.getState().clearCart()
       clearSession()
       router.replace('/')
       router.refresh()

@@ -75,7 +75,7 @@ afterEach(() => {
 })
 
 describe('LogoutButton', () => {
-  it('clears auth while retaining cart and wishlist after a successful logout', async () => {
+  it('LogoutButton: successful logout -> clears persisted cart while retaining wishlist', async () => {
     server.use(
       http.post(
         'http://localhost:3000/api/auth/logout',
@@ -90,7 +90,9 @@ describe('LogoutButton', () => {
     await user.click(screen.getByRole('button', { name: '로그아웃' }))
 
     expect(await screen.findByText('anonymous')).toBeVisible()
-    expect(useCartStore.getState().items).toEqual({ p1: true })
+    expect(useCartStore.getState().items).toEqual({})
+    await useCartStore.persist.rehydrate()
+    expect(useCartStore.getState().items).toEqual({})
     expect(useWishlistStore.getState().items).toEqual({ p2: true })
     expect(router.replace).toHaveBeenCalledWith('/')
     expect(router.refresh).toHaveBeenCalledOnce()
@@ -105,6 +107,7 @@ describe('LogoutButton', () => {
         ),
       ),
     )
+    useCartStore.getState().addToCart('p1')
     const user = userEvent.setup()
     renderLogoutButton()
 
@@ -112,6 +115,7 @@ describe('LogoutButton', () => {
 
     expect(await screen.findByRole('alert')).toBeVisible()
     expect(screen.getByText('authenticated')).toBeVisible()
+    expect(useCartStore.getState().items).toEqual({ p1: true })
     expect(router.replace).not.toHaveBeenCalled()
   })
 })
