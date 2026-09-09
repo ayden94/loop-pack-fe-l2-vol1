@@ -1,18 +1,19 @@
 'use client'
 
-import { useQueryClient } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   createContext,
   type ReactNode,
   useCallback,
   useContext,
+  useEffect,
   useLayoutEffect,
   useMemo,
   useRef,
-  useState,
 } from 'react'
 
 import { identify, reset } from '@/analytics/logger'
+import { authEntity, AuthService } from '@/entities/auth/api/AuthService'
 import type { AuthUser } from '@/entities/auth/model/AuthSchema'
 import type { AuthSession } from '@/entities/auth/model/AuthSession'
 
@@ -32,9 +33,21 @@ type AuthProviderProps = {
 
 export function AuthProvider({ initialSession, children }: AuthProviderProps) {
   const queryClient = useQueryClient()
-  const [session, setSession] = useState(initialSession)
+  const { data: session } = useQuery({
+    ...authEntity.getSession(),
+    initialData: initialSession,
+  })
+  const serverSnapshotRef = useRef(initialSession)
   const expiringRef = useRef(false)
   const identifiedRef = useRef(false)
+
+  useEffect(() => {
+    if (serverSnapshotRef.current === initialSession) {
+      return
+    }
+    serverSnapshotRef.current = initialSession
+    void queryClient.invalidateQueries({ queryKey: AuthService.sessionKey })
+  }, [initialSession, queryClient])
 
   useLayoutEffect(() => {
     if (identifiedRef.current) {
@@ -58,17 +71,30 @@ export function AuthProvider({ initialSession, children }: AuthProviderProps) {
     }
   }, [queryClient])
 
-  const authenticate = useCallback((user: AuthUser) => {
-    expiringRef.current = false
-    setSession({ status: 'authenticated', user })
-  }, [])
+  const setSession = useCallback(
+    (nextSession: AuthSession) => {
+      // 새 로그인·로그아웃보다 먼저 시작한 /me 응답이 상태를 되돌리지 못하게 한다.
+      void queryClient.cancelQueries({ queryKey: AuthService.sessionKey })
+      queryClient.setQueryData(AuthService.sessionKey, nextSession)
+    },
+    [queryClient],
+  )
+
+  const authenticate = useCallback(
+    (user: AuthUser) => {
+      expiringRef.current = false
+      removeProtectedState()
+      setSession({ status: 'authenticated', user })
+    },
+    [removeProtectedState, setSession],
+  )
 
   const clearSession = useCallback(() => {
     expiringRef.current = false
     removeProtectedState()
     reset()
     setSession({ status: 'anonymous' })
-  }, [removeProtectedState])
+  }, [removeProtectedState, setSession])
 
   const expireSession = useCallback(() => {
     if (expiringRef.current) {
@@ -79,7 +105,7 @@ export function AuthProvider({ initialSession, children }: AuthProviderProps) {
     removeProtectedState()
     reset()
     setSession({ status: 'expired' })
-  }, [removeProtectedState])
+  }, [removeProtectedState, setSession])
 
   const value = useMemo<AuthContextValue>(
     () => ({ session, authenticate, clearSession, expireSession }),

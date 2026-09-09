@@ -5,11 +5,13 @@ import '@/analytics/client'
 import {
   QueryClientProvider,
   QueryErrorResetBoundary,
+  useQueryClient,
 } from '@tanstack/react-query'
-import { useRouter } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { NuqsAdapter } from 'nuqs/adapters/next/app'
-import { type ReactNode, useCallback, useEffect, useState } from 'react'
+import { type ReactNode, useCallback, useEffect, useRef, useState } from 'react'
 
+import { AuthService } from '@/entities/auth/api/AuthService'
 import { AuthProvider, useAuth } from '@/entities/auth/model/AuthProvider'
 import { AuthRedirect } from '@/entities/auth/model/AuthRedirect'
 import type { AuthSession } from '@/entities/auth/model/AuthSession'
@@ -50,6 +52,18 @@ function AuthExpiryBridge({
 }) {
   const { expireSession } = useAuth()
   const router = useRouter()
+  const pathname = usePathname()
+  const queryClient = useQueryClient()
+  const previousPathRef = useRef(pathname)
+
+  useEffect(() => {
+    // 첫 렌더는 방금 검증한 SSR snapshot을 사용하고 SPA 이동 때만 다시 조회한다.
+    if (previousPathRef.current === pathname) {
+      return
+    }
+    previousPathRef.current = pathname
+    void queryClient.invalidateQueries({ queryKey: AuthService.sessionKey })
+  }, [pathname, queryClient])
   const handleSessionExpired = useCallback(() => {
     expireSession()
     const currentPath = `${window.location.pathname}${window.location.search}`

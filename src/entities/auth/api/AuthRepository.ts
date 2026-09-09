@@ -18,8 +18,8 @@ export class AuthRepository {
     return sessionResponseSchema.parse(json)
   }
 
-  async me(): Promise<SessionResponse> {
-    const json = await this.api.get('api/auth/me').json<unknown>()
+  async me(signal?: AbortSignal): Promise<SessionResponse> {
+    const json = await this.api.get('api/auth/me', { signal }).json<unknown>()
     return sessionResponseSchema.parse(json)
   }
 

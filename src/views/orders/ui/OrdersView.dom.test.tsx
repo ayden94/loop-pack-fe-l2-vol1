@@ -14,6 +14,7 @@ const router = vi.hoisted(() => ({
 
 vi.mock('next/navigation', () => ({
   useRouter: () => router,
+  usePathname: () => '/orders',
 }))
 
 describe('OrdersView', () => {

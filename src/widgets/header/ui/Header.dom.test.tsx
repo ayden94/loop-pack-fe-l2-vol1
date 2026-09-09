@@ -12,6 +12,7 @@ const router = vi.hoisted(() => ({
 
 vi.mock('next/navigation', () => ({
   useRouter: () => router,
+  usePathname: () => '/',
 }))
 
 describe('Header initial auth state', () => {
