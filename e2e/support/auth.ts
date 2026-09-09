@@ -27,12 +27,12 @@ export function parallelAccount(parallelIndex: number) {
 
 // 서명은 유효하지만 exp가 지난 토큰이다. proxy는 쿠키 존재만 확인해 보호 경로까지
 // 통과시키고, 서버 컴포넌트가 만료로 판정해 reason=expired로 돌려보낸다.
-export function expiredSessionCookie(userId: string) {
+export function expiredSessionCookie(userId: string, baseURL: string) {
   const issuedAtMs = Date.now() - (SESSION_TTL_SECONDS + 60) * 1_000
   return {
     name: SESSION_COOKIE,
     value: createSessionToken(userId, issuedAtMs),
-    domain: 'localhost',
+    domain: new URL(baseURL).hostname,
     path: '/',
   }
 }

@@ -37,10 +37,14 @@ test('Protected checkout - when an anonymous shopper with a cart opens checkout 
 test('Expired session - when a shopper with an expired token opens checkout - explains the expiry and restores the path after signing in again', async ({
   page,
   context,
+  baseURL,
 }, testInfo) => {
   // Arrange
   const account = parallelAccount(testInfo.parallelIndex)
-  await context.addCookies([expiredSessionCookie(account.id)])
+  if (baseURL === undefined) {
+    throw new Error('만료 쿠키를 만들려면 baseURL이 필요합니다.')
+  }
+  await context.addCookies([expiredSessionCookie(account.id, baseURL)])
 
   // Act
   await page.goto('/checkout')
