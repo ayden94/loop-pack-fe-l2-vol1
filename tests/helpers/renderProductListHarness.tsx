@@ -6,6 +6,7 @@ import {
 import { render } from '@testing-library/react'
 import { withNuqsTestingAdapter } from 'nuqs/adapters/testing'
 
+import { AuthProvider } from '@/entities/auth/model/AuthProvider'
 import { useCartStore } from '@/entities/cart/model/CartStore'
 import { ProductService } from '@/entities/product/api/ProductService'
 import { ProductListRouteParams } from '@/entities/product/model/ProductListRouteParams'
@@ -89,9 +90,11 @@ export function renderProductListHarness({
 
   return render(
     <QueryClientProvider client={queryClient}>
-      <NuqsTestingAdapter>
-        <ProductListHarness withHeader={withHeader} />
-      </NuqsTestingAdapter>
+      <AuthProvider initialSession={{ status: 'anonymous' }}>
+        <NuqsTestingAdapter>
+          <ProductListHarness withHeader={withHeader} />
+        </NuqsTestingAdapter>
+      </AuthProvider>
     </QueryClientProvider>,
   )
 }
@@ -99,7 +102,7 @@ export function renderProductListHarness({
 export function resetProductListHarnessState() {
   activeQueryClient?.clear()
   activeQueryClient = undefined
-  localStorage.clear()
+  window.localStorage.clear()
   useCartStore.setState({ items: {} })
   useWishlistStore.setState({ items: {} })
 }
