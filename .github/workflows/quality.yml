@@ -53,7 +53,7 @@ jobs:
           store_path="$(pnpm store path)"
           lock_hash="$(sha256sum pnpm-lock.yaml | cut -d ' ' -f 1)"
           checkout_sha="$(git rev-parse HEAD)"
-          cache_key="week10-s1-pnpm-${RUNNER_OS}-${RUNNER_ARCH}-node-${node_version}-pnpm-${pnpm_version}-run-${GITHUB_RUN_ID}-${lock_hash}"
+          cache_key="week10-s4-pnpm-${RUNNER_OS}-${RUNNER_ARCH}-node-${node_version}-pnpm-${pnpm_version}-probe-lock-hash-v1-${lock_hash}"
           printf 'store-path=%s\ncache-key=%s\n' "$store_path" "$cache_key" >> "$GITHUB_OUTPUT"
           {
             printf '## CI measurement context\n\n'
