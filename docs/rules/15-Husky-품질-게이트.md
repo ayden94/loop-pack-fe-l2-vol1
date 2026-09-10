@@ -168,8 +168,11 @@ Git hook:
 - CI(GitHub Actions)는 pull request와 `main` push에서 `pnpm check`와 동일한 네 명령을
   test → lint → typecheck → build 순서의 개별 step으로 실행한다. 단계별 시간을
   측정하기 위한 분리이며, 앞 단계 실패 시 뒤 단계는 실행하지 않는다.
-- 로컬 `pnpm check`는 그대로 유지한다. `pnpm test:e2e`는 의도적으로 여기에 포함하지
-  않고, CI에서는 네 기본 검증과 기존 조건부 mutation 뒤 별도 단계로 실행한다.
+- 로컬 `pnpm check`는 그대로 유지하고 E2E는 포함하지 않는다. 로컬 `pnpm test:e2e`는
+  독립 실행을 위해 production build부터 수행한다.
+- CI에서는 네 기본 검증과 기존 조건부 mutation 뒤 `pnpm exec playwright test`를
+  실행한다. 같은 job·같은 SHA에서 앞서 성공한 production build를 재사용하며,
+  Playwright의 `pnpm start`로 production 서버를 띄운다. CI에서 build를 두 번 하지 않는다.
 
 | 단계             | 목적                   |
 | ---------------- | ---------------------- |
