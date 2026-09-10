@@ -6,13 +6,13 @@
 재구성한다. 과제 원문이 범위의 기준이며, 이 문서는 실행 순서와 결정·증거의 기준이다.
 요약 과정에서 요구사항을 줄이지 않고 마지막 추적표로 원문과 연결한다.
 
-| 항목              | 값                                                              |
-| ----------------- | --------------------------------------------------------------- |
-| 상태              | S7 실행·skip·required 차단/복구 검증과 정리 완료                |
-| 현재 단계         | Stage 7 결과 확인 대기, S8 미진입                               |
-| 작성 기준         | `volume-10`, `278c2224`                                         |
-| 본 과제 구현·측정 | S7 문서 skip·코드 실행·실패 차단·정상 복구 확인, 임시 보호 제거 |
-| 다음 행동         | S7 결과 문서 commit 및 S8 진입 명시적 확인                      |
+| 항목              | 값                                                       |
+| ----------------- | -------------------------------------------------------- |
+| 상태              | S0~S16 구현·검증·제출 완료                               |
+| 현재 단계         | Stage 16 최종 제출 완료, 최신 원격 Checks는 PR #197 참조 |
+| 작성 기준         | `volume-10`, `278c2224`                                  |
+| 본 과제 구현·측정 | 464 tests·E2E16·예산/env/FSD gate·실제 실패 PR 검증 완료 |
+| 다음 행동         | 추가 변경 없이 결과 보고. PR merge는 수행하지 않음       |
 
 `week10-feedback.md`는 **9주차 피드백 수정 기록**이다. 이번 CI 과제의 완료 증거로
 대체하지 않는다. 기존 문서의 미완료 표시도 이 RFC에서 임의로 완료 처리하지 않는다.
@@ -110,18 +110,18 @@ D1은 S0에서 확정했다. D2에 따른 S1 로컬 준비 후 사용자의 “�
 단일 커밋·push·origin 실험 PR·smoke 최대 2회를 승인받았다.
 S2~S5는 각 단계에서 별도로 확인받는다. 나머지 결정은 해당 Stage에서 갱신한다.
 
-| ID  | 결정할 것                                               | 결정 시점 | 확정에 필요한 근거                                      |
-| --- | ------------------------------------------------------- | --------- | ------------------------------------------------------- |
-| D1  | 확정: origin 측정·실험, upstream ayden94 최종 제출      | S0        | 아래 D1 확정표의 제한과 단계별 확인 유지                |
-| D2  | cold/warm 정의·수집 방식·timeout                        | S1        | 실제 캐시 종류, runner, 명령과 정상 실행 시간           |
-| D3  | 확정: 같은 job production 산출물을 E2E에 재사용         | S3        | Before 6회 모두 E2E가 최대 step, 실제 build 중복 확인   |
-| D4  | 확정: 허용 문서 전용 PR만 Chromium·E2E skip, 재시도 0회 | S6        | 좁은 허용 목록·unknown 실행·기존 quality 유지           |
-| D5  | 번들 측정 대상·단위·도구·임계값·여유폭                  | S8        | 7주차 자료와 현재 반복 측정값                           |
-| D6  | 환경별 필수 변수·비밀 이름·허용 origin                  | S10       | 실제 소비 코드, Preview/Production 구분                 |
-| D7  | required/advisory check와 리포트 방식                   | S11       | 실행 비용·변동성·리스크, skip/failure 동작              |
-| D8  | AI 리뷰 도구·로컬/CI·트리거·비용 상한                   | S12       | 사용할 수 있는 도구와 권한·비용                         |
-| D9  | 반복 지적 중 승격할 규칙 하나                           | S14       | 실제 리뷰 이력, 기존 게이트와 차이, 참/거짓 판별 가능성 |
-| D10 | Lighthouse CI·배포 근거·rollback 선택 항목              | S0·S8·S15 | 7주차 지표, 실행 환경, 운영 범위                        |
+| ID  | 결정할 것                                                 | 결정 시점 | 확정에 필요한 근거                                      |
+| --- | --------------------------------------------------------- | --------- | ------------------------------------------------------- |
+| D1  | 확정: origin 측정·실험, upstream ayden94 최종 제출        | S0        | 아래 D1 확정표의 제한과 단계별 확인 유지                |
+| D2  | cold/warm 정의·수집 방식·timeout                          | S1        | 실제 캐시 종류, runner, 명령과 정상 실행 시간           |
+| D3  | 확정: 같은 job production 산출물을 E2E에 재사용           | S3        | Before 6회 모두 E2E가 최대 step, 실제 build 중복 확인   |
+| D4  | 확정: 허용 문서 전용 PR만 Chromium·E2E skip, 재시도 0회   | S6        | 좁은 허용 목록·unknown 실행·기존 quality 유지           |
+| D5  | /와 /products 초기 외부 JS encoded bytes, 각 348160 bytes | S8        | 7주차 자료와 현재 반복 측정값                           |
+| D6  | APP_ENV·APP_ORIGIN·AUTH_SESSION_SECRET, Preview 경계 분리 | S10       | 실제 소비 코드, Preview/Production 구분                 |
+| D7  | origin/main quality required, AI/Lighthouse advisory      | S11       | 실행 비용·변동성·리스크, skip/failure 동작              |
+| D8  | ChatGPT 웹에서 실제 diff 2회, AI CI 미도입                | S12       | 사용할 수 있는 도구와 권한·비용                         |
+| D9  | TypeScript AST로 상위 FSD 의존 차단                       | S14       | 실제 리뷰 이력, 기존 게이트와 차이, 참/거짓 판별 가능성 |
+| D10 | Lighthouse 미도입·새 배포 없음·rollback 답변              | S0·S8·S15 | 7주차 지표, 실행 환경, 운영 범위                        |
 
 ## 실행 단계와 진행표
 
@@ -129,25 +129,25 @@ S2~S5는 각 단계에서 별도로 확인받는다. 나머지 결정은 해당 
 Stage는 앞 단계 증거를 닫기 전에 진행하지 않는다. 전 단계가 끝나기 전 다음 단계의
 제품·workflow 변경을 섞지 않는다.
 
-| Stage | 실행 단위                         | 과제 연결 | 핵심 산출물                        | 상태                           |
-| ----- | --------------------------------- | --------- | ---------------------------------- | ------------------------------ |
-| S0    | 실행 범위·권한·RFC 확정           | 공통      | 결정표·브랜치/PR 역할              | 검증 완료·사용자 승인          |
-| S1    | 측정 가능한 Before 준비           | 1         | 고정 프로토콜·baseline SHA         | 검증 완료·결과 승인            |
-| S2    | Before cold/warm 수집             | 1         | 6회 raw·중앙값·범위·병목           | 검증 완료·결과 승인            |
-| S3    | 병목 한정 최적화                  | 1         | 선택 근거·동등 검증 CI             | 검증 완료·결과 승인            |
-| S4    | 캐시 hit/miss 실험                | 1         | 복원/미복원 로그·install 비교·원복 | 검증 완료·결과 승인            |
-| S5    | After 측정·비교 판정              | 1         | 6회 raw·Before/After 결론          | 검증 완료·결과 승인            |
-| S6    | 조건부 실행·실패 정책 구현        | 2         | 실행 행렬·스킵 안전 논리           | 로컬 검증 완료·결과 승인       |
-| S7    | 조건에 걸리는/안 걸리는 PR 검증   | 2         | 양쪽 PR·run·머지 가능 상태         | 검증·정리 완료, 결과 확인 대기 |
-| S8    | 번들 측정과 예산 결정             | 3         | 7주차→현재 대응표·임계값           | 초안                           |
-| S9    | 번들 예산 게이트 구현             | 3         | 측정 코드·정상/초과 검증           | 초안                           |
-| S10   | 빌드 전 환경 변수 게이트          | 3         | 검증 코드·환경별 실패 사례         | 초안                           |
-| S11   | required·결과 가시성·실패 PR 검증 | 3         | 보호 규칙·빨강/초록 PR 리포트      | 초안                           |
-| S12   | 팀 규칙 기반 AI 리뷰 기준 작성    | 4         | 프롬프트·실행/비용 정책            | 초안                           |
-| S13   | 실제 AI 리뷰 판별·프롬프트 개선   | 4         | 유효 지적 1개·오탐 1개·개선 근거   | 초안                           |
-| S14   | 반복 지적의 결정적 룰 승격        | 5         | 룰·위반/정상 fixture·책임 표       | 초안                           |
-| S15   | 질문 답변·10주 기술 회고          | 6·질문    | 회고·질문 4개 답변                 | 초안                           |
-| S16   | 최종 품질·제출물·원복 확인        | 공통      | 최종 SHA·검증·제출 인덱스          | 초안                           |
+| Stage | 실행 단위                         | 과제 연결 | 핵심 산출물                        | 상태                                          |
+| ----- | --------------------------------- | --------- | ---------------------------------- | --------------------------------------------- |
+| S0    | 실행 범위·권한·RFC 확정           | 공통      | 결정표·브랜치/PR 역할              | 검증 완료·사용자 승인                         |
+| S1    | 측정 가능한 Before 준비           | 1         | 고정 프로토콜·baseline SHA         | 검증 완료·결과 승인                           |
+| S2    | Before cold/warm 수집             | 1         | 6회 raw·중앙값·범위·병목           | 검증 완료·결과 승인                           |
+| S3    | 병목 한정 최적화                  | 1         | 선택 근거·동등 검증 CI             | 검증 완료·결과 승인                           |
+| S4    | 캐시 hit/miss 실험                | 1         | 복원/미복원 로그·install 비교·원복 | 검증 완료·결과 승인                           |
+| S5    | After 측정·비교 판정              | 1         | 6회 raw·Before/After 결론          | 검증 완료·결과 승인                           |
+| S6    | 조건부 실행·실패 정책 구현        | 2         | 실행 행렬·스킵 안전 논리           | 로컬 검증 완료·결과 승인                      |
+| S7    | 조건에 걸리는/안 걸리는 PR 검증   | 2         | 양쪽 PR·run·머지 가능 상태         | 검증·정리 완료, 결과 확인 대기                |
+| S8    | 번들 측정과 예산 결정             | 3         | 7주차→현재 대응표·임계값           | 완료·7주차 보충 재현/현재 실측·348160 bytes   |
+| S9    | 번들 예산 게이트 구현             | 3         | 측정 코드·정상/초과 검증           | 완료·실제 HTTP 예산/summary·초과 차단         |
+| S10   | 빌드 전 환경 변수 게이트          | 3         | 검증 코드·환경별 실패 사례         | 완료·env 선행 gate·Preview/공개 secret 차단   |
+| S11   | required·결과 가시성·실패 PR 검증 | 3         | 보호 규칙·빨강/초록 PR 리포트      | 완료·origin/main required·PR #18 빨강/초록    |
+| S12   | 팀 규칙 기반 AI 리뷰 기준 작성    | 4         | 프롬프트·실행/비용 정책            | 완료·팀 프롬프트·advisory 정책                |
+| S13   | 실제 AI 리뷰 판별·프롬프트 개선   | 4         | 유효 지적 1개·오탐 1개·개선 근거   | 완료·실제 ChatGPT 리뷰·참 지적 수정/오탐 기각 |
+| S14   | 반복 지적의 결정적 룰 승격        | 5         | 룰·위반/정상 fixture·책임 표       | 완료·AST 상위 FSD 의존 gate·RED/GREEN         |
+| S15   | 질문 답변·10주 기술 회고          | 6·질문    | 회고·질문 4개 답변                 | 완료·기술 회고·필수 4문항                     |
+| S16   | 최종 품질·제출물·원복 확인        | 공통      | 최종 SHA·검증·제출 인덱스          | 완료·464 tests/E2E16·제출 PR #197             |
 
 ## S0 — 실행 범위·권한·체크포인트
 
@@ -1956,6 +1956,52 @@ head/실제 checkout·workflow SHA는 각 run의 measurement context 로그에 �
 
 ## 증거 기록 형식과 제출 위치
 
+### 최종 제출 인덱스 — 2026-09-10
+
+최종 제출 PR: [upstream ayden94 대상 #197](https://github.com/loopers-labs/loop-pack-fe-l2-vol1/pull/197).
+실제 제출 브랜치는 `ayden94:volume-10`이며 PR은 merge하지 않는다.
+최신 원격 check 결과는 이 PR의 Checks에서 확인한다. 아래 수치는 실행 코드가 같은
+로컬 최종 검증 결과이며, 문서-only 마무리 commit으로 이를 새 측정처럼 재작성하지 않는다.
+
+S8 이후에는 사용자의 자율 완료 지시에 따라 정책을 근거로 결정하고 검증된 단계별로
+커밋했다. 앞의 단계별 확인 문구는 당시 진행 이력이며 최종 상태는 이 인덱스를 따른다.
+
+| 산출물                           | 실제 위치·증거                                                               |
+| -------------------------------- | ---------------------------------------------------------------------------- |
+| Before/After·캐시·조건부 실행    | 이 RFC S1~S7, PR #13~#17의 원시 run                                          |
+| 7주차 보충 재현·현재 전송량·예산 | [week10-budgets.md](./week10-budgets.md), `bundle-budget.json`               |
+| bundle gate                      | `scripts/ci/bundle-budget.mjs`, 실제 HTTP fixture·경계 테스트                |
+| env gate                         | `scripts/ci/validate-env.mjs`, `pnpm build`의 선행 `env:check`               |
+| 예산·env 원격 실패/복구·summary  | PR #18, budgets 문서의 네 run과 브라우저 캡처                                |
+| required 최종 정책               | origin/main의 quality(app15368), strict·관리자 적용 유지                     |
+| 실제 AI 리뷰·오탐·수정           | [week10-ai-review.md](./week10-ai-review.md)                                 |
+| 반복 지적의 결정적 룰            | [week10-rule-promotion.md](./week10-rule-promotion.md), AST gate·9개 fixture |
+| 질문 4개·10주 회고               | [week10-retrospective.md](./week10-retrospective.md)                         |
+
+최종 로컬 `pnpm check`는 명시한 test env와 Node 24.17.0에서 **67 files / 464 tests**,
+ESLint·FSD 검사·타입·env·production build·JS 예산까지 통과했다.
+기본 포트를 사용하는 사용자 서버와 충돌하지 않도록 3220번 임시 production 설정에서
+독립 `pnpm test:e2e`도 **16 passed**를 확인했다. 실제 저장소 Playwright 설정은 변경하지 않았다.
+임시 설정만 사용했으며 다음 remote quality에서는 기본 설정을 사용한다.
+
+검증 시 초기 JS는 `/` 299731 bytes, `/products` 301370 bytes로 348160 bytes 한도 안이었다.
+CLI의 잘못된 입력·예산 초과·상위 import·도움말도 실제 프로세스로 확인했다.
+비교 결과는 cold 수치 기준 충족·warm 개선 확정 보류이며 임계값을 결과에 맞춰 바꾸지 않았다.
+
+실험 #15~#18은 미머지 종료·실패 fixture/config 원복을 확인했다.
+Before/After 자료가 있는 #13/#14도 제출 정리 때 미머지 종료하고 증거 브랜치는 유지한다.
+제출 브랜치에는 합성 실패 fixture나 낮춘 실험 예산을 합치지 않는다.
+upstream의 보호 규칙은 변경하지 않았고 실제 배포·운영 수치를 만들어내지 않았다.
+
+빌드 전 검증에 필요한 local test env 예시는 budgets 문서를 따른다.
+문서화된 공개 test secret은 preview/production에서 거부한다.
+정상 결과를 확인한 단일 smoke·실험 결과를 공식 성능 표본으로 재분류하지 않았다.
+
+최종 전용 gate reviewer를 한 번 호출했지만 인증 토큰 만료로 도구 실행 없이 종료됐다.
+따라서 독립 final gate의 APPROVE를 받았다고 주장하지 않는다.
+실제 동작 QA와 S13의 ChatGPT 웹 리뷰는 수행했으며, 미실행 독립 gate는 잔여 검토
+한계로 남긴다. 실패를 숨기거나 인증 문제 때문에 테스트 기준을 낮추지 않았다.
+
 긴 로그를 본문에 붙이지 않는다. run URL과 필요한 로그 발췌·캡처·작은 raw 표를 연결한다.
 로컬 절대 경로나 곧 만료될 artifact만 유일한 근거로 두지 않고 보존 위치·만료도 기록한다.
 
@@ -1982,44 +2028,44 @@ head/실제 checkout·workflow SHA는 각 run의 measurement context 로그에 �
 각 행은 원문의 필수 요구 또는 선택 항목이다. 단계 작성 완료가 과제 완료를 뜻하지 않는다.
 최종 증거 칸은 S16 전에 채운다.
 
-| ID  | 원문 요구사항                                                 | 실행 Stage     | 최종 증거                                                                               |
-| --- | ------------------------------------------------------------- | -------------- | --------------------------------------------------------------------------------------- |
-| R01 | 기존 CI 계승·실제 명령·Node/pnpm·frozen lockfile·job timeout  | S1             | S1 run 34427219215 attempts 1/2, 고정 버전·10분 timeout·원격 성공                       |
-| R02 | Before cold/warm 각각 3회·raw/중앙값/범위                     | S1~S2          | S2 run 34427219215 attempts 3~8, raw·145/135초 중앙값·범위 기록                         |
-| R03 | Actions step 타임스탬프로 최대 병목 지목                      | S2             | S2 step 원시값: 6회 모두 E2E가 최대, cold/warm 중앙값 35초                              |
-| R04 | 같은 검증 유지·병목에 맞는 전략만·비채택 근거                 | S3             | S3 commit 9301b358·run 34436736719, 실제 build 1회·동일 테스트                          |
-| R05 | concurrency main 오취소 방지·병렬 install 비용 확인           | S3             | D3에서 두 전략 미채택 이유 기록. 단일 job·기존 취소 정책 유지                           |
-| R06 | warm 복원 로그 캡처·key 변경 miss·install 차이·lockfile 원복  | S4             | PR #15 원격 4회, K0 hit→K1 miss→K0 hit·전체 tree 원복                                   |
-| R07 | After cold/warm 각각 3회·동등 조건·흔들림 대비 개선 판정      | S5             | run 34436736719 attempts 2~7. cold 기준 충족·warm 근거 부족, 환경 분포 공개             |
-| R08 | lint/type/unit 모든 PR·build 소스/설정 보호                   | S6~S7          | S6 CLI 25개 회귀 + S7 PR #16/#17 정상 경로의 기본 검증 성공                             |
-| R09 | 비싼 검증 하나 이상 조건부·조건/스킵 이유·main 진입 안전성    | S6             | D4 좁은 문서 허용 목록·unknown 실행·main 강제 실행 계약, S7 실제 분기 확인              |
-| R10 | 필요한 경로 누락 방지·required skip 교착/실패 전파 검증       | S6~S7·S11      | S6 경계 검사·S7 임시 required의 CLEAN→BLOCKED→CLEAN 확인. S11 최종 대상 재검증 남음     |
-| R11 | 조건에 걸리는/안 걸리는 실제 PR·Actions 로그·머지 가능 상태   | S7·S11         | PR #16 문서 skip·#17 전체 실행, 4개 run과 보호 적용 중 merge 상태 기록. S11 재검증 남음 |
-| R12 | 채택한 label 재실행/권한·draft/merge queue 동작               | S6~S7          | label·queue 미채택. draft로 skip하지 않는 정책, S7은 ready PR로 보호 차단과 구분        |
-| R13 | flaky 정책·재시도로 실패 숨기지 않음                          | S6             | retries=0 유지·trace/실패 보존. S7 고의 실패 후 같은 assertion·원본 값으로 복구         |
-| R14 | 주요 진입점 번들 예산·7주차 전송량+현재 범위·여유폭 근거      | S8~S9          | 미실행                                                                                  |
-| R15 | build 전 env 게이트·누락/URL/민감 NEXT_PUBLIC 실패            | S10            | 미실행                                                                                  |
-| R16 | required/excluded 판단·비용/변동성/리스크 근거                | S11            | 미실행                                                                                  |
-| R17 | PR 코멘트/summary 결과 가시성·초과 대상/양 표시               | S9~S11         | 미실행                                                                                  |
-| R18 | 실제 예산 초과 PR 빨강·PR 리포트 캡처·수정 후 초록·미머지     | S11            | 미실행                                                                                  |
-| R19 | 실제 PR diff AI 리뷰·특정 유료 API 강제 없음                  | S12~S13        | 미실행                                                                                  |
-| R20 | 1~9주 합의 규칙을 프로젝트 맞춤 프롬프트로 명문화             | S12            | 미실행                                                                                  |
-| R21 | AI 비결정성·required/advisory 배치 근거                       | S12            | 미실행                                                                                  |
-| R22 | CI AI 선택 시 max_turns·timeout·concurrency·trigger·비용 안전 | S12            | 채택 여부 미결정                                                                        |
-| R23 | 잘 잡은 리뷰 1개·오탐 1개·근거·프롬프트 개선                  | S13            | 미실행                                                                                  |
-| R24 | AI/사람의 실제 반복 지적 중 결정 가능한 하나 선정             | S14            | 미실행                                                                                  |
-| R25 | 적합한 결정적 룰·위반 차단/정상 통과·오탐 교정                | S14            | 미실행                                                                                  |
-| R26 | AI/사람에 남긴 것·기계로 내린 것 판단 1문단                   | S14~S15        | 미실행                                                                                  |
-| R27 | 지정 경로 10주 회고·기능 아닌 결정·수치/URL/로그/CI 근거      | S15            | 미실행                                                                                  |
-| R28 | 4개 필수 질문 각각 2~4문장·본인 판단                          | S15            | 미실행                                                                                  |
-| R29 | 최소 권한·코멘트 job 권한 한정·SHA 핀 정책                    | S1·S11~S12·S16 | 미실행                                                                                  |
-| R30 | pull_request_target 위험 회피·fork/secrets·로그 노출 방지     | S1·S10~S12·S16 | 미실행                                                                                  |
-| R31 | AI 활용·직접 판단/검증·역할과 책임·작성/검토 범위 기록        | S0~S16         | 미실행                                                                                  |
-| R32 | workflow·측정·조건·예산·env·리뷰·룰·답변·회고 제출물 연결     | S16            | 미실행                                                                                  |
-| R33 | 최종 pnpm check·실험 코드 원복·회귀 검증                      | S16            | 미실행                                                                                  |
-| O01 | 선택 Lighthouse: 7주차 LCP/CLS 근거·조건·변동성 판단          | S8·S11         | 채택 여부 미결정                                                                        |
-| O02 | Preview/Production URL 확보 권장·배포 자체는 채점 제외        | S0·S15         | 확보 여부 미확인                                                                        |
-| O03 | 선택 rollback 질문: DB·캐시·트랜잭션·flag                     | S15            | 채택 여부 미결정                                                                        |
+| ID  | 원문 요구사항                                                 | 실행 Stage     | 최종 증거                                                                        |
+| --- | ------------------------------------------------------------- | -------------- | -------------------------------------------------------------------------------- |
+| R01 | 기존 CI 계승·실제 명령·Node/pnpm·frozen lockfile·job timeout  | S1             | S1 run 34427219215 attempts 1/2, 고정 버전·10분 timeout·원격 성공                |
+| R02 | Before cold/warm 각각 3회·raw/중앙값/범위                     | S1~S2          | S2 run 34427219215 attempts 3~8, raw·145/135초 중앙값·범위 기록                  |
+| R03 | Actions step 타임스탬프로 최대 병목 지목                      | S2             | S2 step 원시값: 6회 모두 E2E가 최대, cold/warm 중앙값 35초                       |
+| R04 | 같은 검증 유지·병목에 맞는 전략만·비채택 근거                 | S3             | S3 commit 9301b358·run 34436736719, 실제 build 1회·동일 테스트                   |
+| R05 | concurrency main 오취소 방지·병렬 install 비용 확인           | S3             | D3에서 두 전략 미채택 이유 기록. 단일 job·기존 취소 정책 유지                    |
+| R06 | warm 복원 로그 캡처·key 변경 miss·install 차이·lockfile 원복  | S4             | PR #15 원격 4회, K0 hit→K1 miss→K0 hit·전체 tree 원복                            |
+| R07 | After cold/warm 각각 3회·동등 조건·흔들림 대비 개선 판정      | S5             | run 34436736719 attempts 2~7. cold 기준 충족·warm 근거 부족, 환경 분포 공개      |
+| R08 | lint/type/unit 모든 PR·build 소스/설정 보호                   | S6~S7          | S6 CLI 25개 회귀 + S7 PR #16/#17 정상 경로의 기본 검증 성공                      |
+| R09 | 비싼 검증 하나 이상 조건부·조건/스킵 이유·main 진입 안전성    | S6             | D4 좁은 문서 허용 목록·unknown 실행·main 강제 실행 계약, S7 실제 분기 확인       |
+| R10 | 필요한 경로 누락 방지·required skip 교착/실패 전파 검증       | S6~S7·S11      | S6 경계·S7 임시 required skip/실패·S11 main 예산/env BLOCKED→CLEAN 확인          |
+| R11 | 조건에 걸리는/안 걸리는 실제 PR·Actions 로그·머지 가능 상태   | S7·S11         | PR #16/#17 실행/skip·PR #18 main required 실패/복구의 실제 상태 기록             |
+| R12 | 채택한 label 재실행/권한·draft/merge queue 동작               | S6~S7          | label·queue 미채택. draft로 skip하지 않는 정책, S7은 ready PR로 보호 차단과 구분 |
+| R13 | flaky 정책·재시도로 실패 숨기지 않음                          | S6             | retries=0 유지·trace/실패 보존. S7 고의 실패 후 같은 assertion·원본 값으로 복구  |
+| R14 | 주요 진입점 번들 예산·7주차 전송량+현재 범위·여유폭 근거      | S8~S9          | week10-budgets.md: 7주차 재현/현재 실측·340KiB 예산                              |
+| R15 | build 전 env 게이트·누락/URL/민감 NEXT_PUBLIC 실패            | S10            | validate-env + build 선행 연결·실제 PR #18 env RED/GREEN                         |
+| R16 | required/excluded 판단·비용/변동성/리스크 근거                | S11            | origin/main quality required(admin/strict). AI/Lighthouse advisory               |
+| R17 | PR 코멘트/summary 결과 가시성·초과 대상/양 표시               | S9~S11         | 실제 브라우저에서 run summary의 route/bytes/overage와 env 오류 확인              |
+| R18 | 실제 예산 초과 PR 빨강·PR 리포트 캡처·수정 후 초록·미머지     | S11            | PR #18: 34452738722 RED → 34453241815 GREEN, 캡처·미머지 종료                    |
+| R19 | 실제 PR diff AI 리뷰·특정 유료 API 강제 없음                  | S12~S13        | ChatGPT 웹에서 b48e5f5d..6df02466 실제 diff 2회 리뷰                             |
+| R20 | 1~9주 합의 규칙을 프로젝트 맞춤 프롬프트로 명문화             | S12            | week10-ai-review.md 팀 규칙 프롬프트·실제 사용 범위 기록                         |
+| R21 | AI 비결정성·required/advisory 배치 근거                       | S12            | 비결정성 때문에 AI advisory, 작성자 검증 책임 유지                               |
+| R22 | CI AI 선택 시 max_turns·timeout·concurrency·trigger·비용 안전 | S12            | AI CI 미도입. 유료 API·새 키·자동 반복 없음                                      |
+| R23 | 잘 잡은 리뷰 1개·오탐 1개·근거·프롬프트 개선                  | S13            | 공개 CI fixture 배포 허용 결함 RED/GREEN. APP_ENV/metric 오탐 철회               |
+| R24 | AI/사람의 실제 반복 지적 중 결정 가능한 하나 선정             | S14            | week06 RFC 반복된 entity→feature 상위 의존 문제 선정                             |
+| R25 | 적합한 결정적 룰·위반 차단/정상 통과·오탐 교정                | S14            | TypeScript AST 룰·위반4/정상5·실제 CLI exit1/0                                   |
+| R26 | AI/사람에 남긴 것·기계로 내린 것 판단 1문단                   | S14~S15        | week10-rule-promotion.md와 회고: 기계/AI/작성자 책임 구분                        |
+| R27 | 지정 경로 10주 회고·기능 아닌 결정·수치/URL/로그/CI 근거      | S15            | week10-retrospective.md: 결정·수치·CI URL·한계                                   |
+| R28 | 4개 필수 질문 각각 2~4문장·본인 판단                          | S15            | 회고의 필수 질문4개 각2~4문장                                                    |
+| R29 | 최소 권한·코멘트 job 권한 한정·SHA 핀 정책                    | S1·S11~S12·S16 | contents/pull-requests read·전체 action SHA pin 유지                             |
+| R30 | pull_request_target 위험 회피·fork/secrets·로그 노출 방지     | S1·S10~S12·S16 | pull_request_target 미사용·CI 공개 test fixture와 배포 secret 분리               |
+| R31 | AI 활용·직접 판단/검증·역할과 책임·작성/검토 범위 기록        | S0~S16         | 각 RFC에 AI 도구/실제 검증/오탐과 실패 범위 공개                                 |
+| R32 | workflow·측정·조건·예산·env·리뷰·룰·답변·회고 제출물 연결     | S16            | 최종 제출 인덱스로 workflow·gate·리뷰·회고 연결                                  |
+| R33 | 최종 pnpm check·실험 코드 원복·회귀 검증                      | S16            | 최종 pnpm check 464 tests·E2E16·모든 실험 원복/미머지 종료                       |
+| O01 | 선택 Lighthouse: 7주차 LCP/CLS 근거·조건·변동성 판단          | S8·S11         | 미채택·7주차 성능은 기록, Lighthouse는 advisory                                  |
+| O02 | Preview/Production URL 확보 권장·배포 자체는 채점 제외        | S0·S15         | 배포 URL 미확인·새 배포 없음. 로컬 production/실제 CI 근거만 사용                |
+| O03 | 선택 rollback 질문: DB·캐시·트랜잭션·flag                     | S15            | 회고에 답변·실제 운영 rollback 수행 주장 없음                                    |
 
 ## 결정 변경 기록
 

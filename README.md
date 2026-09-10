@@ -36,7 +36,22 @@ pnpm install
 pnpm dev
 ```
 
-`pnpm test`는 전체 Vitest 테스트가 통과해야 완료됩니다. `pnpm check`는 테스트, lint, 타입 검사, 프로덕션 빌드를 순서대로 실행하며 네 단계가 모두 통과해야 완료됩니다. GitHub Actions도 pull request와 `main` push에서 같은 `pnpm check`를 실행합니다.
+`pnpm test`는 전체 Vitest 테스트가 통과해야 완료됩니다. `pnpm check`는 테스트,
+lint(FSD 경계 포함), 타입, 환경 검증·production build, 초기 JS 예산을 순서대로 실행합니다.
+CI는 같은 검증을 명명된 step으로 실행하고, 코드/설정 PR에는 production E2E도 수행합니다.
+문서 전용 PR의 E2E skip 범위와 실제 실패/복구 근거는 [10주차 RFC](docs/rfc/week10-ci.md)를 참고합니다.
+
+production build 전에는 환경 계약을 명시해야 합니다. 아래는 **로컬 테스트 전용** 예시이며
+실제 배포에는 별도 secret과 올바른 HTTPS origin을 사용합니다.
+
+```bash
+APP_ENV=test APP_ORIGIN=http://127.0.0.1:3000 \
+AUTH_SESSION_SECRET=local-test-only-not-for-production pnpm check
+```
+
+`pnpm test:e2e`는 별도로 자체 build 후 실행합니다. Preview/Production 계약과 예산 단위는
+[환경·예산 문서](docs/rfc/week10-budgets.md), 10주 결정 요약은
+[기술 회고](docs/rfc/week10-retrospective.md)에 기록되어 있습니다.
 
 > Next.js(App Router) + React 19 + TypeScript. 1~3주차 React+Vite 산출물은 개인 브랜치 히스토리에 남아 있습니다.
 
@@ -127,12 +142,15 @@ pnpm typecheck
 pnpm build
 ```
 
-- `pnpm lint`: 전체 소스 ESLint 검사
+- `pnpm lint`: 전체 소스 ESLint와 FSD 상위 의존 검사
 - `pnpm lint:fix`: 자동 수정 가능한 ESLint 문제 수정
 - `pnpm format`: Prettier로 포맷 적용
 - `pnpm format:check`: 포맷 위반 여부 확인
 - `pnpm typecheck`: Next 단일 TypeScript 프로젝트 타입 검사
-- `pnpm build`: Next production 빌드
+- `pnpm build`: 환경 계약 검증 후 Next production 빌드
+- `pnpm env:check`: 필수 변수·origin·민감 공개 값 검사
+- `pnpm budget:check`: production 서버의 초기 외부 JS 응답 예산 검사
+- `pnpm architecture:check`: 정적 FSD 상위 의존 검사
 
 ## 제출
 
