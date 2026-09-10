@@ -6,13 +6,13 @@
 재구성한다. 과제 원문이 범위의 기준이며, 이 문서는 실행 순서와 결정·증거의 기준이다.
 요약 과정에서 요구사항을 줄이지 않고 마지막 추적표로 원문과 연결한다.
 
-| 항목              | 값                                               |
-| ----------------- | ------------------------------------------------ |
-| 상태              | S1 검증 결과 승인 — 결과 기록 커밋               |
-| 현재 단계         | Stage 2 진입 승인, 측정 환경 기준 확정 전        |
-| 작성 기준         | `volume-10`, `278c2224`                          |
-| 본 과제 구현·측정 | S1 smoke 2회 성공, 공식 Before/After 측정 미실행 |
-| 다음 행동         | S1 결과 커밋 후 S2 측정 환경·캐시 제어 조건 결정 |
+| 항목              | 값                                                                   |
+| ----------------- | -------------------------------------------------------------------- |
+| 상태              | S2 결과 승인 — 단계 전환 커밋                                        |
+| 현재 단계         | Stage 3 진입·중복 build 재사용 방안 승인                             |
+| 작성 기준         | `volume-10`, `278c2224`                                              |
+| 본 과제 구현·측정 | S2 cold 3회·warm 3회 모두 성공. After 측정·최적화 미실행             |
+| 다음 행동         | S2 결과 커밋 후 S3 최소 변경·로컬 검증, 다음 커밋·원격 검증은 재확인 |
 
 `week10-feedback.md`는 **9주차 피드백 수정 기록**이다. 이번 CI 과제의 완료 증거로
 대체하지 않는다. 기존 문서의 미완료 표시도 이 RFC에서 임의로 완료 처리하지 않는다.
@@ -123,25 +123,25 @@ S2~S5는 각 단계에서 별도로 확인받는다. 나머지 결정은 해당 
 Stage는 앞 단계 증거를 닫기 전에 진행하지 않는다. 전 단계가 끝나기 전 다음 단계의
 제품·workflow 변경을 섞지 않는다.
 
-| Stage | 실행 단위                         | 과제 연결 | 핵심 산출물                        | 상태                        |
-| ----- | --------------------------------- | --------- | ---------------------------------- | --------------------------- |
-| S0    | 실행 범위·권한·RFC 확정           | 공통      | 결정표·브랜치/PR 역할              | 검증 완료·사용자 승인       |
-| S1    | 측정 가능한 Before 준비           | 1         | 고정 프로토콜·baseline SHA         | 검증 완료·결과 승인         |
-| S2    | Before cold/warm 수집             | 1         | 6회 raw·중앙값·범위·병목           | 진입 승인·측정 조건 결정 전 |
-| S3    | 병목 한정 최적화                  | 1         | 선택 근거·동등 검증 CI             | 초안                        |
-| S4    | 캐시 hit/miss 실험                | 1         | 복원/미복원 로그·install 비교·원복 | 초안                        |
-| S5    | After 측정·비교 판정              | 1         | 6회 raw·Before/After 결론          | 초안                        |
-| S6    | 조건부 실행·실패 정책 구현        | 2         | 실행 행렬·스킵 안전 논리           | 초안                        |
-| S7    | 조건에 걸리는/안 걸리는 PR 검증   | 2         | 양쪽 PR·run·머지 가능 상태         | 초안                        |
-| S8    | 번들 측정과 예산 결정             | 3         | 7주차→현재 대응표·임계값           | 초안                        |
-| S9    | 번들 예산 게이트 구현             | 3         | 측정 코드·정상/초과 검증           | 초안                        |
-| S10   | 빌드 전 환경 변수 게이트          | 3         | 검증 코드·환경별 실패 사례         | 초안                        |
-| S11   | required·결과 가시성·실패 PR 검증 | 3         | 보호 규칙·빨강/초록 PR 리포트      | 초안                        |
-| S12   | 팀 규칙 기반 AI 리뷰 기준 작성    | 4         | 프롬프트·실행/비용 정책            | 초안                        |
-| S13   | 실제 AI 리뷰 판별·프롬프트 개선   | 4         | 유효 지적 1개·오탐 1개·개선 근거   | 초안                        |
-| S14   | 반복 지적의 결정적 룰 승격        | 5         | 룰·위반/정상 fixture·책임 표       | 초안                        |
-| S15   | 질문 답변·10주 기술 회고          | 6·질문    | 회고·질문 4개 답변                 | 초안                        |
-| S16   | 최종 품질·제출물·원복 확인        | 공통      | 최종 SHA·검증·제출 인덱스          | 초안                        |
+| Stage | 실행 단위                         | 과제 연결 | 핵심 산출물                        | 상태                             |
+| ----- | --------------------------------- | --------- | ---------------------------------- | -------------------------------- |
+| S0    | 실행 범위·권한·RFC 확정           | 공통      | 결정표·브랜치/PR 역할              | 검증 완료·사용자 승인            |
+| S1    | 측정 가능한 Before 준비           | 1         | 고정 프로토콜·baseline SHA         | 검증 완료·결과 승인              |
+| S2    | Before cold/warm 수집             | 1         | 6회 raw·중앙값·범위·병목           | 검증 완료·결과 승인              |
+| S3    | 병목 한정 최적화                  | 1         | 선택 근거·동등 검증 CI             | 진입 승인·동일 job 산출물 재사용 |
+| S4    | 캐시 hit/miss 실험                | 1         | 복원/미복원 로그·install 비교·원복 | 초안                             |
+| S5    | After 측정·비교 판정              | 1         | 6회 raw·Before/After 결론          | 초안                             |
+| S6    | 조건부 실행·실패 정책 구현        | 2         | 실행 행렬·스킵 안전 논리           | 초안                             |
+| S7    | 조건에 걸리는/안 걸리는 PR 검증   | 2         | 양쪽 PR·run·머지 가능 상태         | 초안                             |
+| S8    | 번들 측정과 예산 결정             | 3         | 7주차→현재 대응표·임계값           | 초안                             |
+| S9    | 번들 예산 게이트 구현             | 3         | 측정 코드·정상/초과 검증           | 초안                             |
+| S10   | 빌드 전 환경 변수 게이트          | 3         | 검증 코드·환경별 실패 사례         | 초안                             |
+| S11   | required·결과 가시성·실패 PR 검증 | 3         | 보호 규칙·빨강/초록 PR 리포트      | 초안                             |
+| S12   | 팀 규칙 기반 AI 리뷰 기준 작성    | 4         | 프롬프트·실행/비용 정책            | 초안                             |
+| S13   | 실제 AI 리뷰 판별·프롬프트 개선   | 4         | 유효 지적 1개·오탐 1개·개선 근거   | 초안                             |
+| S14   | 반복 지적의 결정적 룰 승격        | 5         | 룰·위반/정상 fixture·책임 표       | 초안                             |
+| S15   | 질문 답변·10주 기술 회고          | 6·질문    | 회고·질문 4개 답변                 | 초안                             |
+| S16   | 최종 품질·제출물·원복 확인        | 공통      | 최종 SHA·검증·제출 인덱스          | 초안                             |
 
 ## S0 — 실행 범위·권한·체크포인트
 
@@ -482,6 +482,275 @@ S3 이후로 자동 진행하지 않는다.
 
 **완료:** 유효한 Before 6회와 병목 근거, 최적화 전 검증 집합 고정.
 **커밋 경계:** Before 측정 기록. 코드 변경 없음.
+
+### S2 진입과 조사 결과 — 2026-09-10
+
+S1 결과 기록을 `560f7098`로 커밋했다. 이 문서 커밋은 아직 push하지 않았다.
+실험 PR #13의 head `37233786`, base `72a49cd1`, 기존 run의 attempt 2 성공 상태는
+읽기 전용 조회에서 유지되고 있었다. 현재 S2 공식 실행·캐시 삭제는 **0회**다.
+
+GitHub 공식 계약을 확인했다.
+
+- [동일 run 재실행](https://docs.github.com/en/actions/how-tos/manage-workflow-runs/re-run-workflows-and-jobs)은
+  원래 event의 `GITHUB_SHA`·`GITHUB_REF`와 최초 실행자의 권한을 사용한다.
+  PR을 닫았다 다시 열어 새 run을 만드는 것보다 checkout 기준을 유지하기 쉽다.
+- [Hosted runner](https://docs.github.com/en/actions/reference/runners/github-hosted-runners)는
+  매 job 새 환경을 제공한다. `ubuntu-latest`는 고정 image build/CPU를 뜻하지 않는다.
+  [runner-images 정책](https://github.com/actions/runner-images/blob/main/README.md)도
+  이미지 갱신을 설명한다. `ubuntu-24.04`로만 바꿔도 특정 이미지 빌드·CPU까지 고정되지는 않는다.
+- [cache ID 삭제 API](https://docs.github.com/en/rest/actions/cache#delete-a-github-actions-cache-for-a-repository-using-a-cache-id)로
+  특정 항목만 삭제할 수 있다. 현재 실험 cache는 ID `7527248927`,
+  `refs/pull/13/merge` scope이며 main cache ID `7480586644`와 구분된다.
+
+### S2 실행 조건 — 2026-09-10 사용자 승인
+
+새 workflow나 중간 구현 커밋을 만들지 않고 기존 run `34427219215`를 재사용하는 안이다.
+동일 run의 key가 유지되므로, cold 생성 직전에 **이번 실험의 정확한 key/ref 항목만**
+삭제한다. 이는 S1의 “새 run_id로 cold 생성” 안을 대체하며, 위 사용자 승인으로 확정했다.
+
+| 표본 | 예정 attempt | 캐시 조작                                  | 기대 상태               |
+| ---- | ------------ | ------------------------------------------ | ----------------------- |
+| B-C1 | 3            | 정확한 실험 key/ref의 현재 ID 1개 삭제     | miss → 정상 검증 → save |
+| B-W1 | 4            | 삭제 없음, 직전 cold에서 저장한 cache 사용 | exact hit               |
+| B-C2 | 5            | 직전 save로 생성된 현재 실험 ID 1개 삭제   | miss → 정상 검증 → save |
+| B-W2 | 6            | 삭제 없음                                  | exact hit               |
+| B-C3 | 7            | 현재 실험 ID 1개 삭제                      | miss → 정상 검증 → save |
+| B-W3 | 8            | 삭제 없음                                  | exact hit               |
+
+- 승인 요청 범위는 **추가 attempt 최대 6회 + 특정 실험 cache 삭제 3회**다.
+  실행 한도는 10분/job 기준 최대 60 runner-minutes이며, 큐 대기는 별도다.
+- 삭제 전 매번 목록을 조회해 key 전체 문자열과 ref가 모두 일치하는 항목이 정확히
+  하나인지 확인한다. 현재 알려진 ID를 반복 재사용하지 않는다. 목록 불일치·권한 오류가
+  있으면 멈춘다. main·다른 PR·전체 cache 삭제는 승인 범위가 아니다.
+- C1 → W1 → C2 → W2 → C3 → W3를 직렬 실행한다. 소스·workflow·lockfile·
+  head/base·worker 설정·mutation 조건을 바꾸지 않고, 기존 smoke 1/2는 다시 세지 않는다.
+- cold 측정의 save를 다음 warm 표본의 준비로 쓴다. 별도 warm-up 실행은 추가하지 않는다.
+  준비 run과 warm 표본을 혼동하지 않으며, 이 방식도 Before/After에서 동일하게 유지한다.
+- 실패·조건 불일치가 생기면 기록하고 멈춘다. 승인 없이 대체 run·수정 커밋·cache 추가
+  조작을 하지 않는다. 최대 6회는 실행 상한이지, 유효 표본 6개 확보를 보장하는 말이 아니다.
+- S2 동안 main/실험 PR head를 동결한다. 재실행의 checkout은 고정돼도 paths-filter는
+  PR 파일 목록을 조회하므로 실행 전후 head/base와 mutation 출력을 대조한다.
+
+### 실행 유효성과 환경 비교 가능성 — 승인된 판정 기준
+
+원문은 hosted runner 변동을 전제로 반복 측정과 범위를 요구한다. 반면 같은 runner
+라벨만으로 실제 image/CPU가 동일했다고 주장할 수는 없다. 다음 두 판정을 구분한다.
+
+1. **실행 유효:** 모든 필수 검증 성공, 예상 cold/warm 증거, 시간 로그 완전성,
+   head/base/checkout·workflow·lock hash·실제 Node/pnpm·runner 종류·OS/arch·
+   parallelism·mutation·worker 설정이 기준선과 일치한다.
+2. **환경 관측과 비교:** runner 설정·OS/arch·parallelism·실제 Node/pnpm·검증
+   집합은 고정한다. image build·CPU model은 관측 변수로 기록·구분하며, 이미지
+   빌드 차이만으로 실행 유효 표본을 탈락시키지 않는다. 전체 raw와 cold/warm 통계를
+   제시하되 환경별 분포도 함께 보인다. Before/After의 환경 분포 차이가 있으면
+   단순 중앙값 차이만으로 인과적 개선을 주장하지 않는다.
+
+각 attempt의 raw 시간·환경·채택/보류 이유는 빠짐없이 남긴다. 혼합 환경의 cold/warm
+중앙값·min~max는 **관측 요약**으로 표시하고, 통제된 성능 비교의 증거로 바꾸지 않는다.
+느린 결과를 이유로 제외하거나 동일 환경이 나올 때까지 재시도하지 않는다.
+같은 image/CPU도 host contention·네트워크 변동을 없애는 것은 아니다.
+
+최초 승인한 image build+CPU 완전 일치 조건은 아래 중단 뒤 사용자 확인으로 대체했다.
+고정 가능한 설정과 관측 환경을 구분하는 변경이지, 실패 검증·틀린 캐시 상태를
+허용하는 변경은 아니다. 전체 실행 한도 6회와 전용 캐시 삭제 한도 3회는 유지한다.
+추가 표본·대체 인프라는 별도 승인 사항이며 유료/self-hosted runner를 자동 도입하지 않는다.
+
+사용자의 **“진행해”** 요청으로 위의 전용 캐시 삭제 범위·최대 6회 수집·환경 판정
+기준을 승인받았다. S1의 준비 attempt 1/2는 제외하며 attempt 3부터 공식 수집한다.
+main/다른 PR 캐시 삭제·추가 실행·설정 변경·S3 진입은 승인 범위가 아니다.
+결과 문서는 S2 결과 확인과 단계 전환 승인 전까지 커밋하지 않는다.
+
+### S2 초기 수집과 일시 중단 기록 — 2026-09-10
+
+아래는 환경 기준 변경 승인 **전**의 관측과 당시 중단 판단이다. 원시 값과 의사결정
+이력은 유지하며, 재개 이후 상태는 다음 기록에서 갱신한다.
+
+승인된 추가 실행 6회 중 **2회**, 전용 cache 삭제 3회 중 **1회**만 수행했다.
+run은 동일한 `34427219215`이며, attempt 3/4가 B-C1/B-W1이다.
+S1 smoke attempt 1/2를 이번 통계에 포함하거나 재분류하지 않았다.
+
+| 항목                     | B-C1 / attempt 3                                                                                 | B-W1 / attempt 4                                                                                 |
+| ------------------------ | ------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------ |
+| Run URL                  | [attempt 3](https://github.com/ayden94/loop-pack-fe-l2-vol1/actions/runs/34427219215/attempts/3) | [attempt 4](https://github.com/ayden94/loop-pack-fe-l2-vol1/actions/runs/34427219215/attempts/4) |
+| 시작~종료 UTC            | 02:16:03~02:18:19                                                                                | 02:19:01~02:21:16                                                                                |
+| job wall-clock           | 136초                                                                                            | 135초                                                                                            |
+| 캐시                     | 실제 cold miss·save 성공                                                                         | 같은 key exact hit                                                                               |
+| 필수 검증                | 409 tests·lint·type·build·E2E 16개 성공                                                          | 동일하게 성공                                                                                    |
+| Runner image             | ubuntu24 / 20260831.293.1                                                                        | ubuntu24 / 20260907.300.1                                                                        |
+| CPU/parallelism          | AMD EPYC 7763 / 4                                                                                | AMD EPYC 7763 / 4                                                                                |
+| 실행 유효성              | 충족                                                                                             | 충족                                                                                             |
+| 최초 cold 기준 환경 일치 | 기준 표본                                                                                        | **이미지 빌드 불일치**                                                                           |
+
+두 표본의 head/base/checkout·workflow SHA, 실제 Node/pnpm, OS/arch,
+lock hash, pnpm store/key, mutation=false와 Playwright `16 tests / 2 workers`는 동일하다.
+조건부 mutation은 두 번 모두 skipped, warm의 cache save도 의도대로 skipped였다.
+
+삭제한 cache는 ID `7527248927` 한 개이며 HTTP 204와 목록 조회로 삭제를 확인했다.
+main cache ID `7480586644`는 보존했다. cold 3이 새로 저장한 실험 cache ID는
+`7527770790`이다. B-C2 준비 중 이 새 ID를 조회했지만 **삭제하지 않았다.**
+
+#### 중단 이유와 완료 판정
+
+승인된 보수적 기준은 최초 cold의 동일 image build+CPU에 cold 3개·warm 3개가
+모두 모여야 통제된 Before 기준선으로 인정한다. B-W1이 이미 기준 환경과 달라,
+남은 4회로 같은 환경의 warm 3개를 확보할 수 없다. 따라서 불가능한 완료 조건을
+위해 승인 한도를 소모하지 않고 B-C2 직전에 멈췄다.
+
+- **중단 당시 S2 미완료**였다. 그 시점에는 예정 attempt 5~8을 요청하지 않았다.
+- raw 값은 136초·135초로 보존한다. cold/warm 각각 표본 1개이므로 공식
+  3회 중앙값·범위와 병목 결론을 산출하지 않는다.
+- 1초 차이를 캐시 효과·성능 개선으로 해석하지 않는다.
+- source/workflow 변경·새 커밋·push·S3 진입은 하지 않았다.
+
+#### 환경 기준 변경과 재개 승인
+
+image build+CPU의 완전 일치는 이 RFC에서 제안한 보수적 통제 조건이다.
+과제 원문은 hosted runner의 시간 변동을 전제로 같은 runner 종류·설정과 반복 측정·
+범위를 요구하며, 특정 이미지 빌드가 다시 배정될 것을 보장하지 않는다.
+
+실행 가능한 대안으로 **runner 설정·OS/arch·parallelism·실제 Node/pnpm·검증 집합을
+고정하고 image build/CPU를 관측 변수로 기록·구분**하는 방법을 제안한다.
+이미지 빌드 차이만으로 표본을 자동 탈락시키지 않되, 환경 혼합과 Before/After 분포
+차이를 공개하고 단순 중앙값만으로 인과적 개선을 단정하지 않는다.
+이를 채택하면 기존 2개 raw 표본을 보존한 채 남은 승인 한도의 4회를 수집할 수 있다.
+
+사용자의 **“진행해”** 응답으로 위의 환경 기준 변경과 기존 두 표본을 보존한 채
+남은 **4회** 재개를 승인받았다. attempt 5~8만 추가하며, cold 5·7 직전 각각
+현재의 정확한 실험 cache key/ref 항목 1개를 삭제한다. 현재까지 실행 2회·삭제 1회를
+초기화하지 않으며, 전체 6회·삭제 3회 한도를 넘기지 않는다.
+
+S2의 Before 관측값은 변경한 기준으로 정리하되 물리 환경이 완전히 통제된 데이터라고
+표현하지 않는다. 표본을 속도에 따라 교체하거나 S1 smoke를 공식 표본으로 바꾸지 않는다.
+재개 결과 보고 후 커밋·S3 진입은 다시 명시적으로 확인받는다.
+
+### S2 최종 Before 결과 — 2026-09-10
+
+변경한 환경 판정 기준의 승인 후 남은 네 표본을 수집했다. 공식 표본은 동일
+run `34427219215`의 attempt **3~8**이며 cold 3개·warm 3개가 모두 실행 유효성
+검증을 통과했다. 중단 전에 수집한 attempt 3/4도 원시 값 그대로 포함했다.
+S1 smoke attempt 1/2는 제외했다.
+
+- 고정 head: `3723378634bcd498962b28bacee4f55300b0ec88`
+- 고정 base: `72a49cd1ed26a9721f0c9e5eea37996fb20ee824`
+- 실제 event/checkout/workflow SHA: `b2b31e0065d1ca9528bf135f778cd194b72c4164`
+- 설정: `ubuntu-latest`, Linux/X64, parallelism 4, Node `v24.17.0`,
+  pnpm `10.15.1`, Playwright `16 tests / 2 workers`
+- lockfile SHA256: `0138532944a9c6d465ebde42e3aebdbc51259594cc629a259ae70b72bddde932`
+- 검증 집합: 모든 표본에서 409 tests·lint·typecheck·production build·E2E 16개 성공.
+  mutation=false에 따라 해당 step은 모두 skipped. 소스·설정·검증 순서 변경 없음.
+- 캐시: cold는 실제 miss와 save 성공, warm은 동일 key의 exact hit을 확인했다.
+  warm에서 cache save는 skipped였다.
+
+#### 원시 시간과 환경
+
+시각은 UTC다. wall-clock은 quality job의 시작부터 post/cleanup을 포함한 종료까지이며
+큐 대기 시간을 포함하지 않는다. image 열은 모두 ubuntu24의 image build다.
+
+| 표본 / attempt                                                                                  | 시작     | 종료     | wall-clock | image build    | CPU model                 |
+| ----------------------------------------------------------------------------------------------- | -------- | -------- | ---------- | -------------- | ------------------------- |
+| [B-C1 / 3](https://github.com/ayden94/loop-pack-fe-l2-vol1/actions/runs/34427219215/attempts/3) | 02:16:03 | 02:18:19 | 136초      | 20260831.293.1 | AMD EPYC 7763             |
+| [B-W1 / 4](https://github.com/ayden94/loop-pack-fe-l2-vol1/actions/runs/34427219215/attempts/4) | 02:19:01 | 02:21:16 | 135초      | 20260907.300.1 | AMD EPYC 7763             |
+| [B-C2 / 5](https://github.com/ayden94/loop-pack-fe-l2-vol1/actions/runs/34427219215/attempts/5) | 02:32:09 | 02:34:34 | 145초      | 20260907.300.1 | Intel Xeon Platinum 8573C |
+| [B-W2 / 6](https://github.com/ayden94/loop-pack-fe-l2-vol1/actions/runs/34427219215/attempts/6) | 02:35:12 | 02:37:11 | 119초      | 20260907.300.1 | Intel Xeon Platinum 8573C |
+| [B-C3 / 7](https://github.com/ayden94/loop-pack-fe-l2-vol1/actions/runs/34427219215/attempts/7) | 02:38:32 | 02:41:00 | 148초      | 20260907.300.1 | AMD EPYC 9V74             |
+| [B-W3 / 8](https://github.com/ayden94/loop-pack-fe-l2-vol1/actions/runs/34427219215/attempts/8) | 02:41:37 | 02:43:56 | 139초      | 20260831.293.1 | AMD EPYC 7763             |
+
+#### Cold/Warm 요약
+
+| 상태        | raw 값(초)    | n   | 중앙값 | min~max   | 범위 폭 |
+| ----------- | ------------- | --- | ------ | --------- | ------- |
+| Before cold | 136, 145, 148 | 3   | 145초  | 136~148초 | 12초    |
+| Before warm | 135, 119, 139 | 3   | 135초  | 119~139초 | 20초    |
+
+이는 **혼합된 hosted 환경에서 관측한 Before 통계**다. cold/warm 중앙값의 10초
+차이를 캐시의 인과적 효과나 최적화 성과로 단정하지 않는다. 아직 After가 없으며,
+이 수집에서는 최적화를 적용하지 않았다.
+
+#### 환경별 분포
+
+| image build / CPU                          | cold raw(초) | warm raw(초) |
+| ------------------------------------------ | ------------ | ------------ |
+| 20260831.293.1 / AMD EPYC 7763             | 136 (n=1)    | 139 (n=1)    |
+| 20260907.300.1 / AMD EPYC 7763             | 없음         | 135 (n=1)    |
+| 20260907.300.1 / Intel Xeon Platinum 8573C | 145 (n=1)    | 119 (n=1)    |
+| 20260907.300.1 / AMD EPYC 9V74             | 148 (n=1)    | 없음         |
+
+각 층에 3개씩 있지 않으므로 환경별 확정적 성능 결론은 내리지 않는다.
+S5에서는 전체 분포와 환경별 분포를 함께 대조한다. 비교군 구성이 달라 설명이
+어려우면 인과적 개선 판단을 보류하고, 승인 없이 유리한 표본으로 교체하지 않는다.
+
+#### Step별 원시 시간
+
+단위는 초, 열 순서는 실행 순서다. `skip`은 의도된 미실행이며 0초 실행과 구분한다.
+원천은 `GET /repos/ayden94/loop-pack-fe-l2-vol1/actions/runs/34427219215/attempts/{attempt}/jobs`
+응답의 step별 `started_at`·`completed_at`이다. job 사이의 사용자 확인 대기 시간은
+wall-clock 표본에 넣지 않았다.
+
+| Step                                   | C1   | W1   | C2   | W2   | C3   | W3   |
+| -------------------------------------- | ---- | ---- | ---- | ---- | ---- | ---- |
+| Set up job                             | 2    | 1    | 7    | 2    | 2    | 2    |
+| Checkout                               | 1    | 1    | 2    | 2    | 2    | 2    |
+| Detect mutation target changes         | 0    | 1    | 1    | 0    | 1    | 0    |
+| Set up pnpm                            | 4    | 5    | 4    | 3    | 3    | 5    |
+| Set up Node.js                         | 5    | 5    | 7    | 5    | 5    | 6    |
+| Record measurement context             | 1    | 1    | 0    | 1    | 1    | 1    |
+| Restore measurement pnpm store         | 0    | 3    | 1    | 3    | 0    | 5    |
+| Verify exact cache condition           | 0    | 0    | 0    | 0    | 0    | 0    |
+| Install dependencies                   | 7    | 3    | 6    | 2    | 7    | 2    |
+| Install Playwright Chromium when used  | 23   | 24   | 29   | 24   | 26   | 25   |
+| Run tests                              | 19   | 19   | 15   | 14   | 19   | 19   |
+| Run lint                               | 18   | 18   | 16   | 15   | 20   | 18   |
+| Run typecheck                          | 4    | 4    | 4    | 4    | 5    | 5    |
+| Run production build                   | 11   | 12   | 9    | 10   | 12   | 11   |
+| Run mutation tests for changed targets | skip | skip | skip | skip | skip | skip |
+| Run production end-to-end tests        | 33   | 35   | 35   | 32   | 36   | 35   |
+| Save measurement pnpm store            | 4    | skip | 5    | skip | 6    | skip |
+| Post Set up Node.js                    | 1    | 0    | 0    | 0    | 0    | 0    |
+| Post Set up pnpm                       | 0    | 0    | 0    | 0    | 0    | 0    |
+| Post Checkout                          | 0    | 0    | 1    | 0    | 0    | 0    |
+| Complete job                           | 0    | 0    | 0    | 0    | 0    | 1    |
+| 전체 job wall-clock                    | 136  | 135  | 145  | 119  | 148  | 139  |
+
+step 합계와 job 시간의 차이는 step 사이 간격 등에서 발생한다. 합계를 전체
+wall-clock으로 대신 사용하지 않았다.
+
+#### 병목 지목과 S3 판단 자료
+
+**가장 긴 개별 step은 6회 모두 `Run production end-to-end tests`**였다.
+raw는 33·35·35·32·36·35초, cold/warm 중앙값은 모두 35초다.
+다음으로 Chromium 설치가 cold 중앙값 26초·warm 24초였다. test는 각각 19초,
+lint는 18초였다. 전체 job은 직렬이므로 모든 구간이 critical path에 있지만,
+개별 최대 구간을 `pnpm check` 같은 여러 작업의 합과 혼동하지 않는다.
+
+`package.json`의 `test:e2e`는 `pnpm build && playwright test`이며, 각 attempt 로그에서
+`Run production build`와 `Run production end-to-end tests` 양쪽에 실제 `> next build`
+실행이 있는 것을 확인했다. 단순히 명령 문자열만 보고 중복이라 추정하지 않았다.
+E2E 35초 전체가 build 비용은 아니므로 그 전체를 절감 가능 시간으로 주장하지 않는다.
+
+S3의 우선 검토 후보는 **같은 job·같은 SHA에서 먼저 만든 production 산출물을
+E2E에 재사용해 두 번째 build를 제거**하는 것이다. 실제 Playwright 16개와 앞선
+build 검증, 로컬 `pnpm test:e2e`의 독립 실행 계약은 유지해야 한다.
+pnpm 설치는 cold 7초·warm 2초 중앙값으로 최대 병목이 아니어서, 그 캐시만 더
+최적화하는 것을 우선안으로 잡지 않는다. 병렬 job·추가 브라우저 캐시·concurrency는
+효과와 설치·artifact 비용을 별도로 검토하고, 지금 구현하거나 확정하지 않는다.
+
+#### 한도·보존·완료 확인
+
+- 요청한 공식 attempt는 `[3, 4, 5, 6, 7, 8]` 정확히 6개다. 전부 성공했고
+  대체·제외 run은 없다. S1 smoke는 별도다.
+- 삭제한 ID는 `7527248927`(3 직전), `7527770790`(5 직전),
+  `7528147606`(7 직전)이다. 매번 정확한 key/ref를 조회해 한 항목만 삭제했다.
+- 마지막 실험 cache ID `7528287115`는 `refs/pull/13/merge`에 남겨뒀다.
+  main cache ID `7480586644`는 보존했다. 추가 삭제를 하지 않았다.
+- 6개 job wall-clock 합계는 822초다. 큐 대기·대화 대기·S1 smoke는 이 합계에서 제외한다.
+  청구 금액이나 실제 billing 집계로 표현하지 않는다.
+- PR #13은 OPEN·draft·미머지이며 head/base는 고정됐다. 같은 run은 attempt 8 success로 종료됐다.
+- source/workflow·공유 캐시·보호 규칙 변경, 추가 실행·커밋·push·S3 진입은 하지 않았다.
+
+**S2의 변경된 승인 기준에 따른 수집·분석은 완료**했다. 사용자의 “그렇게해” 요청으로
+S2 결과 기록 커밋과 S3의 동일 job production 산출물 재사용 방안 진행을 승인받았다.
+S3 변경의 커밋·원격 검증이나 S4 진입은 별도로 확인받는다.
+Before/After의 개선 판정은 S5에서 하며 지금 성공을 선고하지 않는다.
 
 ## S3 — 병목 한정 최적화
 
