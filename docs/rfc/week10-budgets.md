@@ -68,3 +68,32 @@ AUTH_SESSION_SECRET=local-test-only-not-for-production pnpm check
 
 누락·URL 오류·민감 공개 변수·Preview의 production origin 사용은 결정적으로 실패한다.
 환경 파일 파싱 실패도 성공으로 삼지 않는다. 예산·env 실패는 job summary에 표시한다.
+
+## S11 required·가시성·실패 PR
+
+origin/main에 GitHub Actions 앱 15368의 `quality`만 required로 적용했다.
+strict up-to-date와 관리자 적용을 켰고, 추가 review 승인이나 merge queue는 요구하지 않았다.
+기존 `quality`는 test·lint·타입·build 전 env·build 후 bundle budget을 포함한다.
+문서 전용 E2E skip은 S7에서 같은 check 이름으로 교착 없는 성공을 확인했다.
+AI·Lighthouse는 비용·비결정성·변동성 때문에 required로 채택하지 않는다.
+upstream 보호 설정을 변경할 관리자 권한은 없으므로 origin 설정을 upstream 적용으로 주장하지 않는다.
+
+[실험 PR #18](https://github.com/ayden94/loop-pack-fe-l2-vol1/pull/18)은 원격 네 실행 뒤
+원본 tree로 복구하고 미머지 종료했다.
+
+| 실험                | run                                                                                     | 실제 결과                                                                                 |
+| ------------------- | --------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| `/` 예산 1 byte     | [34452738722](https://github.com/ayden94/loop-pack-fe-l2-vol1/actions/runs/34452738722) | 299731 bytes 측정, 299730 bytes 초과, budget failure·PR BLOCKED                           |
+| 예산 348160 복구    | [34453241815](https://github.com/ayden94/loop-pack-fe-l2-vol1/actions/runs/34453241815) | quality success·PR CLEAN                                                                  |
+| Preview 경계 누락   | [34453628286](https://github.com/ayden94/loop-pack-fe-l2-vol1/actions/runs/34453628286) | env gate가 APP_ORIGIN·PRODUCTION_APP_ORIGIN 오류 표시, Next build 시작 전 failure·BLOCKED |
+| 원본 test 환경 복구 | [34453949242](https://github.com/ayden94/loop-pack-fe-l2-vol1/actions/runs/34453949242) | quality success·PR CLEAN                                                                  |
+
+실제 브라우저에서 run summary를 열어 첫 실패의 route·실측·한도·초과량 표와
+환경 실패의 변수 이름·이유 표가 raw log를 열지 않아도 보이는 것을 확인하고 캡처했다.
+스크린샷은 Aside 세션 artifact의 `repl-display-PKwgZObMEqjH1JRg.png`(예산),
+`repl-display-dCIrPF20TGEfJ0DZ.png`(환경)로 보존했다.
+동일 내용은 위 공개 run summary에서도 확인 가능하다.
+환경 summary에 secret 값은 없었다. 테스트용 실패 commit은 제출 브랜치에 합치지 않았다.
+
+origin/main의 required는 최종 보호 정책으로 유지한다. 실험 branch만 닫았고 main으로
+실험을 merge하지 않았다. S7의 임시 base 보호와 달리 이 설정은 제거하지 않는다.
