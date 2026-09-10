@@ -6,13 +6,13 @@
 재구성한다. 과제 원문이 범위의 기준이며, 이 문서는 실행 순서와 결정·증거의 기준이다.
 요약 과정에서 요구사항을 줄이지 않고 마지막 추적표로 원문과 연결한다.
 
-| 항목              | 값                                               |
-| ----------------- | ------------------------------------------------ |
-| 상태              | S3 결과 승인 — 단계 전환 커밋                    |
-| 현재 단계         | Stage 4 실험 준비 진입 승인                      |
-| 작성 기준         | `volume-10`, `278c2224`                          |
-| 본 과제 구현·측정 | S3 후보 원격 1회 성공, 공식 After 측정·S4 미실행 |
-| 다음 행동         | S3 결과 커밋 후 S4 lockfile·캐시 실험 범위 확인  |
+| 항목              | 값                                                                |
+| ----------------- | ----------------------------------------------------------------- |
+| 상태              | S4 결과 승인 — 단계 전환 커밋                                     |
+| 현재 단계         | Stage 5 After 측정 준비 진입 승인                                 |
+| 작성 기준         | `volume-10`, `278c2224`                                           |
+| 본 과제 구현·측정 | S4 원격 4회 모두 성공, 원본/변경 hash의 hit·miss와 tree 원복 확인 |
+| 다음 행동         | S4 결과 커밋 후 S5 후보·캐시·실행 범위 확인                       |
 
 `week10-feedback.md`는 **9주차 피드백 수정 기록**이다. 이번 CI 과제의 완료 증거로
 대체하지 않는다. 기존 문서의 미완료 표시도 이 RFC에서 임의로 완료 처리하지 않는다.
@@ -129,8 +129,8 @@ Stage는 앞 단계 증거를 닫기 전에 진행하지 않는다. 전 단계�
 | S1    | 측정 가능한 Before 준비           | 1         | 고정 프로토콜·baseline SHA         | 검증 완료·결과 승인         |
 | S2    | Before cold/warm 수집             | 1         | 6회 raw·중앙값·범위·병목           | 검증 완료·결과 승인         |
 | S3    | 병목 한정 최적화                  | 1         | 선택 근거·동등 검증 CI             | 검증 완료·결과 승인         |
-| S4    | 캐시 hit/miss 실험                | 1         | 복원/미복원 로그·install 비교·원복 | 진입 승인·실험 범위 확인 전 |
-| S5    | After 측정·비교 판정              | 1         | 6회 raw·Before/After 결론          | 초안                        |
+| S4    | 캐시 hit/miss 실험                | 1         | 복원/미복원 로그·install 비교·원복 | 검증 완료·결과 승인         |
+| S5    | After 측정·비교 판정              | 1         | 6회 raw·Before/After 결론          | 진입 승인·측정 범위 확인 전 |
 | S6    | 조건부 실행·실패 정책 구현        | 2         | 실행 행렬·스킵 안전 논리           | 초안                        |
 | S7    | 조건에 걸리는/안 걸리는 PR 검증   | 2         | 양쪽 PR·run·머지 가능 상태         | 초안                        |
 | S8    | 번들 측정과 예산 결정             | 3         | 7주차→현재 대응표·임계값           | 초안                        |
@@ -956,6 +956,195 @@ After 반복 측정과 환경 분포 대조 후 S5에서 한다.
 
 **완료:** hit/miss 로그·시간 차이·원복 SHA/hash. 실패 실험은 제출 이력에 병합하지 않음.
 **커밋 경계:** 증거 기록만. 실험 코드는 전용 브랜치에 한정.
+
+### S4 조사와 대조 실험의 필요성 — 2026-09-10
+
+S3 결과를 `e2ea575f`로 커밋했다. 아직 이 문서 커밋은 push하지 않았다.
+Before PR #13과 후보 PR #14의 head/base는 그대로이며, 둘 다 OPEN·draft·미머지다.
+main·PR #13·PR #14 캐시 세 항목을 읽기 전용으로 확인했고 삭제·갱신하지 않았다.
+
+현재 production 측정 키에는 **run_id와 lockfile SHA256이 함께 포함**된다.
+lockfile 변경 commit을 push하면 새 run_id도 생기므로, 그때의 miss만 보면
+lockfile hash에 의한 무효화인지 run_id 변화에 의한 것인지 구분할 수 없다.
+S2의 캐시 삭제 실험도 cold 생성 검증이지 lockfile hash 변경 실험의 대체가 아니다.
+
+S4는 별도 PR scope에서 **실험 namespace를 고정하고 key의 lock hash 외 변수는
+유지**하는 대조 실험으로 진행하는 안이다. main·Before·After 후보의 workflow는
+변경하지 않고, 실험 종료 후 임시 workflow도 원본으로 복구한다.
+
+### Lockfile 변경 후보 — 의존성 그래프 불변
+
+무관한 의존성을 추가·업그레이드하면 설치량과 패키지 구성이 바뀐다. 캐시 키의
+해시 무효화만 확인하려면 그 변수를 섞지 않는 편이 낫다.
+따라서 실험 브랜치에서만 `pnpm-lock.yaml` 맨 앞에 아래 주석 한 줄을 추가하는 안을 제안한다.
+
+```yaml
+# S4 cache-key probe: temporary comment; dependency graph unchanged.
+```
+
+- 원본 SHA256: `0138532944a9c6d465ebde42e3aebdbc51259594cc629a259ae70b72bddde932`
+- 주석 추가 후보 SHA256: `10ca351f2b025798867739cd25d01a1845995938049c2827a98273a7577bae0c`
+- 메모리에서 원본과 후보의 YAML 전체 파싱 결과가 동일함을 확인했다.
+  importer·package·snapshot·설정의 의미는 그대로다. 실제 lockfile은 아직 수정하지 않았다.
+- 후보 주석을 제거하면 원본 바이트 해시로 복구되는 것도 메모리에서 확인했다.
+- 이 실험은 **유효한 lockfile 바이트 변경이 키를 바꾸는지**를 검증한다.
+  의존성 버전 변경에 대한 설치 동작을 검증했다고 주장하지 않는다.
+- 실제 실행에서는 commit hook 이후 해시·YAML 의미를 다시 확인하고,
+  `pnpm install --frozen-lockfile`이 성공해야 한다. 이 옵션을 끄거나 실패를 우회하지 않는다.
+
+### S4 구체 실행안 — 2026-09-10 사용자 승인
+
+기준은 현재 S3 코드가 있는 `e2ea575f`다. 별도 worktree의
+`experiment/week10-s4-cache-key`에서 수행하고, origin/main 대상 draft 실험 PR을 만든다.
+volume-10과 PR #13/#14의 head는 변경하지 않는다.
+
+실험 workflow는 기존 metadata·검증·cache guard를 유지하고 cache key만
+`week10-s4` 전용 고정 namespace+OS/arch+실제 Node/pnpm+lock hash로 만든다.
+run_id·run_attempt·commit SHA는 **실험 key에서만 제외**하고 metadata에는 계속 기록한다.
+restore-keys는 두지 않는다. 실제 matched key가 primary와 다르면 기존 guard대로 실패한다.
+
+| 순서 | 실험 브랜치 작업                                                           | 예상 원격 동작                                                           | 필수 확인                                                         |
+| ---- | -------------------------------------------------------------------------- | ------------------------------------------------------------------------ | ----------------------------------------------------------------- |
+| 1    | 임시 고정 key workflow commit·push, draft PR 생성                          | 첫 run: 원본 hash key miss → install → save                              | 새 namespace, 정상 `--frozen-lockfile`, full 검증과 save 성공     |
+| 2    | commit 없이 같은 run 전체 재실행                                           | 원본 hash key exact hit                                                  | 실제 복원 메시지·matched key·install 시간                         |
+| 3    | lockfile에 위 주석만 추가해 commit·push                                    | 새 run: 다른 hash key miss → install → save                              | run_id 외 key 변수는 고정, hash만 달라졌는지·YAML 의미 동일성     |
+| 4    | 주석 제거로 원본 lockfile byte hash 복구, commit·push                      | 새 run: 원래 hash key exact hit                                          | 원본 hash 완전 복구, 기존 원본 cache 재사용                       |
+| 5    | PR을 머지하지 않고 닫은 뒤 임시 workflow를 원본으로 복구, 정리 commit·push | 활성 PR 없음, branch push는 main이 아니므로 새 CI를 유발하지 않는지 확인 | 최종 실험 tree가 기준 commit과 동일, 원본 workflow·lock hash 복구 |
+
+승인받을 범위는 **원격 실행 최대 4회 + 실험 브랜치에서 commit/push 최대 4회**다.
+두 번째 run은 같은 run의 재실행이므로 별도 commit이 없다.
+마지막 정리 commit은 PR을 닫은 뒤 수행해 불필요한 다섯 번째 실행을 만들지 않는다.
+실행 전에 실제 trigger 계약도 재확인한다.
+
+이는 단계 전환 때만 commit하는 원칙의 **S4 전용 실험 예외**다.
+제출 브랜치에는 실험 commit을 merge/cherry-pick하지 않고 결과 문서만 남긴다.
+실험 commit 제목은 일반 규칙과 hook을 지키며, 원복에 force-push·reset을 사용하지 않는다.
+
+10분/job 기준 실행 상한은 40 runner-minutes다. 기존 public 표준 runner를 유지하고
+유료 runner를 추가하지 않는다. 캐시 삭제는 계획에 없으며, 새로운 PR scope에 원본/변경
+hash의 두 cache만 생기는 것을 확인한다. 기존 main·Before·후보 캐시는 보존한다.
+실패·예상 밖 키/환경 변화가 있으면 추가 실행으로 채우지 않고 기록·안전 원복 후 멈춘다.
+
+### S4 증거와 완료 판정
+
+- 모든 run/attempt·head/base/checkout·workflow·lock hash·key·runner 환경을 남긴다.
+  commit 변경 때문에 checkout SHA가 바뀌는 것은 예상된 변수이며,
+  원격 head 간 실질 diff가 임시 workflow/lockfile 주석에 한정됐는지 확인한다.
+- 원본 hash의 warm 로그, 변경 hash의 `Cache not found`와 실제 install, 원본 복구 후
+  exact hit을 연결한다. cache 삭제로 만든 miss나 run_id만 바뀐 miss를 증거로 쓰지 않는다.
+- 원본 warm·변경 miss·복구 warm의 install 시간을 비교하되, image/CPU·네트워크
+  변동을 함께 공개한다. 이 소수 표본을 S5 성능 개선 수치로 사용하지 않는다.
+- 모든 run에서 기존 409 tests·lint·type·build·E2E 16개를 유지한다.
+  시험용 실패를 만들기 위해 제품 기능이나 검증을 고장 내지 않는다.
+- 종료 시 lockfile·workflow의 원본 byte hash와 최종 tree 동등성을 확인한다.
+  실험 PR은 닫되 머지하지 않는다. 필요 없는 새 배포·secrets·보호 규칙 변경은 하지 않는다.
+
+사용자의 **“진행해”** 응답으로 위 lockfile 주석 방식·임시 key·실험 commit 최대
+4회·원격 실행 최대 4회·실험 PR 미머지 종료·원복 범위를 승인받았다.
+기존 main·Before·S3 후보의 cache 삭제나 head 변경은 승인 범위에 없다.
+S4 결과 보고 후 제출 브랜치의 결과 문서 commit과 S5 진입은 다시 확인받는다.
+
+### S4 실제 실행 결과 — 2026-09-10
+
+기준 commit `e2ea575f`에서 별도 worktree와
+`experiment/week10-s4-cache-key`를 만들고 [origin draft PR #15](https://github.com/ayden94/loop-pack-fe-l2-vol1/pull/15)에서 실험했다.
+승인된 **원격 실행 4회·실험 commit 4회**를 사용했다. PR은 미머지 종료했고,
+정리 commit까지 push한 실험 branch의 전체 tree가 시작점과 동일함을 확인했다.
+제출 브랜치에 실험 commit을 merge/cherry-pick하지 않았다.
+
+#### Hash와 고정 키
+
+- `H0` 원본: `0138532944a9c6d465ebde42e3aebdbc51259594cc629a259ae70b72bddde932`
+- `H1` 주석 추가: `10ca351f2b025798867739cd25d01a1845995938049c2827a98273a7577bae0c`
+- 공통 key prefix:
+  `week10-s4-pnpm-Linux-X64-node-v24.17.0-pnpm-10.15.1-probe-lock-hash-v1-`
+- `K0 = prefix + H0`, `K1 = prefix + H1`. 실제 원격 key의 prefix는 네 번 모두 같았다.
+  run_id·commit이 달라도 key의 달라진 부분은 lockfile hash뿐이었다.
+
+원본/변경 lockfile 전체의 YAML 파싱 결과가 같았고, importer·dependency graph·
+snapshot 설정을 변경하지 않았다. 각 commit hook 이후에도 예상 hash와 일치했다.
+네 원격 실행 모두 `pnpm install --frozen-lockfile`이 성공했고
+`Lockfile is up to date, resolution step is skipped`를 확인했다.
+이 실험은 유효한 lockfile 바이트 해시의 무효화 계약을 증명하며, 의존성 버전 변경
+동작을 시험한 것으로 표현하지 않는다.
+
+#### 실행·시간·환경
+
+시간은 UTC, job wall-clock은 Jobs API의 시작~종료로 post/cleanup을 포함한다.
+install 시간은 같은 API의 `Install dependencies` step이다. 큐 대기는 제외한다.
+
+| 구간 / run attempt                                                                                               | head       | 시작~종료         | cache          | install | job wall-clock |
+| ---------------------------------------------------------------------------------------------------------------- | ---------- | ----------------- | -------------- | ------- | -------------- |
+| [원본 준비 / 34438098631·1](https://github.com/ayden94/loop-pack-fe-l2-vol1/actions/runs/34438098631/attempts/1) | `772b4835` | 04:40:40~04:42:52 | K0 miss → save | 7초     | 132초          |
+| [원본 warm / 34438098631·2](https://github.com/ayden94/loop-pack-fe-l2-vol1/actions/runs/34438098631/attempts/2) | `772b4835` | 04:43:44~04:45:48 | K0 exact hit   | 3초     | 124초          |
+| [변경 hash / 34438554386·1](https://github.com/ayden94/loop-pack-fe-l2-vol1/actions/runs/34438554386/attempts/1) | `0cabeb59` | 04:47:44~04:49:47 | K1 miss → save | 7초     | 123초          |
+| [원본 복구 / 34438789054·1](https://github.com/ayden94/loop-pack-fe-l2-vol1/actions/runs/34438789054/attempts/1) | `2f086fc7` | 04:51:27~04:53:28 | K0 exact hit   | 2초     | 121초          |
+
+| 구간           | 실제 event/checkout/workflow SHA           | image build                               | CPU           |
+| -------------- | ------------------------------------------ | ----------------------------------------- | ------------- |
+| 원본 준비·warm | `3736e3a3ff9d3bf99427c0755606029cadcb980d` | 준비 20260831.293.1 / warm 20260907.300.1 | AMD EPYC 7763 |
+| 변경 hash      | `dd9b888fb2e1e9a6fae13ee09bc3da45748ebcd6` | 20260831.293.1                            | AMD EPYC 9V74 |
+| 원본 복구      | `cb2cd8c33a2d54c37dd843757f9552b6b8ae6ed2` | 20260831.293.1                            | AMD EPYC 9V74 |
+
+base는 네 번 모두 `72a49cd1ed26a9721f0c9e5eea37996fb20ee824`였다.
+Node `v24.17.0`·pnpm `10.15.1`·Linux/X64·ubuntu24·parallelism 4와
+Playwright `16 tests / 2 workers`를 유지했다. 네 번 모두 409 tests·lint·typecheck·
+production build 1회·E2E 16개가 통과했고 mutation=false는 기존 정책대로 skipped였다.
+
+#### 실제 cache 증거와 설치 시간 해석
+
+- 원본 준비 로그 04:40:54.431Z: `Cache not found for input keys: K0`,
+  04:42:50.517Z: `Cache saved with key: K0`.
+- 원본 warm 로그 04:44:03.966Z: `Cache restored from key: K0`,
+  primary=matched=K0, exact hit=true.
+- 변경 hash 로그 04:47:58.577Z: `Cache not found for input keys: K1`,
+  04:49:45.195Z: `Cache saved with key: K1`.
+- 원본 복구 로그 04:51:45.470Z: `Cache restored from key: K0`,
+  primary=matched=K0, exact hit=true. 새 run에서도 원래 key가 복원됐다.
+
+위 `K0`·`K1`은 긴 key의 문서용 별칭이며, 원격 로그에는 위 prefix와 H0/H1을
+연결한 전체 key가 출력됐다. 부분 복원은 없었고 warm 실행은 cache save를 건너뛰었다.
+
+원본 warm의 install 3초 → 변경 miss의 7초 → 원본 복구 warm의 2초를 관측했다.
+이는 hit/miss에 따른 실제 설치 구간 기록이며, 이미지·CPU·네트워크 변동과 표본 수
+한계 때문에 보편적인 절감률로 주장하지 않는다. S4의 네 실행은 S5 공식 After
+6회에 포함하지 않는다. 특히 S4의 임시 key 설정도 공식 측정 설정과 다르다.
+
+#### 실험 commit과 완전 원복
+
+| 순서 | commit                                     | 목적                             |
+| ---- | ------------------------------------------ | -------------------------------- |
+| 1    | `772b48355674394edf009684e7733f7165f39155` | run_id 없는 고정 실험 key 한 줄  |
+| 2    | `0cabeb5913fc9d122efeece5913e2b2c9cd8b8b6` | 임시 주석으로 lockfile hash 변경 |
+| 3    | `2f086fc7a9c4888e1f59338ff2d3e3399d291e62` | lockfile 원본 바이트 복구        |
+| 4    | `b726f004d40676ad0a222e042608a8d9259778c6` | PR 종료 후 임시 workflow 원복    |
+
+모든 commit에서 lint-staged·commitlint를 통과했다. 강제 push·reset·hook 우회는
+사용하지 않았다. PR #15가 **closed·merged=false**임을 확인한 뒤 네 번째 commit을
+push했다. 현재 workflow의 main-only push와 기본 PR 이벤트 조건에서 추가 실행을
+만들지 않았고, Actions 목록도 총 3개 run ID·4개 attempt만 보였다.
+
+- 원복 lockfile SHA256: H0와 완전히 동일.
+- 원복 workflow SHA256:
+  `b6e66fd30fa1b15aec43f28891c129981582df68d2c903f4e7aa1ff6fc8e520b`.
+- 시작 `e2ea575f`와 종료 `b726f004`의 Git tree:
+  `64d368ba6ecc856523d12a6ef3ba1304e34846e2`, 로컬·원격 commit API에서 모두 동일.
+- 실험 worktree는 clean이며 기준 tree 대비 diff가 없다.
+  volume-10은 실험 전 HEAD를 유지하고 결과 RFC만 미커밋 변경으로 남긴다.
+- 새 S4 cache는 `refs/pull/15/merge`의 K0(ID `7531031084`, 212715987 bytes)와
+  K1(ID `7531177464`, 212706579 bytes) 두 개다. 삭제하지 않고 실험 scope에 남겨뒀다.
+- 기존 main cache `7480586644`, Before cache `7528287115`, S3 후보 cache
+  `7530572515`는 보존했다. PR #13/#14의 head·base도 변경하지 않았다.
+
+로컬 격리 worktree 준비 중 offline install은 store 누락 패키지 때문에 실패했다.
+같은 원본 lockfile과 `--frozen-lockfile`을 유지한 정상 install로 해결했고 lockfile이
+변하지 않았음을 확인했다. YAML LSP는 미설치 상태라 actionlint·YAML 의미 비교·
+실제 원격 frozen install로 검증했으며 도구 의존성을 추가하지 않았다.
+
+**S4의 hit/miss·install 비교·원본 hash/tree 복구 검증은 완료**했다.
+사용자의 “진행해” 요청으로 결과 문서 commit과 S5 측정 준비 진입을 승인받았다.
+S5의 후보 전용 cache 삭제·공식 실행 횟수는 구체 범위를 확인받고 수행한다.
+S4 실험 commit은 제출 브랜치에 합치지 않으며, S6 이후는 별도 승인 없이 진행하지 않는다.
 
 ## S5 — After 6회와 개선 판정
 
