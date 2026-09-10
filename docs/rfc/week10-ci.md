@@ -6,13 +6,13 @@
 재구성한다. 과제 원문이 범위의 기준이며, 이 문서는 실행 순서와 결정·증거의 기준이다.
 요약 과정에서 요구사항을 줄이지 않고 마지막 추적표로 원문과 연결한다.
 
-| 항목              | 값                                                               |
-| ----------------- | ---------------------------------------------------------------- |
-| 상태              | S2 결과 커밋 완료 — S3 로컬 구현·검증 완료                       |
-| 현재 단계         | Stage 3 단일 커밋·push·원격 준비 검증 1회 승인                   |
-| 작성 기준         | `volume-10`, `278c2224`                                          |
-| 본 과제 구현·측정 | S3 workflow 한 줄 변경, After 측정·S4 미실행                     |
-| 다음 행동         | Before PR을 보존하고 별도 후보 PR에서 원격 검증 1회 후 결과 보고 |
+| 항목              | 값                                               |
+| ----------------- | ------------------------------------------------ |
+| 상태              | S3 결과 승인 — 단계 전환 커밋                    |
+| 현재 단계         | Stage 4 실험 준비 진입 승인                      |
+| 작성 기준         | `volume-10`, `278c2224`                          |
+| 본 과제 구현·측정 | S3 후보 원격 1회 성공, 공식 After 측정·S4 미실행 |
+| 다음 행동         | S3 결과 커밋 후 S4 lockfile·캐시 실험 범위 확인  |
 
 `week10-feedback.md`는 **9주차 피드백 수정 기록**이다. 이번 CI 과제의 완료 증거로
 대체하지 않는다. 기존 문서의 미완료 표시도 이 RFC에서 임의로 완료 처리하지 않는다.
@@ -123,25 +123,25 @@ S2~S5는 각 단계에서 별도로 확인받는다. 나머지 결정은 해당 
 Stage는 앞 단계 증거를 닫기 전에 진행하지 않는다. 전 단계가 끝나기 전 다음 단계의
 제품·workflow 변경을 섞지 않는다.
 
-| Stage | 실행 단위                         | 과제 연결 | 핵심 산출물                        | 상태                         |
-| ----- | --------------------------------- | --------- | ---------------------------------- | ---------------------------- |
-| S0    | 실행 범위·권한·RFC 확정           | 공통      | 결정표·브랜치/PR 역할              | 검증 완료·사용자 승인        |
-| S1    | 측정 가능한 Before 준비           | 1         | 고정 프로토콜·baseline SHA         | 검증 완료·결과 승인          |
-| S2    | Before cold/warm 수집             | 1         | 6회 raw·중앙값·범위·병목           | 검증 완료·결과 승인          |
-| S3    | 병목 한정 최적화                  | 1         | 선택 근거·동등 검증 CI             | 로컬 검증 완료·원격 1회 승인 |
-| S4    | 캐시 hit/miss 실험                | 1         | 복원/미복원 로그·install 비교·원복 | 초안                         |
-| S5    | After 측정·비교 판정              | 1         | 6회 raw·Before/After 결론          | 초안                         |
-| S6    | 조건부 실행·실패 정책 구현        | 2         | 실행 행렬·스킵 안전 논리           | 초안                         |
-| S7    | 조건에 걸리는/안 걸리는 PR 검증   | 2         | 양쪽 PR·run·머지 가능 상태         | 초안                         |
-| S8    | 번들 측정과 예산 결정             | 3         | 7주차→현재 대응표·임계값           | 초안                         |
-| S9    | 번들 예산 게이트 구현             | 3         | 측정 코드·정상/초과 검증           | 초안                         |
-| S10   | 빌드 전 환경 변수 게이트          | 3         | 검증 코드·환경별 실패 사례         | 초안                         |
-| S11   | required·결과 가시성·실패 PR 검증 | 3         | 보호 규칙·빨강/초록 PR 리포트      | 초안                         |
-| S12   | 팀 규칙 기반 AI 리뷰 기준 작성    | 4         | 프롬프트·실행/비용 정책            | 초안                         |
-| S13   | 실제 AI 리뷰 판별·프롬프트 개선   | 4         | 유효 지적 1개·오탐 1개·개선 근거   | 초안                         |
-| S14   | 반복 지적의 결정적 룰 승격        | 5         | 룰·위반/정상 fixture·책임 표       | 초안                         |
-| S15   | 질문 답변·10주 기술 회고          | 6·질문    | 회고·질문 4개 답변                 | 초안                         |
-| S16   | 최종 품질·제출물·원복 확인        | 공통      | 최종 SHA·검증·제출 인덱스          | 초안                         |
+| Stage | 실행 단위                         | 과제 연결 | 핵심 산출물                        | 상태                        |
+| ----- | --------------------------------- | --------- | ---------------------------------- | --------------------------- |
+| S0    | 실행 범위·권한·RFC 확정           | 공통      | 결정표·브랜치/PR 역할              | 검증 완료·사용자 승인       |
+| S1    | 측정 가능한 Before 준비           | 1         | 고정 프로토콜·baseline SHA         | 검증 완료·결과 승인         |
+| S2    | Before cold/warm 수집             | 1         | 6회 raw·중앙값·범위·병목           | 검증 완료·결과 승인         |
+| S3    | 병목 한정 최적화                  | 1         | 선택 근거·동등 검증 CI             | 검증 완료·결과 승인         |
+| S4    | 캐시 hit/miss 실험                | 1         | 복원/미복원 로그·install 비교·원복 | 진입 승인·실험 범위 확인 전 |
+| S5    | After 측정·비교 판정              | 1         | 6회 raw·Before/After 결론          | 초안                        |
+| S6    | 조건부 실행·실패 정책 구현        | 2         | 실행 행렬·스킵 안전 논리           | 초안                        |
+| S7    | 조건에 걸리는/안 걸리는 PR 검증   | 2         | 양쪽 PR·run·머지 가능 상태         | 초안                        |
+| S8    | 번들 측정과 예산 결정             | 3         | 7주차→현재 대응표·임계값           | 초안                        |
+| S9    | 번들 예산 게이트 구현             | 3         | 측정 코드·정상/초과 검증           | 초안                        |
+| S10   | 빌드 전 환경 변수 게이트          | 3         | 검증 코드·환경별 실패 사례         | 초안                        |
+| S11   | required·결과 가시성·실패 PR 검증 | 3         | 보호 규칙·빨강/초록 PR 리포트      | 초안                        |
+| S12   | 팀 규칙 기반 AI 리뷰 기준 작성    | 4         | 프롬프트·실행/비용 정책            | 초안                        |
+| S13   | 실제 AI 리뷰 판별·프롬프트 개선   | 4         | 유효 지적 1개·오탐 1개·개선 근거   | 초안                        |
+| S14   | 반복 지적의 결정적 룰 승격        | 5         | 룰·위반/정상 fixture·책임 표       | 초안                        |
+| S15   | 질문 답변·10주 기술 회고          | 6·질문    | 회고·질문 4개 답변                 | 초안                        |
+| S16   | 최종 품질·제출물·원복 확인        | 공통      | 최종 SHA·검증·제출 인덱스          | 초안                        |
 
 ## S0 — 실행 범위·권한·체크포인트
 
@@ -841,9 +841,9 @@ Node `v24.17.0`·pnpm `10.15.1`을 사용했다. 로컬 실행 시간은 S2/S5�
 
 ### S3 커밋·원격 준비 검증 — 사용자 승인
 
-S2 결과 커밋 `02a7629e`와 이전 S1 결과 커밋은 아직 push하지 않았다.
-S3 변경은 workflow 한 줄과 관련 문서 세 개이며, 아직 커밋하지 않았다.
-원격 정상 CI와 After 후보 SHA가 미확정이므로 **S3 전체 완료는 아니다.**
+승인 요청 당시 S2 결과 커밋 `02a7629e`와 이전 S1 결과 커밋은 아직 push하지 않았고,
+S3 변경도 미커밋이었다. 아래 승인 범위에 따라 단일 S3 구현 커밋과 원격 준비 검증을
+진행했으며, 실제 결과는 다음 절에 기록한다.
 
 사용자의 “진행해” 응답으로 다음 범위를 승인받았다.
 
@@ -859,6 +859,89 @@ S3 변경은 workflow 한 줄과 관련 문서 세 개이며, 아직 커밋하�
 이번 승인은 위 단일 커밋·push·별도 draft PR·원격 준비 1회에 한정한다.
 Before PR #13 변경·cache 삭제·추가 재실행·S4/S5 진입은 승인 범위가 아니다.
 원격 검증 결과는 별도로 기록하고, 그 결과 문서의 커밋도 다음 확인 전에는 하지 않는다.
+
+### S3 원격 준비 검증 결과 — 2026-09-10
+
+S3 구현 커밋은 `9301b35861380fe3b03f772a8b7f0de07f076b51`이다.
+`origin/volume-10`과 별도 `experiment/week10-s3-candidate`에 같은 commit을
+push하고 [origin draft PR #14](https://github.com/ayden94/loop-pack-fe-l2-vol1/pull/14)를 만들었다.
+로컬에 남아 있던 S1·S2 결과 커밋도 volume-10 push에 함께 반영됐다.
+Before PR #13의 head `37233786`과 base `72a49cd1`은 변경하지 않았다.
+두 PR 모두 OPEN·draft·미머지 상태다.
+
+| 항목                             | 관측 결과                                                                                                          |
+| -------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| 실행                             | [run 34436736719 / attempt 1](https://github.com/ayden94/loop-pack-fe-l2-vol1/actions/runs/34436736719/attempts/1) |
+| 결과                             | success, 승인된 1회만 실행                                                                                         |
+| job 시작~종료 UTC                | 04:19:31~04:21:45                                                                                                  |
+| 전체 job wall-clock              | 134초, post/cleanup 포함·큐 대기 제외                                                                              |
+| head/base                        | `9301b35861380fe3b03f772a8b7f0de07f076b51` / `72a49cd1ed26a9721f0c9e5eea37996fb20ee824`                            |
+| event/실제 checkout/workflow SHA | `888dc0d59f0e5ceb8dd453b986ca49bd016a0c48`                                                                         |
+| runner                           | Linux/X64, ubuntu24 / 20260907.300.1, AMD EPYC 7763 / parallelism 4                                                |
+| Node/pnpm                        | v24.17.0 / 10.15.1                                                                                                 |
+| lockfile SHA256                  | `0138532944a9c6d465ebde42e3aebdbc51259594cc629a259ae70b72bddde932`                                                 |
+| 실제 테스트                      | 63 files / 409 tests, production Playwright 16 tests / 2 workers                                                   |
+| mutation                         | false, 기존 정책대로 해당 step skipped                                                                             |
+| 캐시                             | 새 run_id의 cold miss, 같은 primary key로 save 성공                                                                |
+
+캐시 키는
+`week10-s1-pnpm-Linux-X64-node-v24.17.0-pnpm-10.15.1-run-34436736719-0138532944a9c6d465ebde42e3aebdbc51259594cc629a259ae70b72bddde932`다.
+matched key와 exact-hit 출력은 비어 있었으며, 실제 로그에 `Cache not found for input keys`와
+`Cache saved with key`가 확인됐다. 저장된 cache ID는 `7530572515`, scope는
+`refs/pull/14/merge`, 크기는 `212730028 bytes`다. 기존 main cache `7480586644`와
+Before PR cache `7528287115`는 보존했다. 이번 S3 작업에서는 캐시를 삭제하지 않았다.
+
+#### 실제 build·검증 범위 확인
+
+- 로그의 `> next build`는 **04:21:04.052Z에 선행 production build에서 한 번만**
+  나타났다. E2E step에서 두 번째 build를 실행하지 않았다.
+- E2E는 `pnpm exec playwright test`로 production 서버를 시작했고, 기본 CI 설정에서
+  `Running 16 tests using 2 workers`와 `16 passed`를 확인했다.
+- 409개 테스트·lint·typecheck·선행 production build·production E2E가 모두 성공했다.
+  mutation=false에 따른 skip 외에는 필요한 검증을 생략하지 않았다.
+- Before workflow와 커밋된 S3 workflow를 비교하면 실행 코드 차이는 E2E의
+  `pnpm test:e2e` → `pnpm exec playwright test` 한 줄뿐이다.
+  package.json·lockfile·테스트·제품 코드·Playwright 설정은 그대로다.
+
+#### Step별 시간
+
+원천은 attempt 1의 Jobs API이며 단위는 초다. step 사이 간격 때문에 합계가
+전체 job wall-clock과 같지 않을 수 있다.
+
+| Step                                   | 시간    |
+| -------------------------------------- | ------- |
+| Set up job                             | 1       |
+| Checkout                               | 1       |
+| Detect mutation target changes         | 1       |
+| Set up pnpm                            | 6       |
+| Set up Node.js                         | 5       |
+| Record measurement context             | 0       |
+| Restore measurement pnpm store         | 0       |
+| Verify exact cache condition           | 0       |
+| Install dependencies                   | 8       |
+| Install Playwright Chromium when used  | 28      |
+| Run tests                              | 18      |
+| Run lint                               | 19      |
+| Run typecheck                          | 4       |
+| Run production build                   | 11      |
+| Run mutation tests for changed targets | skipped |
+| Run production end-to-end tests        | 24      |
+| Save measurement pnpm store            | 5       |
+| Post Set up Node.js                    | 0       |
+| Post Set up pnpm                       | 0       |
+| Post Checkout                          | 1       |
+| Complete job                           | 0       |
+| 전체 job wall-clock                    | 134     |
+
+이 실행은 **S3 후보 정상 동작 확인용 smoke**다. S5의 공식 After 6회에 포함하지
+않으며, 134초나 E2E 24초를 Before 중앙값과 단순 비교해 절감 효과를 확정하지 않는다.
+실제 중복 build 제거와 검증 집합 보존은 확인했고, 성능 개선 판단은 동일 방법의
+After 반복 측정과 환경 분포 대조 후 S5에서 한다.
+
+**S3의 로컬·원격 준비 검증은 완료**했다. After 후보 head는 `9301b358`,
+실제 검증된 merge SHA는 `888dc0d5`다. 사용자의 “진행해” 요청으로 S3 결과 문서
+커밋과 S4 실험 준비 진입을 승인받았다. S4의 임시 lockfile·키 변경과 원격 실행·
+실험 커밋 범위는 구체안을 확인받은 뒤 실행한다. S5는 별도 승인 없이 진입하지 않는다.
 
 ## S4 — 캐시 hit/miss와 원복
 
