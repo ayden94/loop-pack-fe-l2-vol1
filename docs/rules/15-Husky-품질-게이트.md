@@ -178,6 +178,8 @@ Git hook:
   항상 유지하며, main push에서는 E2E도 항상 실행한다.
 - `scripts/ci/classify-docs-only.mjs`는 실제 필터 집계를 검증한다. 불명확한 결과·빈 목록·
   API 파일 상한에 걸릴 수 있는 목록은 skip을 허용하지 않고, 잘못된 입력은 job을 실패시킨다.
+- `pnpm check`와 CI는 production build 뒤 `pnpm budget:check`도 실행한다.
+  초기 JS 응답 예산은 `bundle-budget.json`, 측정 근거는 `docs/rfc/week10-budgets.md`를 따른다.
 
 | 단계             | 목적                   |
 | ---------------- | ---------------------- |

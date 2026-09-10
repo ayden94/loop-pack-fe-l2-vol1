@@ -15,11 +15,12 @@
     "format": "prettier . --write",
     "format:check": "prettier . --check",
     "typecheck": "tsc --noEmit",
+    "budget:check": "node scripts/ci/bundle-budget.mjs",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "pnpm build && playwright test",
     "test:mutate": "stryker run",
-    "check": "pnpm test && pnpm lint && pnpm typecheck && pnpm build",
+    "check": "pnpm test && pnpm lint && pnpm typecheck && pnpm build && pnpm budget:check",
     "commitlint": "commitlint",
     "prepare": "husky"
   },

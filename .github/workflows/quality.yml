@@ -139,6 +139,8 @@ jobs:
         run: pnpm typecheck
       - name: Run production build
         run: pnpm build
+      - name: Run bundle budget
+        run: pnpm budget:check
       - name: Run mutation tests for changed targets
         if: steps.changes.outputs.mutation == 'true'
         run: pnpm test:mutate
