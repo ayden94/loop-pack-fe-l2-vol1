@@ -12,7 +12,12 @@ export function validateEnvironment(env) {
   }
   if (
     !env.AUTH_SESSION_SECRET?.trim() ||
-    env.AUTH_SESSION_SECRET === 'loopers-week09-secret'
+    env.AUTH_SESSION_SECRET === 'loopers-week09-secret' ||
+    (['preview', 'production'].includes(env.APP_ENV) &&
+      [
+        'week10-ci-only-not-a-production-secret',
+        'local-test-only-not-for-production',
+      ].includes(env.AUTH_SESSION_SECRET))
   ) {
     errors.push({
       variable: 'AUTH_SESSION_SECRET',

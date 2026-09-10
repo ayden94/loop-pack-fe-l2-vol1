@@ -42,6 +42,16 @@ describe('validateEnvironment', () => {
     ).toContain('APP_ORIGIN')
   })
 
+  it('validateEnvironment: public CI fixture used in production -> fails', () => {
+    expect(
+      validateEnvironment({
+        APP_ENV: 'production',
+        APP_ORIGIN: 'https://shop.example.test',
+        AUTH_SESSION_SECRET: 'week10-ci-only-not-a-production-secret',
+      }).map((error) => error.variable),
+    ).toContain('AUTH_SESSION_SECRET')
+  })
+
   it('validateEnvironment: preview omits production boundary -> fails', () => {
     expect(
       validateEnvironment({
