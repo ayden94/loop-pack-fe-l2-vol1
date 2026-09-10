@@ -6,13 +6,13 @@
 재구성한다. 과제 원문이 범위의 기준이며, 이 문서는 실행 순서와 결정·증거의 기준이다.
 요약 과정에서 요구사항을 줄이지 않고 마지막 추적표로 원문과 연결한다.
 
-| 항목              | 값                                                            |
-| ----------------- | ------------------------------------------------------------- |
-| 상태              | S0 완료 — S1 로컬 기준선 준비 검증 완료                       |
-| 현재 단계         | Stage 1 원격 준비 검증 승인, S2 미진입                        |
-| 작성 기준         | `volume-10`, `278c2224`                                       |
-| 본 과제 구현·측정 | S1 workflow 로컬 구현, 원격 smoke·공식 측정 미실행            |
-| 다음 행동         | 승인된 S1 단일 커밋·push 후 origin 실험 PR에서 smoke 최대 2회 |
+| 항목              | 값                                               |
+| ----------------- | ------------------------------------------------ |
+| 상태              | S1 검증 결과 승인 — 결과 기록 커밋               |
+| 현재 단계         | Stage 2 진입 승인, 측정 환경 기준 확정 전        |
+| 작성 기준         | `volume-10`, `278c2224`                          |
+| 본 과제 구현·측정 | S1 smoke 2회 성공, 공식 Before/After 측정 미실행 |
+| 다음 행동         | S1 결과 커밋 후 S2 측정 환경·캐시 제어 조건 결정 |
 
 `week10-feedback.md`는 **9주차 피드백 수정 기록**이다. 이번 CI 과제의 완료 증거로
 대체하지 않는다. 기존 문서의 미완료 표시도 이 RFC에서 임의로 완료 처리하지 않는다.
@@ -123,25 +123,25 @@ S2~S5는 각 단계에서 별도로 확인받는다. 나머지 결정은 해당 
 Stage는 앞 단계 증거를 닫기 전에 진행하지 않는다. 전 단계가 끝나기 전 다음 단계의
 제품·workflow 변경을 섞지 않는다.
 
-| Stage | 실행 단위                         | 과제 연결 | 핵심 산출물                        | 상태                           |
-| ----- | --------------------------------- | --------- | ---------------------------------- | ------------------------------ |
-| S0    | 실행 범위·권한·RFC 확정           | 공통      | 결정표·브랜치/PR 역할              | 검증 완료·사용자 승인          |
-| S1    | 측정 가능한 Before 준비           | 1         | 고정 프로토콜·baseline SHA         | 로컬 검증 완료, 원격 승인 대기 |
-| S2    | Before cold/warm 수집             | 1         | 6회 raw·중앙값·범위·병목           | 초안                           |
-| S3    | 병목 한정 최적화                  | 1         | 선택 근거·동등 검증 CI             | 초안                           |
-| S4    | 캐시 hit/miss 실험                | 1         | 복원/미복원 로그·install 비교·원복 | 초안                           |
-| S5    | After 측정·비교 판정              | 1         | 6회 raw·Before/After 결론          | 초안                           |
-| S6    | 조건부 실행·실패 정책 구현        | 2         | 실행 행렬·스킵 안전 논리           | 초안                           |
-| S7    | 조건에 걸리는/안 걸리는 PR 검증   | 2         | 양쪽 PR·run·머지 가능 상태         | 초안                           |
-| S8    | 번들 측정과 예산 결정             | 3         | 7주차→현재 대응표·임계값           | 초안                           |
-| S9    | 번들 예산 게이트 구현             | 3         | 측정 코드·정상/초과 검증           | 초안                           |
-| S10   | 빌드 전 환경 변수 게이트          | 3         | 검증 코드·환경별 실패 사례         | 초안                           |
-| S11   | required·결과 가시성·실패 PR 검증 | 3         | 보호 규칙·빨강/초록 PR 리포트      | 초안                           |
-| S12   | 팀 규칙 기반 AI 리뷰 기준 작성    | 4         | 프롬프트·실행/비용 정책            | 초안                           |
-| S13   | 실제 AI 리뷰 판별·프롬프트 개선   | 4         | 유효 지적 1개·오탐 1개·개선 근거   | 초안                           |
-| S14   | 반복 지적의 결정적 룰 승격        | 5         | 룰·위반/정상 fixture·책임 표       | 초안                           |
-| S15   | 질문 답변·10주 기술 회고          | 6·질문    | 회고·질문 4개 답변                 | 초안                           |
-| S16   | 최종 품질·제출물·원복 확인        | 공통      | 최종 SHA·검증·제출 인덱스          | 초안                           |
+| Stage | 실행 단위                         | 과제 연결 | 핵심 산출물                        | 상태                        |
+| ----- | --------------------------------- | --------- | ---------------------------------- | --------------------------- |
+| S0    | 실행 범위·권한·RFC 확정           | 공통      | 결정표·브랜치/PR 역할              | 검증 완료·사용자 승인       |
+| S1    | 측정 가능한 Before 준비           | 1         | 고정 프로토콜·baseline SHA         | 검증 완료·결과 승인         |
+| S2    | Before cold/warm 수집             | 1         | 6회 raw·중앙값·범위·병목           | 진입 승인·측정 조건 결정 전 |
+| S3    | 병목 한정 최적화                  | 1         | 선택 근거·동등 검증 CI             | 초안                        |
+| S4    | 캐시 hit/miss 실험                | 1         | 복원/미복원 로그·install 비교·원복 | 초안                        |
+| S5    | After 측정·비교 판정              | 1         | 6회 raw·Before/After 결론          | 초안                        |
+| S6    | 조건부 실행·실패 정책 구현        | 2         | 실행 행렬·스킵 안전 논리           | 초안                        |
+| S7    | 조건에 걸리는/안 걸리는 PR 검증   | 2         | 양쪽 PR·run·머지 가능 상태         | 초안                        |
+| S8    | 번들 측정과 예산 결정             | 3         | 7주차→현재 대응표·임계값           | 초안                        |
+| S9    | 번들 예산 게이트 구현             | 3         | 측정 코드·정상/초과 검증           | 초안                        |
+| S10   | 빌드 전 환경 변수 게이트          | 3         | 검증 코드·환경별 실패 사례         | 초안                        |
+| S11   | required·결과 가시성·실패 PR 검증 | 3         | 보호 규칙·빨강/초록 PR 리포트      | 초안                        |
+| S12   | 팀 규칙 기반 AI 리뷰 기준 작성    | 4         | 프롬프트·실행/비용 정책            | 초안                        |
+| S13   | 실제 AI 리뷰 판별·프롬프트 개선   | 4         | 유효 지적 1개·오탐 1개·개선 근거   | 초안                        |
+| S14   | 반복 지적의 결정적 룰 승격        | 5         | 룰·위반/정상 fixture·책임 표       | 초안                        |
+| S15   | 질문 답변·10주 기술 회고          | 6·질문    | 회고·질문 4개 답변                 | 초안                        |
+| S16   | 최종 품질·제출물·원복 확인        | 공통      | 최종 SHA·검증·제출 인덱스          | 초안                        |
 
 ## S0 — 실행 범위·권한·체크포인트
 
@@ -323,7 +323,9 @@ Before/After 양쪽에 동일하게 적용한다. 이는 측정 하네스이며 
   측정 중 PR을 동결하고, S1 원격 smoke에서 이 조건을 먼저 확인한다.
 
 로컬 정적·셸 검증은 GitHub의 캐시 저장/복원·PR 토큰 권한·재실행 SHA를 증명하지 않는다.
-따라서 **현재 S1의 원격 완료 조건은 미충족**이며 정상 baseline SHA/run은 아직 없다.
+이 항목들은 아래 원격 smoke 2회로 추가 검증했다. baseline 후보 head는 `37233786`,
+실제 검증한 merge SHA는 `b2b31e00`이다. runner 이미지·CPU 차이는 S2 진입 전
+측정 환경 결정에 반영해야 하며, 이 smoke를 동등 환경의 성능 비교로 사용하지 않는다.
 
 사용자 확인으로 정한 커밋·원격 검증 순서:
 
@@ -354,7 +356,100 @@ S1 완료 조건을 줄이거나 원격 검증을 S2로 옮기지는 않는다.
 
 YAML LSP는 설치되어 있지 않아 해당 진단은 실행하지 못했다. 프로젝트 의존성이나
 lockfile에 도구를 추가하지 않고 actionlint·YAML 파싱·실제 셸 실행으로 대체했다.
-정적 계약과 fixture는 이번 작업의 로컬 검증이며, 원격 캐시/권한/재실행 검증은 여전히 남아 있다.
+정적 계약과 fixture는 로컬 검증이다. 원격 캐시/권한/재실행 결과는 아래에 별도로 기록한다.
+
+### S1 원격 준비 검증 — 2026-09-10
+
+승인된 S1 단일 커밋은 `3723378634bcd498962b28bacee4f55300b0ec88`이다.
+`origin/volume-10`과 전용 실험 브랜치 `experiment/week10-s1-baseline`에 같은
+commit을 push하고 [origin draft PR #13](https://github.com/ayden94/loop-pack-fe-l2-vol1/pull/13)을 생성했다.
+대상은 origin/main이며, 최종 upstream 제출 PR이 아니다. **머지하지 않는다.**
+
+GitHub 공식 과금 문서와 저장소 visibility를 확인했다. public 저장소의 표준
+`ubuntu-latest` runner를 사용하며 유료 runner·설정·캐시 삭제는 추가하지 않았다.
+참고: [GitHub Actions billing](https://docs.github.com/en/billing/concepts/product-billing/github-actions).
+
+| 실행                                                                                                               | 관측 상태              | job 시작~종료 UTC | wall-clock | 결과                       |
+| ------------------------------------------------------------------------------------------------------------------ | ---------------------- | ----------------- | ---------- | -------------------------- |
+| [run 34427219215 / attempt 1](https://github.com/ayden94/loop-pack-fe-l2-vol1/actions/runs/34427219215/attempts/1) | cold, matched key 없음 | 01:52:51~01:55:10 | 139초      | success, 캐시 저장 완료    |
+| [동일 run / attempt 2](https://github.com/ayden94/loop-pack-fe-l2-vol1/actions/runs/34427219215/attempts/2)        | warm, exact hit=true   | 01:56:18~01:58:50 | 152초      | success, 중복 저장 skipped |
+
+attempt 1에서 확인한 고정 식별자:
+
+- head: `3723378634bcd498962b28bacee4f55300b0ec88`
+- base: `72a49cd1ed26a9721f0c9e5eea37996fb20ee824`
+- event/실제 checkout/workflow SHA: `b2b31e0065d1ca9528bf135f778cd194b72c4164`
+- runner: Linux/X64, `ubuntu24 / 20260831.293.1`, AMD EPYC 7763, parallelism 4
+- Node/pnpm: `v24.17.0 / 10.15.1`
+- lockfile SHA256: `0138532944a9c6d465ebde42e3aebdbc51259594cc629a259ae70b72bddde932`
+- pnpm store: `/home/runner/setup-pnpm/node_modules/.bin/store/v10`
+- mutation: `false`, 해당 step은 기존 정책대로 skipped
+- cache key: `week10-s1-pnpm-Linux-X64-node-v24.17.0-pnpm-10.15.1-run-34427219215-0138532944a9c6d465ebde42e3aebdbc51259594cc629a259ae70b72bddde932`
+
+첫 실행 로그의 `Cache not found for input keys`와 마지막 `Cache saved with key`를
+위 동일 key로 확인했다. PR 파일 조회, 409개 테스트·lint·타입·build와 E2E 16개가
+두 attempt에서 모두 성공했다. 두 번째 실행은 `Cache restored successfully`와
+`Cache restored from key`가 위 primary key와 일치하며 exact hit=true다.
+불필요한 cache save는 skipped다. head/base, event/checkout/workflow SHA,
+Node/pnpm, OS/arch, lock hash, store/key, mutation=false가 두 attempt에서 동일하다.
+
+이번 전용 cache ID는 `7527248927`, scope는 `refs/pull/13/merge`,
+크기는 `212703908 bytes`다. 기존 main 캐시를 삭제하거나 덮어쓰지 않았다.
+
+#### 환경 차이와 해석 한계
+
+| 항목         | attempt 1                       | attempt 2                 |
+| ------------ | ------------------------------- | ------------------------- |
+| Runner image | ubuntu24 / 20260831.293.1       | ubuntu24 / 20260907.300.1 |
+| CPU          | AMD EPYC 7763 64-Core Processor | Intel(R) Xeon(R) 6973P-C  |
+| parallelism  | 4                               | 4                         |
+
+같은 `ubuntu-latest`와 같은 run 재실행이어도 이미지 빌드와 CPU가 바뀌었다.
+**139초→152초를 캐시의 개선·악화로 해석하지 않는다.** 의존성 설치는 6초→5초였지만
+pnpm 설정·브라우저 설치 등 다른 구간의 변동과 환경 차이가 있다.
+이번 증거는 캐시 상태 제어·검증 실행·메타데이터 수집 기능의 정상 동작을 보여준다.
+
+S2 실행 전에 동일 환경 표본의 인정 기준과 hosted runner 변동을 어떻게 통제할지
+명시적으로 결정해야 한다. 예를 들어 허용한 image/CPU 조합별로 표본을 분리할지,
+기존 프로토콜의 환경 조건을 재정의할지를 근거와 함께 결정한다.
+현재 조건을 만족시키려고 무제한 재실행하거나, 고정할 수 없는 환경을 고정했다고
+주장하지 않는다. runner·측정 횟수·제외 기준을 바꾸려면 먼저 확인받는다.
+
+#### 실제 step 시간
+
+단위는 초, attempt별 Jobs API의 `started_at`·`completed_at` 차이다.
+합산 step 시간과 job wall-clock은 step 사이 구간 때문에 같지 않을 수 있다.
+job 종료에는 액션 post/cleanup도 포함했으며 큐 대기는 포함하지 않았다.
+
+| Step                                   | attempt 1 | attempt 2 |
+| -------------------------------------- | --------- | --------- |
+| Set up job                             | 2         | 3         |
+| Checkout                               | 2         | 3         |
+| Detect mutation target changes         | 1         | 1         |
+| Set up pnpm                            | 3         | 16        |
+| Set up Node.js                         | 5         | 5         |
+| Record measurement context             | 1         | 0         |
+| Restore measurement pnpm store         | 0         | 4         |
+| Verify exact cache condition           | 0         | 0         |
+| Install dependencies                   | 6         | 5         |
+| Install Playwright Chromium when used  | 24        | 39        |
+| Run tests                              | 19        | 12        |
+| Run lint                               | 18        | 13        |
+| Run typecheck                          | 4         | 3         |
+| Run production build                   | 11        | 10        |
+| Run mutation tests for changed targets | skipped   | skipped   |
+| Run production end-to-end tests        | 34        | 33        |
+| Save measurement pnpm store            | 4         | skipped   |
+| Post Set up Node.js                    | 0         | 0         |
+| Post Set up pnpm                       | 0         | 0         |
+| Post Checkout                          | 0         | 0         |
+| Complete job                           | 0         | 0         |
+| 전체 job wall-clock                    | 139       | 152       |
+
+이 두 run attempt는 S1 준비 smoke이며 **S2의 공식 Before 6회에 포함하지 않는다.**
+사용자의 “커밋하고 넘어가” 요청으로 S1 결과 기록 커밋과 S2 진입을 승인받았다.
+S2의 환경 변동 처리·캐시 조작 같은 구체 실행 조건은 별도로 설명하고 확정한다.
+S3 이후로 자동 진행하지 않는다.
 
 ### 측정 프로토콜
 
@@ -704,7 +799,8 @@ lockfile에 도구를 추가하지 않고 actionlint·YAML 파싱·실제 셸 �
 | --- | --- | --- | --- |
 | 2026-09-09 | S0·D1 | origin 측정·실험과 upstream 제출 분리, 제한 조건 채택 | S0 커밋·S1 진입. S2 이후는 별도 확인 |
 
-CI 실험은 아직 수행하지 않았다.
+S1 원격 smoke 2회는 사용자의 단일 커밋·push·실험 PR 승인 범위에서 수행했다.
+공식 Before/After 측정은 아직 하지 않았고, 이후 단계는 별도 확인받는다.
 
 AI가 과제 원문·기존 RFC·설정을 대조해 실행 단계와 추적표 초안을 작성했다.
 예산·required·조건부 실행·리뷰 도구·승격 룰의 최종 판단과 각 Stage 진행 확인은
