@@ -1,6 +1,6 @@
 {
   "routes": [
-    { "path": "/", "limitBytes": 348160 },
+    { "path": "/", "limitBytes": 1 },
     { "path": "/products", "limitBytes": 348160 }
   ]
 }
