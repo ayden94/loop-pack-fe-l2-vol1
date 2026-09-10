@@ -13,6 +13,11 @@ jobs:
   quality:
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    env:
+      APP_ENV: test
+      APP_ORIGIN: http://127.0.0.1:3000
+      # 공개된 테스트 계정/서버 전용 fixture이며 배포 secret으로 사용하지 않는다.
+      AUTH_SESSION_SECRET: week10-ci-only-not-a-production-secret
     permissions:
       contents: read
       pull-requests: read

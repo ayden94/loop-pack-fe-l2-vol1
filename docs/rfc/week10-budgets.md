@@ -40,3 +40,31 @@ PR summary에는 경로·실측·한도·초과량을 실패 시에도 표시한
 Lighthouse CI는 이번에 채택하지 않는다. 7주차에서 이미 LCP/CLS를 측정했고,
 hosted 환경의 변동성이 있으므로 결정적인 JS 예산과 별도로 advisory 영역에 남긴다.
 Preview/Production 외부 배포 URL은 확인되지 않았으며 새 유료 배포는 하지 않는다.
+
+## S10 환경 계약
+
+`pnpm build`는 `pnpm env:check`가 성공한 뒤에만 Next build를 시작한다.
+실제 Next production `.env*` 로딩을 사용하며 로그에는 변수 이름과 이유만 출력한다.
+
+| 환경 변수             | 계약                                                                                            |
+| --------------------- | ----------------------------------------------------------------------------------------------- |
+| APP_ENV               | test / development / preview / production 중 명시                                               |
+| APP_ORIGIN            | 실제 서버 API 요청에 쓰는 HTTP(S) origin. path·query·hash·credentials 금지                      |
+| AUTH_SESSION_SECRET   | 비어 있지 않은 명시 값. 기존 코드의 fallback 값 사용 금지                                       |
+| PRODUCTION_APP_ORIGIN | preview에서 필수. preview APP_ORIGIN과 다르게 설정                                              |
+| NEXT*PUBLIC*\*        | SECRET·PASSWORD·PRIVATE_KEY·ACCESS_TOKEN·REFRESH_TOKEN·DATABASE_URL 접미사는 서버 전용으로 차단 |
+
+preview/production origin은 HTTPS를 요구한다. 공개 API URL이나 publishable key를
+모두 금지하는 규칙은 아니다. CI는 `APP_ENV=test`와 공개 테스트 전용 secret을 쓰며
+실제 배포 secret·GitHub secrets를 읽거나 변경하지 않는다.
+실제 배포는 별도 환경에서 올바른 origin과 비밀 값을 제공해야 한다.
+
+로컬 검증 예시(실제 배포용 secret이 아님):
+
+```sh
+APP_ENV=test APP_ORIGIN=http://127.0.0.1:3000 \
+AUTH_SESSION_SECRET=local-test-only-not-for-production pnpm check
+```
+
+누락·URL 오류·민감 공개 변수·Preview의 production origin 사용은 결정적으로 실패한다.
+환경 파일 파싱 실패도 성공으로 삼지 않는다. 예산·env 실패는 job summary에 표시한다.

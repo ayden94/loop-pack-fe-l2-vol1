@@ -180,6 +180,8 @@ Git hook:
   API 파일 상한에 걸릴 수 있는 목록은 skip을 허용하지 않고, 잘못된 입력은 job을 실패시킨다.
 - `pnpm check`와 CI는 production build 뒤 `pnpm budget:check`도 실행한다.
   초기 JS 응답 예산은 `bundle-budget.json`, 측정 근거는 `docs/rfc/week10-budgets.md`를 따른다.
+- `pnpm build`는 `pnpm env:check`를 먼저 실행한다. 실제 환경 변수 계약과 로컬
+  테스트용 실행 예시는 `docs/rfc/week10-budgets.md`를 따른다. secret 값은 출력하지 않는다.
 
 | 단계             | 목적                   |
 | ---------------- | ---------------------- |
