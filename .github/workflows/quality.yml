@@ -12,6 +12,10 @@ permissions:
 jobs:
   quality:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      pull-requests: read
     steps:
       - name: Checkout
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
@@ -30,11 +34,83 @@ jobs:
         uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271 # v6.0.9
         with:
           version: 10.15.1
+          cache: false
       - name: Set up Node.js
         uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
         with:
           node-version-file: .nvmrc
-          cache: pnpm
+          package-manager-cache: false
+      - name: Record measurement context
+        id: measurement
+        env:
+          EVENT_ACTION: ${{ github.event.action }}
+          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          PR_BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
+          MUTATION_CHANGED: ${{ steps.changes.outputs.mutation }}
+        run: |
+          node_version="$(node --version)"
+          pnpm_version="$(pnpm --version)"
+          store_path="$(pnpm store path)"
+          lock_hash="$(sha256sum pnpm-lock.yaml | cut -d ' ' -f 1)"
+          checkout_sha="$(git rev-parse HEAD)"
+          cache_key="week10-s1-pnpm-${RUNNER_OS}-${RUNNER_ARCH}-node-${node_version}-pnpm-${pnpm_version}-run-${GITHUB_RUN_ID}-${lock_hash}"
+          printf 'store-path=%s\ncache-key=%s\n' "$store_path" "$cache_key" >> "$GITHUB_OUTPUT"
+          {
+            printf '## CI measurement context\n\n'
+            printf '| Field | Value |\n| --- | --- |\n'
+            printf '| Repository | %s |\n' "$GITHUB_REPOSITORY"
+            printf '| Event/action | %s / %s |\n' "$GITHUB_EVENT_NAME" "$EVENT_ACTION"
+            printf '| Run/attempt | %s / %s |\n' "$GITHUB_RUN_ID" "$GITHUB_RUN_ATTEMPT"
+            printf '| Run URL | %s/%s/actions/runs/%s/attempts/%s |\n' "$GITHUB_SERVER_URL" "$GITHUB_REPOSITORY" "$GITHUB_RUN_ID" "$GITHUB_RUN_ATTEMPT"
+            printf '| Head/base SHA | %s / %s |\n' "$PR_HEAD_SHA" "$PR_BASE_SHA"
+            printf '| Event/checkout SHA | %s / %s |\n' "$GITHUB_SHA" "$checkout_sha"
+            printf '| Workflow ref/SHA | %s / %s |\n' "$GITHUB_WORKFLOW_REF" "$GITHUB_WORKFLOW_SHA"
+            printf '| Runner OS/arch | %s / %s |\n' "$RUNNER_OS" "$RUNNER_ARCH"
+            printf '| Runner image/version | %s / %s |\n' "$ImageOS" "$ImageVersion"
+            printf '| CPU/parallelism | %s |\n' "$(node -p "require('node:os').cpus()[0].model + ' / ' + require('node:os').availableParallelism()")"
+            printf '| Node/pnpm | %s / %s |\n' "$node_version" "$pnpm_version"
+            printf '| Lockfile SHA256 | %s |\n' "$lock_hash"
+            printf '| pnpm store | %s |\n' "$store_path"
+            printf '| Cache key | %s |\n' "$cache_key"
+            printf '| Mutation required | %s |\n' "$MUTATION_CHANGED"
+            printf '| Recorded at UTC | %s |\n' "$(date -u +%FT%TZ)"
+          } | tee -a "$GITHUB_STEP_SUMMARY"
+      - name: Restore measurement pnpm store
+        id: pnpm-cache
+        uses: actions/cache/restore@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
+        with:
+          path: ${{ steps.measurement.outputs.store-path }}
+          key: ${{ steps.measurement.outputs.cache-key }}
+      - name: Verify exact cache condition
+        env:
+          PRIMARY_KEY: ${{ steps.pnpm-cache.outputs.cache-primary-key }}
+          MATCHED_KEY: ${{ steps.pnpm-cache.outputs.cache-matched-key }}
+          CACHE_HIT: ${{ steps.pnpm-cache.outputs.cache-hit }}
+        run: |
+          if [ -z "$PRIMARY_KEY" ]; then
+            echo "::error::Cache action did not report a primary key."
+            exit 1
+          fi
+          if [ -n "$MATCHED_KEY" ] && [ "$MATCHED_KEY" != "$PRIMARY_KEY" ]; then
+            echo "::error::Partial cache restoration is not a valid cold or warm sample."
+            exit 1
+          fi
+          if [ "$MATCHED_KEY" = "$PRIMARY_KEY" ] && [ "$CACHE_HIT" = "true" ]; then
+            cache_state=warm
+          elif [ -z "$MATCHED_KEY" ] && [ -z "$CACHE_HIT" ]; then
+            cache_state=cold
+          else
+            echo "::error::Inconsistent cache outputs; do not classify this sample."
+            exit 1
+          fi
+          {
+            printf '\n## pnpm cache observation\n\n'
+            printf '| Field | Value |\n| --- | --- |\n'
+            printf '| Observed state | %s |\n' "$cache_state"
+            printf '| Primary key | %s |\n' "$PRIMARY_KEY"
+            printf '| Matched key | %s |\n' "$MATCHED_KEY"
+            printf '| Exact hit | %s |\n' "$CACHE_HIT"
+          } | tee -a "$GITHUB_STEP_SUMMARY"
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
       - name: Install Playwright Chromium when used
@@ -42,10 +118,22 @@ jobs:
           if pnpm exec playwright --version >/dev/null 2>&1; then
             pnpm exec playwright install --with-deps chromium
           fi
-      - name: Run quality checks
-        run: pnpm check
+      - name: Run tests
+        run: pnpm test
+      - name: Run lint
+        run: pnpm lint
+      - name: Run typecheck
+        run: pnpm typecheck
+      - name: Run production build
+        run: pnpm build
       - name: Run mutation tests for changed targets
         if: steps.changes.outputs.mutation == 'true'
         run: pnpm test:mutate
       - name: Run production end-to-end tests
         run: pnpm test:e2e
+      - name: Save measurement pnpm store
+        if: steps.pnpm-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
+        with:
+          path: ${{ steps.measurement.outputs.store-path }}
+          key: ${{ steps.pnpm-cache.outputs.cache-primary-key }}

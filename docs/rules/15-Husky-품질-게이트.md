@@ -165,8 +165,11 @@ Git hook:
 ### 11. `pnpm check`는 최종 관문이다
 
 - `pnpm check`는 테스트, lint, 타입 검사, 프로덕션 빌드를 순서대로 실행하며 네 단계가 모두 통과해야 완료된다.
-- CI(GitHub Actions)도 pull request와 `main` push에서 같은 `pnpm check`를 실행한다.
-- `pnpm test:e2e`는 의도적으로 `pnpm check`에 포함하지 않고 CI에서 `pnpm check` 다음 별도 단계로 실행한다.
+- CI(GitHub Actions)는 pull request와 `main` push에서 `pnpm check`와 동일한 네 명령을
+  test → lint → typecheck → build 순서의 개별 step으로 실행한다. 단계별 시간을
+  측정하기 위한 분리이며, 앞 단계 실패 시 뒤 단계는 실행하지 않는다.
+- 로컬 `pnpm check`는 그대로 유지한다. `pnpm test:e2e`는 의도적으로 여기에 포함하지
+  않고, CI에서는 네 기본 검증과 기존 조건부 mutation 뒤 별도 단계로 실행한다.
 
 | 단계             | 목적                   |
 | ---------------- | ---------------------- |
