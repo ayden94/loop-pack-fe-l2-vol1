@@ -30,6 +30,12 @@ jobs:
               - 'src/views/product-list/model/ProductListStatePolicy.ts'
               - 'src/entities/product/model/ProductListRouteParams.ts'
               - 'src/entities/product/model/ProductQueryKeyFactory.ts'
+            all:
+              - '**'
+            docs:
+              - 'README.md'
+              - 'docs/rfc/*.md'
+              - 'docs/assignments/*.md'
       - name: Set up pnpm
         uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271 # v6.0.9
         with:
@@ -40,6 +46,12 @@ jobs:
         with:
           node-version-file: .nvmrc
           package-manager-cache: false
+      - name: Classify documentation-only change
+        id: e2e-policy
+        env:
+          CHANGED_COUNT: ${{ steps.changes.outputs.all_count }}
+          DOCS_COUNT: ${{ steps.changes.outputs.docs_count }}
+        run: node scripts/ci/classify-docs-only.mjs
       - name: Record measurement context
         id: measurement
         env:
@@ -114,6 +126,7 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
       - name: Install Playwright Chromium when used
+        if: github.event_name != 'pull_request' || steps.e2e-policy.outputs.docs_only != 'true'
         run: |
           if pnpm exec playwright --version >/dev/null 2>&1; then
             pnpm exec playwright install --with-deps chromium
@@ -130,6 +143,7 @@ jobs:
         if: steps.changes.outputs.mutation == 'true'
         run: pnpm test:mutate
       - name: Run production end-to-end tests
+        if: github.event_name != 'pull_request' || steps.e2e-policy.outputs.docs_only != 'true'
         run: pnpm exec playwright test
       - name: Save measurement pnpm store
         if: steps.pnpm-cache.outputs.cache-hit != 'true'

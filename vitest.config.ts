@@ -15,7 +15,7 @@ export default defineConfig({
         test: {
           name: 'node',
           environment: 'node',
-          include: ['src/**/*.test.{ts,tsx}'],
+          include: ['src/**/*.test.{ts,tsx}', 'scripts/ci/**/*.test.ts'],
           exclude: ['src/**/*.dom.test.tsx'],
           setupFiles: ['./tests/setup/msw.ts'],
         },

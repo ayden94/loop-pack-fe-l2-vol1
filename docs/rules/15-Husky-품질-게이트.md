@@ -173,6 +173,11 @@ Git hook:
 - CI에서는 네 기본 검증과 기존 조건부 mutation 뒤 `pnpm exec playwright test`를
   실행한다. 같은 job·같은 SHA에서 앞서 성공한 production build를 재사용하며,
   Playwright의 `pnpm start`로 production 서버를 띄운다. CI에서 build를 두 번 하지 않는다.
+- PR에서 `README.md`, `docs/rfc/*.md`, `docs/assignments/*.md`만 변경됐다고
+  정상 분류된 경우 Chromium 설치와 E2E 두 step만 생략한다. test·lint·typecheck·build는
+  항상 유지하며, main push에서는 E2E도 항상 실행한다.
+- `scripts/ci/classify-docs-only.mjs`는 실제 필터 집계를 검증한다. 불명확한 결과·빈 목록·
+  API 파일 상한에 걸릴 수 있는 목록은 skip을 허용하지 않고, 잘못된 입력은 job을 실패시킨다.
 
 | 단계             | 목적                   |
 | ---------------- | ---------------------- |
