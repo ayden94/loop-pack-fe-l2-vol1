@@ -6,13 +6,13 @@
 재구성한다. 과제 원문이 범위의 기준이며, 이 문서는 실행 순서와 결정·증거의 기준이다.
 요약 과정에서 요구사항을 줄이지 않고 마지막 추적표로 원문과 연결한다.
 
-| 항목              | 값                                                                 |
-| ----------------- | ------------------------------------------------------------------ |
-| 상태              | S6 결과 승인 — 단계 전환 커밋                                      |
-| 현재 단계         | Stage 7 실험 준비 진입 승인                                        |
-| 작성 기준         | `volume-10`, `278c2224`                                            |
-| 본 과제 구현·측정 | Before 6회·After 6회 성공. cold 수치 기준 충족·warm 근거 부족 판정 |
-| 다음 행동         | S6 단일 커밋 후 S7 기준 브랜치·실험 PR·실행 범위 확인              |
+| 항목              | 값                                                              |
+| ----------------- | --------------------------------------------------------------- |
+| 상태              | S7 실행·skip·required 차단/복구 검증과 정리 완료                |
+| 현재 단계         | Stage 7 결과 확인 대기, S8 미진입                               |
+| 작성 기준         | `volume-10`, `278c2224`                                         |
+| 본 과제 구현·측정 | S7 문서 skip·코드 실행·실패 차단·정상 복구 확인, 임시 보호 제거 |
+| 다음 행동         | S7 결과 문서 commit 및 S8 진입 명시적 확인                      |
 
 `week10-feedback.md`는 **9주차 피드백 수정 기록**이다. 이번 CI 과제의 완료 증거로
 대체하지 않는다. 기존 문서의 미완료 표시도 이 RFC에서 임의로 완료 처리하지 않는다.
@@ -29,6 +29,12 @@
   상태 소유권을 중심으로 반복 결함을 방지.
 
 ## 운영 원칙
+
+**2026-09-10 자율 진행 변경:** 사용자의 “이제 나한테 묻지 말고 끝까지 진행해줘”
+요청으로 남은 S8~S16의 반복 승인 대기를 해제한다. 아래의 이전 단계별 확인 문구는
+이전 진행 이력이며, 남은 작업은 측정·검증 근거로 결정하고 검증된 단계별로 커밋한다.
+원격 실험은 origin에서 격리·미머지로 수행하고 secrets·유료 지출·upstream 설정은
+변경하지 않는다. 실패한 검증을 감추거나 실제 작성자 경험을 만들어내지 않는다.
 
 1. 각 Stage에서 목표·선택지·예상 영향·완료 조건을 먼저 설명한다.
 2. 아래 사용자 결정표의 해당 항목을 확정한 뒤 구현한다. 측정으로 알 수 있는 사실을
@@ -123,25 +129,25 @@ S2~S5는 각 단계에서 별도로 확인받는다. 나머지 결정은 해당 
 Stage는 앞 단계 증거를 닫기 전에 진행하지 않는다. 전 단계가 끝나기 전 다음 단계의
 제품·workflow 변경을 섞지 않는다.
 
-| Stage | 실행 단위                         | 과제 연결 | 핵심 산출물                        | 상태                        |
-| ----- | --------------------------------- | --------- | ---------------------------------- | --------------------------- |
-| S0    | 실행 범위·권한·RFC 확정           | 공통      | 결정표·브랜치/PR 역할              | 검증 완료·사용자 승인       |
-| S1    | 측정 가능한 Before 준비           | 1         | 고정 프로토콜·baseline SHA         | 검증 완료·결과 승인         |
-| S2    | Before cold/warm 수집             | 1         | 6회 raw·중앙값·범위·병목           | 검증 완료·결과 승인         |
-| S3    | 병목 한정 최적화                  | 1         | 선택 근거·동등 검증 CI             | 검증 완료·결과 승인         |
-| S4    | 캐시 hit/miss 실험                | 1         | 복원/미복원 로그·install 비교·원복 | 검증 완료·결과 승인         |
-| S5    | After 측정·비교 판정              | 1         | 6회 raw·Before/After 결론          | 검증 완료·결과 승인         |
-| S6    | 조건부 실행·실패 정책 구현        | 2         | 실행 행렬·스킵 안전 논리           | 로컬 검증 완료·결과 승인    |
-| S7    | 조건에 걸리는/안 걸리는 PR 검증   | 2         | 양쪽 PR·run·머지 가능 상태         | 진입 승인·실험 범위 확인 전 |
-| S8    | 번들 측정과 예산 결정             | 3         | 7주차→현재 대응표·임계값           | 초안                        |
-| S9    | 번들 예산 게이트 구현             | 3         | 측정 코드·정상/초과 검증           | 초안                        |
-| S10   | 빌드 전 환경 변수 게이트          | 3         | 검증 코드·환경별 실패 사례         | 초안                        |
-| S11   | required·결과 가시성·실패 PR 검증 | 3         | 보호 규칙·빨강/초록 PR 리포트      | 초안                        |
-| S12   | 팀 규칙 기반 AI 리뷰 기준 작성    | 4         | 프롬프트·실행/비용 정책            | 초안                        |
-| S13   | 실제 AI 리뷰 판별·프롬프트 개선   | 4         | 유효 지적 1개·오탐 1개·개선 근거   | 초안                        |
-| S14   | 반복 지적의 결정적 룰 승격        | 5         | 룰·위반/정상 fixture·책임 표       | 초안                        |
-| S15   | 질문 답변·10주 기술 회고          | 6·질문    | 회고·질문 4개 답변                 | 초안                        |
-| S16   | 최종 품질·제출물·원복 확인        | 공통      | 최종 SHA·검증·제출 인덱스          | 초안                        |
+| Stage | 실행 단위                         | 과제 연결 | 핵심 산출물                        | 상태                           |
+| ----- | --------------------------------- | --------- | ---------------------------------- | ------------------------------ |
+| S0    | 실행 범위·권한·RFC 확정           | 공통      | 결정표·브랜치/PR 역할              | 검증 완료·사용자 승인          |
+| S1    | 측정 가능한 Before 준비           | 1         | 고정 프로토콜·baseline SHA         | 검증 완료·결과 승인            |
+| S2    | Before cold/warm 수집             | 1         | 6회 raw·중앙값·범위·병목           | 검증 완료·결과 승인            |
+| S3    | 병목 한정 최적화                  | 1         | 선택 근거·동등 검증 CI             | 검증 완료·결과 승인            |
+| S4    | 캐시 hit/miss 실험                | 1         | 복원/미복원 로그·install 비교·원복 | 검증 완료·결과 승인            |
+| S5    | After 측정·비교 판정              | 1         | 6회 raw·Before/After 결론          | 검증 완료·결과 승인            |
+| S6    | 조건부 실행·실패 정책 구현        | 2         | 실행 행렬·스킵 안전 논리           | 로컬 검증 완료·결과 승인       |
+| S7    | 조건에 걸리는/안 걸리는 PR 검증   | 2         | 양쪽 PR·run·머지 가능 상태         | 검증·정리 완료, 결과 확인 대기 |
+| S8    | 번들 측정과 예산 결정             | 3         | 7주차→현재 대응표·임계값           | 초안                           |
+| S9    | 번들 예산 게이트 구현             | 3         | 측정 코드·정상/초과 검증           | 초안                           |
+| S10   | 빌드 전 환경 변수 게이트          | 3         | 검증 코드·환경별 실패 사례         | 초안                           |
+| S11   | required·결과 가시성·실패 PR 검증 | 3         | 보호 규칙·빨강/초록 PR 리포트      | 초안                           |
+| S12   | 팀 규칙 기반 AI 리뷰 기준 작성    | 4         | 프롬프트·실행/비용 정책            | 초안                           |
+| S13   | 실제 AI 리뷰 판별·프롬프트 개선   | 4         | 유효 지적 1개·오탐 1개·개선 근거   | 초안                           |
+| S14   | 반복 지적의 결정적 룰 승격        | 5         | 룰·위반/정상 fixture·책임 표       | 초안                           |
+| S15   | 질문 답변·10주 기술 회고          | 6·질문    | 회고·질문 4개 답변                 | 초안                           |
+| S16   | 최종 품질·제출물·원복 확인        | 공통      | 최종 SHA·검증·제출 인덱스          | 초안                           |
 
 ## S0 — 실행 범위·권한·체크포인트
 
@@ -1599,6 +1605,194 @@ S8로 자동 진행하지 않는다.
 **완료:** 양쪽 PR·run URL과 실행/skip 로그, required 대기 교착이 없다는 증거.
 **커밋 경계:** 실험 결과와 교정된 정책. 테스트용 PR은 머지하지 않음.
 
+### S7 준비 확인 — 2026-09-10
+
+준비 조사 당시 S6을 `f0dce100`으로 단일 커밋했고 아직 push 전이었다.
+origin에 admin 권한이 있고 repository ruleset 목록은 비어 있었다.
+main의 classic protection은 `Branch not protected`였다.
+제안한 `experiment/week10-s7-base`, `experiment/week10-s7-docs`,
+`experiment/week10-s7-code` 이름은 원격에 없었다.
+
+S6 workflow가 없는 origin/main으로 새 문서 PR을 만들면, S6 도입 diff까지 포함돼
+문서 전용 PR이 아니다. main을 먼저 변경하거나 `.github/**`를 skip 허용 목록으로
+넓히는 대신 **동일 S6 commit의 격리 base**를 만드는 안을 제안한다.
+이는 기존 origin/main 대상 실험 규칙의 S7 한정 예외로, 아래 구체 범위의 사용자 승인을 받았다.
+
+### S7 원격 실험안 — 2026-09-10 사용자 승인
+
+| 브랜치                    | 역할·기준                                              |
+| ------------------------- | ------------------------------------------------------ |
+| volume-10                 | S6 commit을 push하되 이 브랜치로 실험 PR을 만들지 않음 |
+| experiment/week10-s7-base | S6 commit `f0dce100`을 그대로 가리키는 고정 base       |
+| experiment/week10-s7-docs | 동일 base에서 허용 경로의 문서 fixture만 추가          |
+| experiment/week10-s7-code | 동일 base에서 실행되는 CI 테스트 fixture만 추가        |
+
+실험 head 두 개는 격리 worktree에서 준비한다. 문서 fixture는
+`docs/rfc/week10-s7-probe.md`, 코드 fixture는 `scripts/ci/quality-gate-probe.test.ts`를
+후보로 사용한다. 코드 fixture는 실제 Vitest가 실행하는 합성 게이트 검사이며,
+기존 제품 테스트를 고치거나 약화하지 않는다. 이 파일은 실험 브랜치에만 두고
+제출 브랜치로 merge/cherry-pick하지 않는다.
+
+새 base에만 임시 classic protection을 적용하는 안이다.
+
+- required status check는 기존 **`quality`** 하나, strict up-to-date 확인을 사용한다.
+- 관리자에게도 check를 적용해 admin bypass로 안전성을 증명하지 않는다.
+- PR 승인 review·새 권한·merge queue는 추가하지 않는다.
+- 실제 GitHub Actions check의 이름/앱과 상태가 이 규칙에 연결되는지 읽어서 확인한다.
+- origin/main·upstream의 보호 정책은 변경하지 않는다. S11의 최종 required 결정과
+  구분되는 **격리 브랜치 실험용 설정**이다.
+- API 권한·플랜 때문에 적용하지 못하면 우회하지 않고 중단한다.
+
+### 실행 행렬과 관측 증거
+
+| 실행 | PR·변경                                                 | 예상 Actions 결과                                                        | 확인할 PR 상태                             |
+| ---- | ------------------------------------------------------- | ------------------------------------------------------------------------ | ------------------------------------------ |
+| 1    | docs PR: 허용 문서 fixture만 추가                       | 분류 true, test/lint/type/build 성공, Chromium·E2E skip, quality success | required가 pending에 남지 않음             |
+| 2    | code PR: 정상 합성 테스트 fixture 추가                  | 분류 false, 전체 검증·Chromium·E2E 실행 성공                             | quality 충족으로 check에 의한 차단 없음    |
+| 3    | 같은 code PR: 합성 fixture만 결정적으로 실패하도록 변경 | test 실패 → quality failure. 뒤 step 미실행을 의도된 docs skip과 구별    | required check 실패로 merge 차단           |
+| 4    | 같은 code PR: fixture를 최초 정상 상태로 복구           | 같은 검증 다시 성공, 임의 retry·continue-on-error 없음                   | 실패 차단 해제, required pending 교착 없음 |
+
+실험 PR은 처음부터 ready로 만들어 draft 제한과 required check의 영향을 구분한다.
+D4 정책은 draft 여부로 실행을 생략하지 않으며, 별도 label/draft 전환/merge queue를
+새로 도입하지 않는다. **어느 PR도 실제로 merge하지 않는다.**
+
+원격 관측은 다음을 함께 기록한다.
+
+- base/head/실제 checkout·workflow SHA, changed-file 목록과 all/docs 집계,
+  `docs_only` 출력, 각 step의 success/failure/skipped.
+- run URL·attempt·check 이름/앱·conclusion, required 설정 조회 결과.
+- GitHub PR의 conflict 여부와 merge state를 구분한다.
+  `mergeable`만 보고 check 차단이 없다고 판단하지 않고 status-check rollup과
+  merge state도 함께 본다. GitHub가 상태를 계산 중이면 그 완료 신호를 기다린다.
+- 실패 run은 지우지 않는다. 복구는 합성 fixture를 원래 정상 내용으로 되돌리는 것이며,
+  실제 제품 테스트를 삭제·skip하거나 실패 단언을 완화하는 작업이 아니다.
+
+### 승인된 횟수·정리 범위
+
+사용자 승인 범위는 다음으로 한정한다.
+
+1. S6 `volume-10` push와 세 실험 브랜치 게시.
+2. **격리 base 대상 PR 2개** 생성, 실험 브랜치 commit/push **최대 4회**
+   (문서 1회·코드 정상 1회·고의 실패 1회·복구 1회).
+3. 기본 10분/job timeout을 유지한 **원격 run 최대 4회**.
+   실패 run도 이 한도에 포함하며 예상 밖 실패를 추가 실행으로 채우지 않는다.
+4. 새 실험 base에만 위 임시 required 규칙 설정·조회.
+5. 증거 수집 후 두 PR을 **미머지 종료**하고, 이번에 생성한 base의 임시 보호 규칙만 제거.
+   원래 없던 규칙임을 적용 전 확인하고 삭제 전에도 대상과 소유 범위를 확인한다.
+
+source/workflow는 S6 상태를 유지하고 고의 실패는 전용 fixture에만 한정한다.
+Before·After·S4 PR의 head, main/upstream 정책, 기존 캐시와 secrets는 건드리지 않는다.
+실험 종료 후 정상 fixture 복구·추가 CI 없음·새 보호 규칙 제거를 확인한다.
+남는 실험 브랜치는 증거용으로 보존하고 원격 브랜치를 임의 삭제하지 않는다.
+
+이 실험은 S6 분류와 required 계약의 검증이며 성능 측정이 아니다.
+이후 S11에서 실제 대상 브랜치의 최종 protection을 적용하면 그 설정으로 다시 검증한다.
+
+사용자의 **“그렇게 해”** 응답으로 S6 push·격리 브랜치 3개·PR 2개·원격 실행
+최대 4회·실험 commit 최대 4회·실험 base에만 임시 required 적용과 제거를 승인받았다.
+required는 실제 GitHub Actions 앱 ID `15368`의 `quality`로 확인했다.
+기존 main/upstream·다른 실험 PR·캐시는 변경하지 않는다.
+S7 결과 commit과 S8 진입은 다시 명시적 확인을 받는다.
+
+### S7 실제 원격 결과 — 2026-09-10
+
+기준은 S6 commit `f0dce100e900917969d551afeae656f14c9c3363`이다.
+이를 `origin/volume-10`과 고정 실험 base `experiment/week10-s7-base`에 게시하고,
+같은 base에서 독립된 문서/코드 head를 만들었다. workflow·lockfile은 변경하지 않았다.
+
+임시 classic protection은 **실험 base에만** 적용했다.
+`quality`를 GitHub Actions 앱 ID `15368`에 묶어 required로 지정하고
+`strict=true`, `enforce_admins.enabled=true`를 확인했다.
+별도 승인 review·merge queue는 추가하지 않았고 두 PR은 처음부터 ready로 만들었다.
+따라서 아래 상태는 draft 제한이나 admin bypass로 얻은 결과가 아니다.
+
+#### 실행·skip·차단·복구
+
+| 사례      | PR / run                                                                                                                                                    | 전체/문서 집계 | 분류            | 주요 결과                                                 | 보호 적용 중 PR 상태               | job 시간 |
+| --------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------- | --------------- | --------------------------------------------------------- | ---------------------------------- | -------- |
+| 문서 전용 | [PR #16](https://github.com/ayden94/loop-pack-fe-l2-vol1/pull/16) / [34447106282](https://github.com/ayden94/loop-pack-fe-l2-vol1/actions/runs/34447106282) | 1 / 1          | docs_only=true  | 434 tests·lint·type·build 성공, Chromium·E2E만 skip       | MERGEABLE / CLEAN, quality success | 84초     |
+| 코드 정상 | [PR #17](https://github.com/ayden94/loop-pack-fe-l2-vol1/pull/17) / [34447480314](https://github.com/ayden94/loop-pack-fe-l2-vol1/actions/runs/34447480314) | 1 / 0          | docs_only=false | 합성 fixture 포함 435 tests·lint·type·build·E2E 16개 성공 | MERGEABLE / CLEAN, quality success | 131초    |
+| 고의 실패 | 같은 PR / [34447885114](https://github.com/ayden94/loop-pack-fe-l2-vol1/actions/runs/34447885114)                                                           | 1 / 0          | docs_only=false | 합성 1개 실패·기존 434개 통과, quality failure            | MERGEABLE / BLOCKED                | 86초     |
+| 정상 복구 | 같은 PR / [34448226857](https://github.com/ayden94/loop-pack-fe-l2-vol1/actions/runs/34448226857)                                                           | 1 / 0          | docs_only=false | 435 tests·lint·type·build·E2E 16개 다시 성공              | MERGEABLE / CLEAN, quality success | 124초    |
+
+네 run은 모두 attempt 1이다. job 시작~종료 UTC는 차례대로
+06:51:19~06:52:43, 06:56:06~06:58:17, 07:01:21~07:02:47,
+07:05:21~07:07:25다. 시간은 post/cleanup을 포함한 기록이며 성능 비교 표본은 아니다.
+S5의 Before/After에 합산하지 않는다.
+
+문서 PR의 API 변경 목록은 `docs/rfc/week10-s7-probe.md` 한 개,
+코드 PR은 `scripts/ci/quality-gate-probe.test.ts` 한 개였다.
+분류 step의 실제 `CHANGED_COUNT`·`DOCS_COUNT`와 CLI 출력을 로그에서 대조했다.
+누적된 제출 브랜치 변경을 문서-only로 오인하지 않았고, source/workflow diff를 숨기지 않았다.
+
+#### 실패 차단이 의도된 skip과 다른 이유
+
+| Step/결과       | 문서 PR      | 코드 정상     | 코드 실패     | 코드 복구     |
+| --------------- | ------------ | ------------- | ------------- | ------------- |
+| 분류            | success/true | success/false | success/false | success/false |
+| Chromium 설치   | skipped      | success       | success       | success       |
+| 테스트          | success      | success       | failure       | success       |
+| lint/type/build | success      | success       | skipped       | success       |
+| E2E             | skipped      | success       | skipped       | success       |
+| cache save      | success      | success       | skipped       | success       |
+| quality         | success      | success       | **failure**   | success       |
+
+고의 실패는 `probeValue = 'ready'`를 `'blocked'`로 바꾼 합성 fixture 한 줄이다.
+assertion `expect(probeValue).toBe('ready')`는 처음부터 끝까지 유지했다.
+로컬과 원격에서 `expected 'blocked' to be 'ready'`를 확인했고, 실패 run의 집계는
+`1 failed | 434 passed (435)`였다. 제품 테스트·검증 조건은 삭제하거나 완화하지 않았다.
+
+코드 실패에서 뒤 step들이 skipped인 것은 test 실패 후의 fail-fast 동작이다.
+docs-only skip으로 분류된 것이 아니며, job 전체는 failure로 남았다.
+충돌 판정인 `MERGEABLE`과 보호 규칙 판정인 `BLOCKED`를 구분했고,
+임시 required와 관리자 적용이 유지된 상태에서 차단을 확인했다.
+
+복구는 합성 값만 원래 `'ready'`로 되돌렸다. fixture의 원본 바이트 hash와
+전체 정상 코드 branch tree가 처음의 정상 commit과 같음을 확인했다.
+**보호를 제거하기 전에** quality success와 MERGEABLE/CLEAN 복귀를 확인했다.
+실패 run은 삭제하지 않았고, 관리자 우회 merge나 실제 merge는 수행하지 않았다.
+
+#### 실험 커밋·기준선
+
+| 목적              | commit                                     |
+| ----------------- | ------------------------------------------ |
+| 문서 fixture      | `184f145d78b7a4a884fb6c3d4b71edbc999d216c` |
+| 정상 코드 fixture | `305a028c8e280f8426b3d89f63404c353d58f28f` |
+| 고의 실패 값 주입 | `55b284bbeac82a8da3aa62c301d5c9773e0830c5` |
+| 원래 정상 값 복구 | `ae5b60d86654e1358d5caf3b22cf09e02a68e320` |
+
+실험 commit은 승인된 4회이며 모두 기존 lint-staged·commitlint를 통과했다.
+고의 실패 commit은 required 동작을 검증하기 위한 격리 실험으로, 제출 브랜치에는 합치지 않았다.
+정상 코드 commit `305a028c`와 복구 `ae5b60d8`의 tree는
+`1cbac5f87f83b07a885ef959c02fa586957a7bab`로 같다.
+합성 fixture hash도 `a6e2436f2d0c8e67831068e5d42ebdf36b2aed44e1878d13016c1f01e264db1d`로 복구됐다.
+이는 정상 fixture를 포함한 tree이며, fixture가 없는 base tree와 같다는 뜻은 아니다.
+
+각 run의 check API에서 이름 `quality`, 앱 ID `15368`, success/failure가
+PR rollup과 일치함을 확인했다. base는 모든 PR에서 S6 commit으로 고정됐다.
+head/실제 checkout·workflow SHA는 각 run의 measurement context 로그에 보존돼 있다.
+
+#### 정리와 적용 범위의 한계
+
+- 성공·차단 해제 증거를 수집한 뒤 PR #16/#17을 **closed·merged=false**로 종료했다.
+- 제거 직전 보호 응답이 이번에 설정한 응답과 그대로 같은지 대조한 뒤,
+  `experiment/week10-s7-base`의 보호만 DELETE했다. HTTP 204 후
+  `Branch not protected` 404와 repository ruleset 빈 목록을 확인했다.
+- origin/main은 실험 전후 모두 `Branch not protected`였다.
+  upstream 보호를 변경하는 요청은 하지 않았다.
+- 기존 PR #13/#14/#15의 head/base/state와 기존 캐시 IDs를 보존했다.
+  캐시 삭제·remote branch 삭제·force-push·reset을 하지 않았다.
+- 실험 code worktree는 clean이고 fixture는 정상 상태다. 실험 branches는 증거용으로
+  남겼으며 제출 브랜치에는 문서·코드 fixture를 merge/cherry-pick하지 않았다.
+- 원격 실험은 정확히 4회, 실험 commit도 4회다. 후속 실행을 추가하지 않았다.
+
+이번 검증은 **격리 base에서의 required 계약과 조건부 실행**을 확인한 것이다.
+현재 main이 보호된다는 뜻은 아니다. S11에서 최종 보호 대상을 확정·적용하면
+그 설정에서 required·skip·실패 전파를 다시 확인해야 한다.
+
+**S7 원격 검증과 정리는 완료**했다. 결과 RFC는 미커밋 상태로 사용자 확인 대기이며,
+결과 commit과 S8 진입은 아직 수행하지 않았다.
+
 ## S8 — 번들 측정과 예산 결정
 
 **진입:** S7 완료, 7주차 원시 근거 확보.
@@ -1788,44 +1982,44 @@ S8로 자동 진행하지 않는다.
 각 행은 원문의 필수 요구 또는 선택 항목이다. 단계 작성 완료가 과제 완료를 뜻하지 않는다.
 최종 증거 칸은 S16 전에 채운다.
 
-| ID  | 원문 요구사항                                                 | 실행 Stage     | 최종 증거                                                                   |
-| --- | ------------------------------------------------------------- | -------------- | --------------------------------------------------------------------------- |
-| R01 | 기존 CI 계승·실제 명령·Node/pnpm·frozen lockfile·job timeout  | S1             | S1 run 34427219215 attempts 1/2, 고정 버전·10분 timeout·원격 성공           |
-| R02 | Before cold/warm 각각 3회·raw/중앙값/범위                     | S1~S2          | S2 run 34427219215 attempts 3~8, raw·145/135초 중앙값·범위 기록             |
-| R03 | Actions step 타임스탬프로 최대 병목 지목                      | S2             | S2 step 원시값: 6회 모두 E2E가 최대, cold/warm 중앙값 35초                  |
-| R04 | 같은 검증 유지·병목에 맞는 전략만·비채택 근거                 | S3             | S3 commit 9301b358·run 34436736719, 실제 build 1회·동일 테스트              |
-| R05 | concurrency main 오취소 방지·병렬 install 비용 확인           | S3             | D3에서 두 전략 미채택 이유 기록. 단일 job·기존 취소 정책 유지               |
-| R06 | warm 복원 로그 캡처·key 변경 miss·install 차이·lockfile 원복  | S4             | PR #15 원격 4회, K0 hit→K1 miss→K0 hit·전체 tree 원복                       |
-| R07 | After cold/warm 각각 3회·동등 조건·흔들림 대비 개선 판정      | S5             | run 34436736719 attempts 2~7. cold 기준 충족·warm 근거 부족, 환경 분포 공개 |
-| R08 | lint/type/unit 모든 PR·build 소스/설정 보호                   | S6~S7          | 미실행                                                                      |
-| R09 | 비싼 검증 하나 이상 조건부·조건/스킵 이유·main 진입 안전성    | S6             | 미실행                                                                      |
-| R10 | 필요한 경로 누락 방지·required skip 교착/실패 전파 검증       | S6~S7·S11      | 미실행                                                                      |
-| R11 | 조건에 걸리는/안 걸리는 실제 PR·Actions 로그·머지 가능 상태   | S7·S11         | 미실행                                                                      |
-| R12 | 채택한 label 재실행/권한·draft/merge queue 동작               | S6~S7          | 채택 여부 미결정                                                            |
-| R13 | flaky 정책·재시도로 실패 숨기지 않음                          | S6             | 미실행                                                                      |
-| R14 | 주요 진입점 번들 예산·7주차 전송량+현재 범위·여유폭 근거      | S8~S9          | 미실행                                                                      |
-| R15 | build 전 env 게이트·누락/URL/민감 NEXT_PUBLIC 실패            | S10            | 미실행                                                                      |
-| R16 | required/excluded 판단·비용/변동성/리스크 근거                | S11            | 미실행                                                                      |
-| R17 | PR 코멘트/summary 결과 가시성·초과 대상/양 표시               | S9~S11         | 미실행                                                                      |
-| R18 | 실제 예산 초과 PR 빨강·PR 리포트 캡처·수정 후 초록·미머지     | S11            | 미실행                                                                      |
-| R19 | 실제 PR diff AI 리뷰·특정 유료 API 강제 없음                  | S12~S13        | 미실행                                                                      |
-| R20 | 1~9주 합의 규칙을 프로젝트 맞춤 프롬프트로 명문화             | S12            | 미실행                                                                      |
-| R21 | AI 비결정성·required/advisory 배치 근거                       | S12            | 미실행                                                                      |
-| R22 | CI AI 선택 시 max_turns·timeout·concurrency·trigger·비용 안전 | S12            | 채택 여부 미결정                                                            |
-| R23 | 잘 잡은 리뷰 1개·오탐 1개·근거·프롬프트 개선                  | S13            | 미실행                                                                      |
-| R24 | AI/사람의 실제 반복 지적 중 결정 가능한 하나 선정             | S14            | 미실행                                                                      |
-| R25 | 적합한 결정적 룰·위반 차단/정상 통과·오탐 교정                | S14            | 미실행                                                                      |
-| R26 | AI/사람에 남긴 것·기계로 내린 것 판단 1문단                   | S14~S15        | 미실행                                                                      |
-| R27 | 지정 경로 10주 회고·기능 아닌 결정·수치/URL/로그/CI 근거      | S15            | 미실행                                                                      |
-| R28 | 4개 필수 질문 각각 2~4문장·본인 판단                          | S15            | 미실행                                                                      |
-| R29 | 최소 권한·코멘트 job 권한 한정·SHA 핀 정책                    | S1·S11~S12·S16 | 미실행                                                                      |
-| R30 | pull_request_target 위험 회피·fork/secrets·로그 노출 방지     | S1·S10~S12·S16 | 미실행                                                                      |
-| R31 | AI 활용·직접 판단/검증·역할과 책임·작성/검토 범위 기록        | S0~S16         | 미실행                                                                      |
-| R32 | workflow·측정·조건·예산·env·리뷰·룰·답변·회고 제출물 연결     | S16            | 미실행                                                                      |
-| R33 | 최종 pnpm check·실험 코드 원복·회귀 검증                      | S16            | 미실행                                                                      |
-| O01 | 선택 Lighthouse: 7주차 LCP/CLS 근거·조건·변동성 판단          | S8·S11         | 채택 여부 미결정                                                            |
-| O02 | Preview/Production URL 확보 권장·배포 자체는 채점 제외        | S0·S15         | 확보 여부 미확인                                                            |
-| O03 | 선택 rollback 질문: DB·캐시·트랜잭션·flag                     | S15            | 채택 여부 미결정                                                            |
+| ID  | 원문 요구사항                                                 | 실행 Stage     | 최종 증거                                                                               |
+| --- | ------------------------------------------------------------- | -------------- | --------------------------------------------------------------------------------------- |
+| R01 | 기존 CI 계승·실제 명령·Node/pnpm·frozen lockfile·job timeout  | S1             | S1 run 34427219215 attempts 1/2, 고정 버전·10분 timeout·원격 성공                       |
+| R02 | Before cold/warm 각각 3회·raw/중앙값/범위                     | S1~S2          | S2 run 34427219215 attempts 3~8, raw·145/135초 중앙값·범위 기록                         |
+| R03 | Actions step 타임스탬프로 최대 병목 지목                      | S2             | S2 step 원시값: 6회 모두 E2E가 최대, cold/warm 중앙값 35초                              |
+| R04 | 같은 검증 유지·병목에 맞는 전략만·비채택 근거                 | S3             | S3 commit 9301b358·run 34436736719, 실제 build 1회·동일 테스트                          |
+| R05 | concurrency main 오취소 방지·병렬 install 비용 확인           | S3             | D3에서 두 전략 미채택 이유 기록. 단일 job·기존 취소 정책 유지                           |
+| R06 | warm 복원 로그 캡처·key 변경 miss·install 차이·lockfile 원복  | S4             | PR #15 원격 4회, K0 hit→K1 miss→K0 hit·전체 tree 원복                                   |
+| R07 | After cold/warm 각각 3회·동등 조건·흔들림 대비 개선 판정      | S5             | run 34436736719 attempts 2~7. cold 기준 충족·warm 근거 부족, 환경 분포 공개             |
+| R08 | lint/type/unit 모든 PR·build 소스/설정 보호                   | S6~S7          | S6 CLI 25개 회귀 + S7 PR #16/#17 정상 경로의 기본 검증 성공                             |
+| R09 | 비싼 검증 하나 이상 조건부·조건/스킵 이유·main 진입 안전성    | S6             | D4 좁은 문서 허용 목록·unknown 실행·main 강제 실행 계약, S7 실제 분기 확인              |
+| R10 | 필요한 경로 누락 방지·required skip 교착/실패 전파 검증       | S6~S7·S11      | S6 경계 검사·S7 임시 required의 CLEAN→BLOCKED→CLEAN 확인. S11 최종 대상 재검증 남음     |
+| R11 | 조건에 걸리는/안 걸리는 실제 PR·Actions 로그·머지 가능 상태   | S7·S11         | PR #16 문서 skip·#17 전체 실행, 4개 run과 보호 적용 중 merge 상태 기록. S11 재검증 남음 |
+| R12 | 채택한 label 재실행/권한·draft/merge queue 동작               | S6~S7          | label·queue 미채택. draft로 skip하지 않는 정책, S7은 ready PR로 보호 차단과 구분        |
+| R13 | flaky 정책·재시도로 실패 숨기지 않음                          | S6             | retries=0 유지·trace/실패 보존. S7 고의 실패 후 같은 assertion·원본 값으로 복구         |
+| R14 | 주요 진입점 번들 예산·7주차 전송량+현재 범위·여유폭 근거      | S8~S9          | 미실행                                                                                  |
+| R15 | build 전 env 게이트·누락/URL/민감 NEXT_PUBLIC 실패            | S10            | 미실행                                                                                  |
+| R16 | required/excluded 판단·비용/변동성/리스크 근거                | S11            | 미실행                                                                                  |
+| R17 | PR 코멘트/summary 결과 가시성·초과 대상/양 표시               | S9~S11         | 미실행                                                                                  |
+| R18 | 실제 예산 초과 PR 빨강·PR 리포트 캡처·수정 후 초록·미머지     | S11            | 미실행                                                                                  |
+| R19 | 실제 PR diff AI 리뷰·특정 유료 API 강제 없음                  | S12~S13        | 미실행                                                                                  |
+| R20 | 1~9주 합의 규칙을 프로젝트 맞춤 프롬프트로 명문화             | S12            | 미실행                                                                                  |
+| R21 | AI 비결정성·required/advisory 배치 근거                       | S12            | 미실행                                                                                  |
+| R22 | CI AI 선택 시 max_turns·timeout·concurrency·trigger·비용 안전 | S12            | 채택 여부 미결정                                                                        |
+| R23 | 잘 잡은 리뷰 1개·오탐 1개·근거·프롬프트 개선                  | S13            | 미실행                                                                                  |
+| R24 | AI/사람의 실제 반복 지적 중 결정 가능한 하나 선정             | S14            | 미실행                                                                                  |
+| R25 | 적합한 결정적 룰·위반 차단/정상 통과·오탐 교정                | S14            | 미실행                                                                                  |
+| R26 | AI/사람에 남긴 것·기계로 내린 것 판단 1문단                   | S14~S15        | 미실행                                                                                  |
+| R27 | 지정 경로 10주 회고·기능 아닌 결정·수치/URL/로그/CI 근거      | S15            | 미실행                                                                                  |
+| R28 | 4개 필수 질문 각각 2~4문장·본인 판단                          | S15            | 미실행                                                                                  |
+| R29 | 최소 권한·코멘트 job 권한 한정·SHA 핀 정책                    | S1·S11~S12·S16 | 미실행                                                                                  |
+| R30 | pull_request_target 위험 회피·fork/secrets·로그 노출 방지     | S1·S10~S12·S16 | 미실행                                                                                  |
+| R31 | AI 활용·직접 판단/검증·역할과 책임·작성/검토 범위 기록        | S0~S16         | 미실행                                                                                  |
+| R32 | workflow·측정·조건·예산·env·리뷰·룰·답변·회고 제출물 연결     | S16            | 미실행                                                                                  |
+| R33 | 최종 pnpm check·실험 코드 원복·회귀 검증                      | S16            | 미실행                                                                                  |
+| O01 | 선택 Lighthouse: 7주차 LCP/CLS 근거·조건·변동성 판단          | S8·S11         | 채택 여부 미결정                                                                        |
+| O02 | Preview/Production URL 확보 권장·배포 자체는 채점 제외        | S0·S15         | 확보 여부 미확인                                                                        |
+| O03 | 선택 rollback 질문: DB·캐시·트랜잭션·flag                     | S15            | 채택 여부 미결정                                                                        |
 
 ## 결정 변경 기록
 
